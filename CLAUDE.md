@@ -36,7 +36,7 @@ constraint is that every number and design decision must be explainable under pr
 |---|---|---|
 | Task 0 | Load + profile the dataset into Postgres (self-imposed, not in the brief) | **Done, 11/11 validation gates pass** |
 | Task 1 | Funnel analysis — headline rate, causes, 2–3 highest-leverage problems. **As a presentation.** | **Done** — [notebook](notebooks/02_task1_funnel_analysis.ipynb), [published report](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018) |
-| Task 2 | Redesigned waterfall — diagram + decision logic + rationale. Every change tied to a Task 1 finding. | **Not started** |
+| Task 2 | Redesigned waterfall — diagram + decision logic + rationale. Every change tied to a Task 1 finding. | **Done** — [doc](TASK2_WATERFALL_DESIGN.md), [diagram](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d) |
 | Task 3 | PRD + ARD/monitoring plan + project plan. | **Not started** |
 
 ## Environment
@@ -221,12 +221,45 @@ and AUDIT_LOG.md §9, presentation-ready version at
   recovery rate of comparable routed-onward users (48.09%), would recover ~48,649 people, taking the
   rate from 7.93% to ~6.0%. Stated plainly as a comparison-group estimate, not a guarantee.
 
-## Open threads for Task 2 (redesigned waterfall) and Task 3 (build docs)
+## Task 2 findings, in brief
 
-- No provider **cost or latency** data exists in this dataset — Task 2's cost/friction trade-offs
-  need to be argued qualitatively or with stated assumptions, not computed from data that isn't here.
-- The Idology-bypass control question (a "primary" check with a ~100% pass rate) is the one open
-  item with genuine *risk* implications rather than conversion ones — worth flagging explicitly in
-  Task 2 rather than folding into the routing fix.
-- The 48,649-person recovery estimate should be presented with its caveat attached every time it's
-  quoted, not just the first time — it's a projection from a comparable group, not a controlled result.
+Done — full logic and every number's derivation in
+[TASK2_WATERFALL_DESIGN.md](TASK2_WATERFALL_DESIGN.md), diagram version at
+[The Waterfall, Rebuilt](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d).
+Design exercise built on Task 1's findings — no new tables, no notebook, one supporting SQL check
+(AUDIT_LOG.md §10).
+
+- **The core move:** a reason classifier (new L1.5) tags every Idology FAIL as `SSN_MISMATCH` /
+  `IDENTITY_ATTR_MISMATCH` / `SANCTIONS_HIT` / `NO_DATA`, and the routing tree guarantees every class
+  reaches a defined fallback and, if that fails too, manual review. "Stranded" (Finding 1) becomes
+  structurally impossible rather than merely less likely.
+- **New evidence found while building this, not in the original Task 1 pass:** all 9,994
+  sanctions/PEP/watchlist mentions in `reviewer_comment` sit inside an `idology_result='FAIL'`, and
+  **zero** of the 101,201 stranded users have any reviewer comment at all — so today's design has no
+  way to know whether any stranded user carried an undetected sanctions signal. Sanctions/PEP is
+  therefore split into its own always-checked flag with a **hard, immediate** route to
+  compliance — skipping automated fallbacks rather than waiting for them to fail first. This is why
+  the redesign is risk-**positive**, not merely risk-neutral.
+- **Removed:** the `ProviderA_Lexis_Nexis` undocumented-bypass entry point (Finding 5) and the
+  unreproducible "older accounts → Persona-SSN" rule (Finding 4) — both retired rather than
+  preserved-with-caveats, since neither could be defended if probed.
+- **Modelled effect:** 7.93% → ~6.0% from routing the stranded population alone, at the *observed*
+  48.09% recovery rate (not the pre-existing 48,649-person estimate re-derived, the same one, reused
+  with its caveat carried forward).
+- **The real trade-off, stated plainly:** manual review volume goes up ~2.4× (illustrative ~$238K/yr,
+  ~8 FTE) to make this work — the single biggest number in the design, sized from real Task 1
+  proportions but illustrative unit costs, and the first thing to challenge with real ops numbers.
+
+## Open threads for Task 3 (build docs)
+
+- **The reason classifier (L1.5) is the load-bearing engineering dependency** the whole Task 2 design
+  assumes — confirming what Idology's actual API response contains (or can be made to contain) is
+  the first build item, before anything else in the PRD is actionable.
+- **The ~2.4× manual review increase needs a phased rollout**, not a day-one flip — Task 3's rollout
+  plan should size a ramp, not a single cutover.
+- No provider **cost or latency** data exists in this dataset — Task 2's figures used illustrative
+  unit costs on real volumes; Task 3's ARD/monitoring plan should specify what real numbers to
+  instrument and collect, not assume Task 2's placeholders.
+- Both the 48,649-person recovery estimate (Task 1) and the ~2.4× review-volume estimate (Task 2)
+  are comparison-group projections, not controlled results — carry that caveat every time either is
+  quoted, not just the first time.

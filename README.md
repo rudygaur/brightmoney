@@ -9,17 +9,25 @@ not a production codebase — the SQL and notebooks exist to make the analysis's
 and defensible, not to ship anywhere. Everything here works the same regardless of what kind of
 Postgres you point it at (Docker, or a native install) — see **Setup** below.
 
-**Headline finding:** 7.93% of users aren't verified against a 5% target, and just over half of that
-gap is a single routing bug — 101,201 people who failed the first identity check and were simply
-never given a second one. Full story, with charts: **[Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018)**.
+**Headline finding (Task 1):** 7.93% of users aren't verified against a 5% target, and just over
+half of that gap is a single routing bug — 101,201 people who failed the first identity check and
+were simply never given a second one. Full story, with charts:
+**[Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018)**.
+
+**The fix (Task 2):** a redesigned waterfall that makes that routing failure structurally
+impossible — every check outcome gets a defined next step, and nobody exits without either verifying
+or being seen by a human. It also closes a sanctions/PEP visibility gap the current design has no way
+to measure. Full story: **[The Waterfall, Rebuilt](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d)**.
 
 ## Start here, depending on what you want
 
 | I want to... | Go to |
 |---|---|
-| See the finding as charts, no setup required | **[Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018)** (published report) |
+| See why users fail, as charts, no setup required | **[Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018)** (Task 1 report) |
+| See the fix, as a diagram, no setup required | **[The Waterfall, Rebuilt](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d)** (Task 2 report) |
 | Get the numbers and reasoning without opening a notebook | [IMPORTANT.md](IMPORTANT.md) — one-page cheat sheet |
 | See exactly how the data was loaded and cleaned, and why | [AUDIT_LOG.md](AUDIT_LOG.md) — full decision trail |
+| Read the redesign's full logic and cost trade-offs | [TASK2_WATERFALL_DESIGN.md](TASK2_WATERFALL_DESIGN.md) |
 | Run the SQL myself / verify a number | Set up Postgres below, then run the notebooks |
 | Understand working conventions for this repo | [CLAUDE.md](CLAUDE.md) |
 
@@ -32,6 +40,7 @@ notebooks/
   02_task1_funnel_analysis.ipynb             the funnel analysis itself, in plain English + SQL
 AUDIT_LOG.md                                 every loading/cleaning decision, defect, and caveat
 IMPORTANT.md                                 one-page summary: numbers, traps, judgement calls
+TASK2_WATERFALL_DESIGN.md                    the redesigned waterfall: logic, stop conditions, cost
 .env.example                                 copy to .env and fill in your Postgres connection
 ```
 

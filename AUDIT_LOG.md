@@ -11,9 +11,9 @@ cleaning decision, and defended or revised.
 | **Dataset** | `KYC_Synthetic_Dataset.csv` — 273,899,427 bytes (272 MB) |
 | **Records** | 2,515,262 (see Q1 — this is *not* `wc -l`) |
 | **Target** | PostgreSQL 18.1, database `study`, schema `kyc` |
-| **Code** | [01_kyc_load_and_setup.ipynb](notebooks/01_kyc_load_and_setup.ipynb) (load) · [02_task1_funnel_analysis.ipynb](notebooks/02_task1_funnel_analysis.ipynb) (Task 1) |
+| **Code** | [01_kyc_load_and_setup.ipynb](notebooks/01_kyc_load_and_setup.ipynb) (load) · [02_task1_funnel_analysis.ipynb](notebooks/02_task1_funnel_analysis.ipynb) (Task 1) · [TASK2_WATERFALL_DESIGN.md](TASK2_WATERFALL_DESIGN.md) (Task 2) |
 | **Started** | 2026-09-06 |
-| **Status** | Loaded and validated (11/11 checks) · **Task 1 complete** · Tasks 2–3 outstanding |
+| **Status** | Loaded and validated (11/11 checks) · **Tasks 1–2 complete** · Task 3 outstanding |
 | **Quick reference** | [IMPORTANT.md](IMPORTANT.md) — headline numbers, traps and judgement calls |
 | **New to this project?** | [README.md](README.md) has the one-paragraph summary and setup |
 
@@ -35,6 +35,7 @@ order.
 - [8. Defects found and fixed](#8-defects-found-and-fixed-during-this-work) — two real bugs, caught and corrected
 - [9. Task 1 — funnel analysis](#9-task-1--funnel-analysis-method-and-findings) — the actual answer
 - [Open questions, quirks and how they were handled](#open-questions-quirks-and-how-they-were-handled) — **Q1–Q8, the traps in this dataset**
+- [10. Task 2 — redesigned waterfall](#10-task-2--redesigned-waterfall) — the sanctions-check evidence behind the redesign
 - [Reproducing this](#reproducing-this) — how to re-run it yourself
 - [Run history](#run-history) — timestamped log auto-appended by the notebooks
 
@@ -67,6 +68,15 @@ Three things the data already says, before any Task 1 work:
 
 Two data quirks that will corrupt results if not handled: `state` mixes `OH` with `Ohio` (Q2), and
 `wc -l` overstates the row count because of embedded newlines (Q1).
+
+**Task 2 is also done.** The redesigned waterfall ([doc](TASK2_WATERFALL_DESIGN.md) ·
+[diagram](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d)) makes finding 2
+above structurally impossible — every failure now gets a reason class and a defined fallback, so
+nobody exits without verifying or being seen by a human. One new thing came out of building it: every
+sanctions/PEP mention in this dataset sits inside an Idology FAIL with no structured field to tell it
+apart from an ordinary mismatch, and the stranded population from finding 2 has **zero** reviewer
+comments — meaning today's design has no visibility into whether any of them included an undetected
+sanctions signal. See §10.
 
 ---
 
@@ -476,6 +486,67 @@ visibly contradicted it.
 **Fix:** narrative rewritten to name the selection effect explicitly, and a like-for-like cohort
 comparison added that holds "failed Idology" constant — which is the comparison that actually
 isolates the effect of routing.
+
+---
+
+## 10. Task 2 — redesigned waterfall
+
+Deliverables: [TASK2_WATERFALL_DESIGN.md](TASK2_WATERFALL_DESIGN.md) (full text, every number's
+derivation) and [The Waterfall, Rebuilt](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d)
+(diagram + rationale). Design exercise, not data mining — no new tables, no notebook. One SQL check
+was run first to ground the sanctions/PEP handling in evidence rather than assumption, recorded here.
+
+### The check, and what it found
+
+Before proposing "route every failure onward" as the headline fix, checked whether it could touch
+sanctions/PEP screening — since the brief explicitly requires those controls not weaken.
+
+```sql
+-- users whose review notes mention sanctions/watchlist/PEP/OFAC, and their idology_result
+select idology_result, count(*)
+  from kyc.kyc_users
+ where lower(reviewer_comment) like '%sanction%' or lower(reviewer_comment) like '%watchlist%'
+    or lower(reviewer_comment) like '%pep%'      or lower(reviewer_comment) like '%ofac%'
+ group by 1;
+```
+
+| Finding | Number |
+|---|---:|
+| Users with a sanctions/watchlist/PEP/OFAC mention in `reviewer_comment` | 9,994 |
+| ...of whom `idology_result = 'FAIL'` | **9,994 (100%)** |
+| ...of whom reached manual review (`manual_review_result` populated) | **9,994 (100%)** |
+| ...of whom were subsequently cleared (verified) | 7,896 (79.0%) |
+| Stranded users (`idology_result='FAIL'`, `checks_run=1`) with **any** reviewer comment | **0** |
+
+**Reading this:** sanctions/PEP screening currently rides entirely on the same undifferentiated
+Idology FAIL as an ordinary identity mismatch — no structured field distinguishes them. Every
+sanctions-flagged case that has a review record was in fact escalated to a human, and 79% of those
+turned out to be false positives cleared on review, consistent with name-matching screening being
+noisy by nature. But the **stranded** population (Task 1's central finding, 101,201 users) has zero
+reviewer comments — by construction, since they never reached a second check or a human. There is no
+way to know, from this data, whether any of them included an undetected sanctions/PEP signal.
+
+**The defensible claim, stated precisely (see Traps for the general pattern):** not "N sanctions
+hits are being missed" — unprovable, since a stranded user's true status is unobserved by definition.
+The claim actually supported is narrower: *today's design has zero visibility into this population's
+risk profile*, because the two signals are folded together and the stranded state skips every point
+where they could be told apart. This became Task 2's Finding 6, and it's why the redesign is
+risk-**positive** (closes a blind spot), not merely risk-neutral (doesn't make things worse).
+
+### Numbers used, and where each comes from
+
+All sizing in the Task 2 deliverables traces to Task 1's validated figures — nothing new was
+computed except the sanctions check above. Notably: the 57.3% / 29.4% / 13.3% split (non-SSN / SSN /
+manual-only) used to project the newly-routed stranded population's branch distribution is the
+*observed* split among Idology failures that were **already** routed onward
+(`idology_result='FAIL' and checks_run>1`), applied to the 101,201 stranded users as an assumption of
+similarity — flagged as an estimate in the design doc, same caveat pattern as the 48,649-recovery
+estimate in §9.
+
+Illustrative unit costs (provider $/call, manual review $/case, analyst throughput) are **not**
+derived from data — none exists in this dataset (§9's caveat 9 already flagged this for Task 1, and
+it applies again here). They exist only to make the cost/volume trade-off concrete; the volumes
+multiplying them are real, the unit prices are placeholders pending real vendor/ops numbers.
 
 ---
 

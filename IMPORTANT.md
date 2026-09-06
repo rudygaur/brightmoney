@@ -198,7 +198,9 @@ weakening a control that is working.
 | [notebooks/01_kyc_load_and_setup.ipynb](notebooks/01_kyc_load_and_setup.ipynb) | Load, clean, constrain, grant, validate |
 | [notebooks/02_task1_funnel_analysis.ipynb](notebooks/02_task1_funnel_analysis.ipynb) | Task 1 analysis, in reading order |
 | [AUDIT_LOG.md](AUDIT_LOG.md) | Full trail: env, decisions, defects, caveats, run history |
-| [Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018) | Published report — the same story as charts, no code |
+| [Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018) | Task 1 report — the funnel story as charts, no code |
+| [TASK2_WATERFALL_DESIGN.md](TASK2_WATERFALL_DESIGN.md) | Task 2 — redesigned waterfall, full logic and rationale |
+| [The Waterfall, Rebuilt](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d) | Task 2 report — the redesign as a diagram |
 | `IMPORTANT.md` | This file |
 
 **DB:** Postgres, database `study`, schema `kyc` — works against **Docker or a native install**, see
@@ -213,4 +215,15 @@ cd /Users/rudransh/d_drive/GITHUB/Brightmoney
 .venv/bin/jupyter lab
 ```
 
-**Still to do:** Task 2 (redesigned waterfall) and Task 3 (PRD, ARD, project plan).
+**Still to do:** Task 3 (PRD, ARD/monitoring plan, project plan).
+
+## 10. Task 2, in one paragraph
+
+Every failure gets a reason class (SSN / identity-attribute / sanctions / no-data) and a guaranteed
+fallback chain ending in manual review — "stranded" becomes structurally impossible instead of just
+less likely. **New finding while building it:** every sanctions/PEP mention in the data sits inside
+an undifferentiated Idology FAIL, and the 101,201 stranded users have zero reviewer comments — so
+today's design can't tell if any of them hid a sanctions signal. That's why sanctions/PEP gets its
+own hard-routed flag, and why this redesign is risk-**positive**, not just risk-neutral. The honest
+cost: manual review volume goes up ~2.4× (illustrative ~$238K/yr, ~8 FTE) — the biggest number in the
+design, and the first one to challenge with real ops data.
