@@ -1,7 +1,7 @@
 # Task 2 — Redesigned KYC Waterfall
 
-**New here?** [README.md](README.md) for setup, [IMPORTANT.md](IMPORTANT.md) for the Task 1 numbers
-this design builds on, [Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018)
+**New here?** [README.md](README.md) for setup, [notebooks/02_task1_funnel_analysis.ipynb](notebooks/02_task1_funnel_analysis.ipynb)
+for the Task 1 numbers this design builds on, [Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018)
 for the Task 1 report. **Diagram version of this document:** [The Waterfall, Rebuilt](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d).
 
 ---
@@ -9,8 +9,8 @@ for the Task 1 report. **Diagram version of this document:** [The Waterfall, Reb
 ## Answer first
 
 **Route everyone who fails the first check — that alone closes most of the gap.** Task 1 found that
-101,201 users (50.8% of every non-verification) failed the primary check and were simply never given
-a second one; users who *were* routed onward recovered at 48.09% against 0.01% for those left
+101,162 users (50.7% of every non-verification) failed the primary check and were simply never given
+a second one; users who *were* routed onward recovered at 48.09% against essentially 0% for those left
 stranded. This redesign makes "never routed" structurally impossible: every failure gets a reason
 class and a defined path, and nobody exits the waterfall without either verifying or being seen by a
 human. Modelled effect: **7.93% → roughly 6.0%**, most of the way to the 5% bar, with the remaining
@@ -27,9 +27,9 @@ building this design (see Finding 6).
 
 This document originally jumped straight to the redesign. It shouldn't have — a redesign is only as
 credible as the audit of what it's replacing. So: every distinct path actually taken through today's
-system was enumerated (all 37 of them, no volume threshold) and checked against the brief's literal
-rules, not just the headline "stranded" finding from Task 1. Full method, the complete 37-path table,
-and the SQL: [AUDIT_LOG.md §10](AUDIT_LOG.md#10-full-flow-audit--every-path-in-the-data-classified-valid-or-invalid).
+system was enumerated (all 38 of them, no volume threshold) and checked against the brief's literal
+rules, not just the headline "stranded" finding from Task 1. Full method, the classification query,
+and the reconciled totals: [notebooks/02_task1_funnel_analysis.ipynb](notebooks/02_task1_funnel_analysis.ipynb), Part 7.
 
 **85.67% of today's flow volume already matches the documented design exactly.** The other 14.33%
 splits into one small, mostly-benign undocumented pattern and four real problems — this is exactly
@@ -162,12 +162,12 @@ is as final as a hard reject; nothing downstream may re-open it (Finding 7).
 
 | # | Task 1 finding | Redesign response |
 |---|---|---|
-| **1** | 101,201 users (50.8% of all non-verifications) failed Idology and were never routed onward; comparable routed users recovered at 48.09% vs. 0.01% stranded. **The single highest-leverage finding.** | The reason classifier (L1.5) and the routing tree above guarantee every failure gets a path. "Stranded" becomes structurally impossible. |
+| **1** | 101,162 users (50.7% of all non-verifications) failed Idology and were never routed onward; comparable routed users recovered at 48.09% vs. essentially 0% stranded (3 of the 101,162 verified anyway despite it). **The single highest-leverage finding.** | The reason classifier (L1.5) and the routing tree above guarantee every failure gets a path. "Stranded" becomes structurally impossible. |
 | **2** | Manual review reached only 30.2% of users eligible for it (Task 1 §2.6) — the safety net had a hole exactly where the design says it should catch people. | Every path now terminates at manual review if automation doesn't resolve it. Coverage goes from "sometimes" to "always." |
 | **3** | Persona IDV clears 86.3% of the failures it's tried on vs. 30.7% without it, but ran on under 1% of Idology failures (Task 1 §4.1) — the best tool, barely used. | Promoted to the standard second non-SSN fallback (L3) — but deliberately kept *after* the cheaper ACRO check, because it's also the highest-cost, highest-friction step (see §6). |
 | **4** | The documented "older accounts → legacy Persona-SSN" rule showed no age or account-vintage signal anywhere in the data (Task 1 §2.5) — not reproducible, and reported honestly as unresolved rather than guessed. | Retired. Persona-SSN (L2b) is now a standard fallback for every SSN-path failure, not a segment nobody can define. |
-| **5** | `ProviderA_Lexis_Nexis` was acting as an undocumented second primary entry point — 94,184 users (3.7%) never saw Idology at all, and this route passed ~99% of what it saw (Task 1 §2.1, §2.4) — flagged as a control question, not just a routing curiosity. | Idology becomes the sole, mandatory L1. `ProviderA`/`ProviderB` are unified into one documented secondary role (L2a), reached only *after* a real primary check. |
-| **6** | *New evidence, found while building this design* (§ below) — sanctions/PEP screening rides entirely on the same undifferentiated Idology FAIL signal as ordinary identity mismatches, and **zero of the 101,201 stranded users have any reviewer comment at all** — meaning today's design has no visibility into whether any of them included an undetected sanctions or PEP signal. | Sanctions/PEP is split into its own always-checked flag (L1.5) with a **hard, immediate route to compliance** — skipping automated fallbacks rather than waiting for them to fail first. This is why the redesign is risk-*positive*, not just risk-neutral: it closes a blind spot the current design has no way to even measure. |
+| **5** | `ProviderA_Lexis_Nexis` was acting as an undocumented second primary entry point — 94,183 users (3.7%) never saw Idology at all, and this route passed ~99% of what it saw (Task 1 §2.1, §2.4) — flagged as a control question, not just a routing curiosity. | Idology becomes the sole, mandatory L1. `ProviderA`/`ProviderB` are unified into one documented secondary role (L2a), reached only *after* a real primary check. |
+| **6** | *New evidence, found while building this design* (§ below) — sanctions/PEP screening rides entirely on the same undifferentiated Idology FAIL signal as ordinary identity mismatches, and **zero of the 101,162 stranded users have any reviewer comment at all** — meaning today's design has no visibility into whether any of them included an undetected sanctions or PEP signal. | Sanctions/PEP is split into its own always-checked flag (L1.5) with a **hard, immediate route to compliance** — skipping automated fallbacks rather than waiting for them to fail first. This is why the redesign is risk-*positive*, not just risk-neutral: it closes a blind spot the current design has no way to even measure. |
 | **7** | *New evidence, from the §1 flow audit* — 131,538 users get a clean Idology PASS and the waterfall runs further checks on them anyway, contradicting "if the user passes, they are verified and exit the waterfall" outright. A small tail of 201 of them end up **not verified despite having passed.** | PASS becomes an unconditional stop, symmetric with the hard-reject stop conditions in §4. No downstream check — automated or manual — may run once Idology returns a clean PASS. |
 
 ### Finding 6, in detail
@@ -182,7 +182,7 @@ inadvertently touch sanctions/PEP handling before proposing it as the headline f
   79.0% were subsequently cleared as false positives — consistent with name-matching screening being
   noisy by nature, and with manual review correctly separating true hits from false positives when it
   gets the chance.
-- **Zero of the 101,201 stranded users have a reviewer comment of any kind.** Structurally, nobody —
+- **Zero of the 101,162 stranded users have a reviewer comment of any kind.** Structurally, nobody —
   human or system — has ever recorded why they failed beyond the bare Idology FAIL, because they
   never reached the point (a secondary check, or manual review) where that would happen.
 
@@ -242,7 +242,7 @@ into a budget conversation — the volumes are load-bearing, the unit costs are 
 
 **Where the cost actually goes — three effects, sized against Task 1's real numbers:**
 
-1. **More automated secondary calls.** Routing the 101,201 stranded users through 1–2 automated
+1. **More automated secondary calls.** Routing the 101,162 stranded users through 1–2 automated
    fallbacks each, in roughly the same proportions Task 1 observed among comparable *already-routed*
    failures (57.3% non-SSN / 29.4% SSN / 13.3% manual-only) — that's on the order of **100,000–160,000
    additional provider calls**. At a blended illustrative $1.00–1.50/call: **roughly +$120K–240K per
