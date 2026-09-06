@@ -15,6 +15,30 @@ cleaning decision, and defended or revised.
 | **Started** | 2026-09-06 |
 | **Status** | Loaded and validated (11/11 checks) · **Task 1 complete** · Tasks 2–3 outstanding |
 | **Quick reference** | [IMPORTANT.md](IMPORTANT.md) — headline numbers, traps and judgement calls |
+| **New to this project?** | [README.md](README.md) has the one-paragraph summary and setup |
+
+**In a hurry?** Read [Status and headline findings](#status-and-headline-findings) just below, then
+jump straight to whichever numbered section you need — everything here is written to be read out of
+order.
+
+<details>
+<summary><b>Contents</b> (click to expand)</summary>
+
+- [Status and headline findings](#status-and-headline-findings) — the short version, for anyone skimming
+- [1. Environment](#1-environment) — what server this ran against, and why the code doesn't care
+- [2. Credentials](#2-credentials)
+- [3. Profiling before loading](#3-profiling-before-loading) — what the CSV actually contains
+- [4. Load design — two layers](#4-load-design--two-layers)
+- [5. Transformations](#5-transformations-applied-between-kyc_raw-and-kyc_users) — raw → analysis-ready
+- [6. Roles and grants](#6-roles-and-grants)
+- [7. Validation gates](#7-validation-gates) — the 11 checks that must pass
+- [8. Defects found and fixed](#8-defects-found-and-fixed-during-this-work) — two real bugs, caught and corrected
+- [9. Task 1 — funnel analysis](#9-task-1--funnel-analysis-method-and-findings) — the actual answer
+- [Open questions, quirks and how they were handled](#open-questions-quirks-and-how-they-were-handled) — **Q1–Q8, the traps in this dataset**
+- [Reproducing this](#reproducing-this) — how to re-run it yourself
+- [Run history](#run-history) — timestamped log auto-appended by the notebooks
+
+</details>
 
 ---
 
@@ -48,9 +72,11 @@ Two data quirks that will corrupt results if not handled: `state` mixes `OH` wit
 
 ## 1. Environment
 
-Established by inspection, not assumption — the first attempt was aimed at the wrong server.
+Established by inspection, not assumption — the first attempt was aimed at the wrong server. Kept
+here as the record of *this run*; none of it is a requirement of the code, which is written to be
+generic (see the callout below and README's Setup section).
 
-| Item | Value |
+| Item | Value (this run) |
 |---|---|
 | Server | PostgreSQL **18.1** (Debian 18.1-1.pgdg13+2), aarch64 Linux |
 | Deployment | Docker container `postgres`, image `postgres`, `0.0.0.0:5432->5432/tcp` |
@@ -58,29 +84,43 @@ Established by inspection, not assumption — the first attempt was aimed at the
 | Database | `study` (pre-existing — **not** created by this work) |
 | Schema | `kyc` (created by this work; `public` was left untouched) |
 
-**Note on a false start.** A macOS EDB PostgreSQL 17 install exists at `/Library/PostgreSQL/17`, and
-its client binaries are what `psql` would resolve to. It was **not** running, and its data directory
-is owned by the `postgres` OS user. The server actually listening on 5432 is the Docker container
-above, on a *different major version*. This matters: `/Library/PostgreSQL/17/bin/psql` connects to an
-18.1 server, and any future `pg_dump` from those v17 binaries against this v18 server will refuse to
-run. Use the venv/psycopg path in the notebook, or the container's own `psql`.
+**Note on a false start.** This dev machine also has a macOS EDB PostgreSQL 17 install at
+`/Library/PostgreSQL/17`, and its client binaries are what a bare `psql` resolves to. It was **not**
+running, and its data directory is owned by a separate `postgres` OS user — not the account doing
+this work. The server actually listening on 5432 turned out to be the Docker container above, on a
+*different major version*. This matters beyond this one project: `/Library/PostgreSQL/17/bin/psql`
+will happily connect to a v18 server, but `pg_dump` from those v17 binaries against it will refuse.
+**General lesson:** don't assume `psql`/`pg_dump` on `PATH` belong to the server you're actually
+talking to — check `psql --version` against the server's own `select version()` first, on any
+machine, Docker or native.
 
-**Consequence for loading:** because the server runs in a container, it has no visibility of
-`/Users/rudransh/...`. Server-side `COPY ... FROM '<path>'` is therefore impossible regardless of
-privileges. The load streams the file from the client with `COPY ... FROM STDIN` (see §4).
+**Consequence for loading — and why the code is generic, not Docker-specific.** A containerised
+server cannot see the host filesystem at all, so server-side `COPY ... FROM '<path>'` was never
+going to work here. But that same command is *also* unreliable on a plain native install, for a
+different reason: the Postgres server process commonly runs as its own OS user (`postgres`), which
+has no access to *your* home directory either — exactly the EDB v17 situation above. Since neither
+environment can be trusted to read an arbitrary local path, the load streams the file from the
+*client* with `COPY ... FROM STDIN` instead (see §4), which works identically on Docker, a native
+install, or a remote server. This project's own notebooks connect over TCP via `.env` and never
+special-case which kind of Postgres is on the other end — see
+[README.md](README.md#setup--works-with-docker-or-a-native-postgres-install) for both setups.
 
 ---
 
 ## 2. Credentials
 
-- Password supplied by the user in `.env` at the project root, as `PGPASSWORD`.
+- Password supplied by the user in `.env` at the project root, as `PGPASSWORD` (this run's Docker
+  container required one). `PGPASSWORD` is **not mandatory** in general, though — the notebooks pass
+  `None` rather than an empty string when it's unset, so a native install using peer/trust auth
+  (common on a fresh local Postgres.app or Homebrew setup) works with `.env` omitting it entirely.
+  See `.env.example` for both cases.
 - `.env` is **git-ignored** (`.gitignore` created) and set to `chmod 600` (it was world-readable `644`).
 - The notebook reads it via `python-dotenv`. Everything else (`PGHOST`, `PGPORT`, `PGUSER`,
   `PGDATABASE`) falls back to `localhost` / `5432` / `postgres` / `study`.
 - The password does not appear in the notebook, in this log, or in any committed file.
 
 Connecting as superuser `postgres` — required to create roles. Day-to-day analysis should use the
-`kyc_ro` role (§6).
+`kyc_ro` role (§6). On a native install this may instead be your OS username acting as superuser.
 
 ---
 
@@ -441,17 +481,22 @@ isolates the effect of routing.
 
 ## Reproducing this
 
+Full setup for either a Docker or a native Postgres install is in
+[README.md](README.md#setup--works-with-docker-or-a-native-postgres-install) — this load does not
+assume either one. Once Postgres is up and `.env` is filled in:
+
 ```bash
 cd /Users/rudransh/d_drive/GITHUB/Brightmoney
-docker start postgres                       # server must be up on :5432
 .venv/bin/jupyter lab notebooks/01_kyc_load_and_setup.ipynb
 ```
 
 Run the cells top to bottom. They are idempotent — a re-run drops and rebuilds `kyc_raw` and
 `kyc_users` and re-appends a run record below.
 
-The notebook refuses to touch a non-empty `kyc` schema unless `ALLOW_SCHEMA_REBUILD` is set to
-`True`, so it cannot silently overwrite existing work in the shared `study` database.
+The notebook refuses to run if the `kyc` schema contains any table it did not create itself (i.e.
+anything other than `kyc_raw`, `ref_state`, `kyc_users`) unless `ALLOW_FOREIGN_OVERWRITE` is set to
+`True` in that cell, so it cannot silently overwrite someone else's work in the shared `study`
+database. Its own three tables *are* dropped and rebuilt on every run — that's the idempotency.
 
 ## Run history
 
@@ -553,6 +598,51 @@ Idology PASS; 35% of Idology failures routed nowhere; the "older accounts to Per
 not reproducible from the data; manual review under-triggered.
 
 ### Task 1 analysis run — 2026-09-07 00:06:31 IST
+
+- **Notebook:** `notebooks/02_task1_funnel_analysis.ipynb` (read-only; no DDL, no writes to `kyc`)
+- **Headline:** 7.93% not verified (199,515 of 2,515,262) vs a 5% bar — 73,752 users over budget
+- **Largest single cause:** 101,162 users failed Idology and had no second check run (50.7% of all non-verifications)
+- **Observed recovery rate of comparable routed users:** 48.09%
+- **Modelled impact of fixing routing alone:** ~48,649 users recovered, rate 7.93% -> ~6.0%
+
+| Non-verification bucket | Users |
+|---|---:|
+| A. Avoidable — no check ever ran | 843 |
+| B. Avoidable — failed 1st check, never routed on | 101,325 |
+| C. Partly avoidable — 2+ checks failed, no manual review | 48,598 |
+| D. Genuine — assessed incl. manual review, still failed | 48,655 |
+
+**Waterfall discrepancies found vs the documented design:** undocumented second entry point at
+ProviderA_LexisNexis (3.7% of traffic, ~100% pass); non-blocking LexisNexis checks after an
+Idology PASS; 35% of Idology failures routed nowhere; the "older accounts to Persona-SSN" rule
+not reproducible from the data; manual review under-triggered.
+
+### Run — 2026-09-07 00:49:32 IST
+
+- **Server:** PostgreSQL 18.1 (Debian 18.1-1.pgdg13+2) on aarch64-unknown-linux-gnu
+- **Target:** `postgres@localhost:5432/study`, schema `kyc`
+- **Source file:** `KYC_Synthetic_Dataset.csv` (273,899,427 bytes)
+- **Records parsed from CSV:** 2,515,262
+- **Rows in `kyc.kyc_raw`:** 2,515,262
+- **Rows in `kyc.kyc_users`:** 2,515,262
+- **Validation:** ALL CHECKS PASSED
+
+| Step | Detail | Seconds |
+|---|---|---|
+| Profiled CSV | 2,515,262 records, 17 columns | 9.08 |
+| Created roles kyc_owner / kyc_rw / kyc_ro |  | 0.01 |
+| Created schema kyc |  | 0.00 |
+| Created kyc.kyc_raw (landing table) |  | 0.04 |
+| Created and populated kyc.ref_state |  | 0.01 |
+| Loaded CSV into kyc.kyc_raw | 2,515,262 rows | 1.99 |
+| Built kyc.kyc_users (typed analytical table) |  | 3.11 |
+| Added primary key, NOT NULLs and CHECK constraints to kyc.kyc_users |  | 2.29 |
+| Created indexes on kyc.kyc_users |  | 3.62 |
+| ANALYZE kyc.kyc_users |  | 0.25 |
+| Granted privileges on schema kyc to kyc_ro / kyc_rw / kyc_owner |  | 0.01 |
+| Granted kyc_owner/kyc_rw/kyc_ro to postgres |  | 0.00 |
+
+### Task 1 analysis run — 2026-09-07 00:49:53 IST
 
 - **Notebook:** `notebooks/02_task1_funnel_analysis.ipynb` (read-only; no DDL, no writes to `kyc`)
 - **Headline:** 7.93% not verified (199,515 of 2,515,262) vs a 5% bar — 73,752 users over budget

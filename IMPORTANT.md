@@ -1,10 +1,13 @@
 # IMPORTANT — key points, numbers and steps
 
 The short version of everything. `AUDIT_LOG.md` has the full trail; this file is what you should be
-able to recall and defend without looking anything up.
+able to recall and defend without looking anything up. **New to this project entirely?**
+[README.md](README.md) is one paragraph plus setup — start there instead.
 
 Every number here is produced by [notebooks/02_task1_funnel_analysis.ipynb](notebooks/02_task1_funnel_analysis.ipynb)
-against `kyc.kyc_users`. Nothing is hardcoded or estimated except where marked **[estimate]**.
+against `kyc.kyc_users`. Nothing is hardcoded or estimated except where marked **[estimate]**. If a
+term below is unfamiliar (Idology, waterfall, SSN path...), §3's table names the role of each check,
+or see the glossary in notebook 01's opening cell.
 
 ---
 
@@ -144,8 +147,10 @@ weakening a control that is working.
 2. **Loaded in two layers** — `kyc_raw` (verbatim, all `TEXT`, no constraints, so a bad value becomes
    a finding rather than an aborted load) → `kyc_users` (typed, cleaned, constrained). Every
    transformation happens between the two and is reviewable.
-3. **Streamed `COPY ... FROM STDIN`** client-side — the server is a Docker container and cannot see
-   local file paths.
+3. **Streamed `COPY ... FROM STDIN`** client-side — works identically whether Postgres is in Docker
+   (can't see the host filesystem at all) or natively installed (the server process often runs as a
+   different OS user with no access to *your* files either — this project hit that exact wall on its
+   own native macOS Postgres install). Streaming sidesteps the question on either setup.
 4. **11 validation gates**, all asserted: row counts reconcile against the independent parse, no rows
    dropped in cleaning, no NULL booleans, verified count survives the boolean cast, null counts match
    the pre-load profile.
@@ -189,18 +194,22 @@ weakening a control that is working.
 
 | File | What |
 |---|---|
+| [README.md](README.md) | Start here if you're new — summary, file map, setup |
 | [notebooks/01_kyc_load_and_setup.ipynb](notebooks/01_kyc_load_and_setup.ipynb) | Load, clean, constrain, grant, validate |
 | [notebooks/02_task1_funnel_analysis.ipynb](notebooks/02_task1_funnel_analysis.ipynb) | Task 1 analysis, in reading order |
 | [AUDIT_LOG.md](AUDIT_LOG.md) | Full trail: env, decisions, defects, caveats, run history |
+| [Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018) | Published report — the same story as charts, no code |
 | `IMPORTANT.md` | This file |
 
-**DB:** PostgreSQL 18.1 in Docker (`postgres` container) → database `study`, schema `kyc`.
+**DB:** Postgres, database `study`, schema `kyc` — works against **Docker or a native install**, see
+[README.md's Setup section](README.md#setup--works-with-docker-or-a-native-postgres-install).
 Tables: `kyc_raw` (verbatim), `kyc_users` (**analyse from here**), `ref_state`.
-Roles: `kyc_ro` / `kyc_rw` / `kyc_owner`. Credentials in `.env` (git-ignored, chmod 600).
+Roles: `kyc_ro` / `kyc_rw` / `kyc_owner`. Credentials in `.env` (git-ignored, chmod 600) — copy
+`.env.example` and fill in your setup (it has a block for each).
 
 ```bash
-docker start postgres
 cd /Users/rudransh/d_drive/GITHUB/Brightmoney
+# make sure your Postgres server is running (docker start postgres, or however your native install runs)
 .venv/bin/jupyter lab
 ```
 

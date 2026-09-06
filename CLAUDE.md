@@ -1,6 +1,8 @@
 # CLAUDE.md — Brightmoney APM KYC Case Study
 
-Working context for this project. Read this first in any new session.
+Working context for this project. Read this first in any new session. **For a human collaborator
+(not Claude), [README.md](README.md) is the better starting point** — this file is terser and
+assumes more context.
 
 ## What this is
 
@@ -9,8 +11,11 @@ software project — the deliverables are analysis and product documents, and th
 make the numbers defensible.
 
 Brief: [APM KYC_Design_Project_Assignment_Instructions.md](APM%20KYC_Design_Project_Assignment_Instructions.md)
+Setup (Docker or native Postgres): [README.md](README.md)
 Data-loading record: [AUDIT_LOG.md](AUDIT_LOG.md)
 Load code: [notebooks/01_kyc_load_and_setup.ipynb](notebooks/01_kyc_load_and_setup.ipynb)
+Task 1 analysis: [notebooks/02_task1_funnel_analysis.ipynb](notebooks/02_task1_funnel_analysis.ipynb)
+Published report: [Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018)
 
 The scenario: a US FinTech verifies every user through a KYC **waterfall** (primary provider →
 secondary providers → manual review). 2.5M synthetic user rows. An acceptable non-verification rate
@@ -30,36 +35,53 @@ constraint is that every number and design decision must be explainable under pr
 | | Deliverable | Status |
 |---|---|---|
 | Task 0 | Load + profile the dataset into Postgres (self-imposed, not in the brief) | **Done, 11/11 validation gates pass** |
-| Task 1 | Funnel analysis — headline rate, causes, 2–3 highest-leverage problems. **As a presentation.** | **Not started** (evidence largely gathered, see below) |
+| Task 1 | Funnel analysis — headline rate, causes, 2–3 highest-leverage problems. **As a presentation.** | **Done** — [notebook](notebooks/02_task1_funnel_analysis.ipynb), [published report](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018) |
 | Task 2 | Redesigned waterfall — diagram + decision logic + rationale. Every change tied to a Task 1 finding. | **Not started** |
 | Task 3 | PRD + ARD/monitoring plan + project plan. | **Not started** |
 
 ## Environment
 
+This project is **not tied to Docker** — the notebooks connect over plain TCP and load the CSV by
+streaming it from the client, so the identical code runs against a Dockerised Postgres or a native
+install (Postgres.app, Homebrew, apt, the EDB installer, ...). Only `.env` changes between machines.
+Full setup for both cases: [README.md](README.md#setup--works-with-docker-or-a-native-postgres-install).
+
 ```bash
 cd /Users/rudransh/d_drive/GITHUB/Brightmoney
-docker start postgres                       # server must be up on :5432
+# make sure your Postgres server is up (docker start postgres, or however your native install runs)
 .venv/bin/jupyter lab notebooks/01_kyc_load_and_setup.ipynb
 ```
 
-- **Server:** PostgreSQL **18.1** in Docker container named `postgres`, published `0.0.0.0:5432`.
+- **Server (this dev machine, at last run):** PostgreSQL 18.1 in a Docker container named `postgres`,
+  published on `0.0.0.0:5432`. *Not a requirement of the code* — see README for a native setup.
 - **Database:** `study` (pre-existing and shared — *not* created by this work). **Schema: `kyc`.**
 - **Client:** `.venv/` — Python 3.13, psycopg 3.3.5, pandas 3.0.5, jupyterlab, python-dotenv.
-- **Credentials:** `.env` holds **only** `PGPASSWORD` (chmod 600, git-ignored). Everything else falls
-  back to `localhost` / `5432` / `postgres` / `study`. Never print the password or write it to a file.
-- Not a git repository. `.gitignore` exists in anticipation.
+- **Credentials:** `.env` (chmod 600, git-ignored, see `.env.example`) holds `PGHOST`/`PGPORT`/
+  `PGUSER`/`PGPASSWORD`/`PGDATABASE`; all optional with sensible defaults. `PGPASSWORD` may be left
+  unset for a native install using peer/trust auth — the notebooks pass `None`, not `''`, so psycopg
+  falls back to `~/.pgpass`/peer auth instead of sending an empty password. Never print the password
+  or write it to a file.
+- `PROJECT` (the repo root) is resolved at runtime by walking up from the notebook's cwd looking for
+  `AUDIT_LOG.md` — no hardcoded absolute path, so this also runs unmodified from a different clone
+  or a different machine.
+- Git repository with remote `origin` at `github.com/rudygaur/brightmoney`. `.env` and the 272 MB
+  CSV are git-ignored — never `git add -f` either.
 
-**Two environment traps, both already hit once:**
+**Two environment traps hit while building this — both now handled generically, not worked around:**
 
-1. A macOS EDB PostgreSQL **17** install at `/Library/PostgreSQL/17` is what bare `psql` resolves to.
-   It is **not running**. Its v17 client binaries will connect to the v18 container but `pg_dump`
-   from them will refuse. Use the venv/psycopg path, or the container's own `psql`.
-2. The server is in a container, so it **cannot see `/Users/rudransh/...`**. Server-side
-   `COPY ... FROM '<path>'` is impossible regardless of privileges. The load streams from the client
-   with `COPY ... FROM STDIN` in 4 MB chunks.
+1. A macOS EDB PostgreSQL **17** install at `/Library/PostgreSQL/17` is what a bare `psql` resolves
+   to on this dev machine. It was not the server actually in use; its v17 client binaries will
+   connect to a v18 server but `pg_dump` from them will refuse. If `psql` behaves unexpectedly,
+   check `psql --version` against the server's actual `select version()` before assuming a bug.
+2. A containerised server cannot see the host filesystem at all, and a *native* server process
+   commonly runs as its own OS user with no access to your home directory either (this dev machine's
+   EDB v17 install's data directory belonged to a separate `postgres` OS user) — so server-side
+   `COPY ... FROM '<path>'` isn't reliable on either kind of setup. The load always streams from the
+   client with `COPY ... FROM STDIN` in 4 MB chunks instead, which sidesteps the question entirely.
 
 **Roles:** `kyc_ro` (SELECT — the right role for ad-hoc analysis), `kyc_rw`, `kyc_owner`. All NOLOGIN
-group roles granted to `postgres`. `ALTER DEFAULT PRIVILEGES` is set, so new tables in `kyc` inherit.
+group roles granted to the connecting user. `ALTER DEFAULT PRIVILEGES` is set, so new tables in `kyc`
+inherit.
 
 ## Data model
 
@@ -95,22 +117,27 @@ Indexed on: `is_verified`, `kyc_source`, `enrolled_date`, `state_code`, `idology
 
 ## Established numbers — do not recompute from scratch, and do not contradict without evidence
 
-Verified by 11 validation gates plus VALIDATEd CHECK constraints across all 2.5M rows.
+Verified by 11 validation gates plus VALIDATEd CHECK constraints across all 2.5M rows. These are the
+**final, post-bugfix** figures (see Traps #2 below) — if you see `101,159` / `50.7%` anywhere, that's
+the stale pre-fix number; the corrected one is `101,201` / `50.8%`.
 
 **Headline: non-verification runs at 7.93%** (199,515 of 2,515,262) against the brief's 5% bar.
 7.90% if the 843 never-processed users are excluded. **The gap is real, not a denominator artefact.**
 
-Non-verifications split into genuine rejection vs avoidable process loss:
+Non-verifications split into genuine rejection vs avoidable process loss (excludes 107 test accounts):
 
 | Bucket | Users | % of non-verified |
 |---|---:|---:|
-| 1. No check ever ran | 843 | 0.4% |
-| 2. **Failed Idology, never routed onward** | **101,159** | **50.7%** |
-| 3. Ran 2+ checks, failed them all | 97,419 | 48.9% |
+| A. No check ever ran | 843 | 0.4% |
+| B. **Failed Idology, never routed onward** | **101,325** | **50.8%** |
+| C. Ran 2+ automated checks, never reached manual review | 48,598 | 24.4% |
+| D. Genuine rejection — assessed incl. manual review, still failed | 48,655 | 24.4% |
 
-Buckets 1 and 2 are process losses. **Over half of all non-verifications never reached a second
-provider at all**, against a brief describing a multi-step waterfall. That routing gap is the
-highest-leverage Task 1 finding.
+A+B are process losses (~51.2%), C is partly avoidable (~24.4%), D is the irreducible floor
+(~24.4%). **Over half of all non-verifications never reached a second provider at all**, against a
+brief describing a multi-step waterfall. That routing gap is the highest-leverage Task 1 finding —
+confirmed with a like-for-like comparison: users who failed Idology and *were* routed onward
+recovered at **48.09%**; those left stranded recovered at **0.01%** (12 of 101,201).
 
 Waterfall depth (`checks_run`): 87.3% of users get exactly 1 check (95.4% of them verify); 10.2% get
 2 (75.8% verify); 2.3% get 3 (43.7%); 0.18% get 4; 2 users get 5. Nobody gets 6.
@@ -169,26 +196,37 @@ These were chosen deliberately; keep them unless there's a reason not to.
   calls this flag `ALLOW_SCHEMA_REBUILD` and describes it as blocking any non-empty schema — the
   code is the accurate version; fix the log when next editing it.*
 
-## Open threads for Task 1
+## Task 1 findings, in brief
 
-Evidence still to gather before the Task 1 presentation can be written:
+Done — full reasoning in [notebooks/02_task1_funnel_analysis.ipynb](notebooks/02_task1_funnel_analysis.ipynb)
+and AUDIT_LOG.md §9, presentation-ready version at
+[Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018).
 
-- **Reconstruct the actual waterfall from the data** — which checks fire, in what order, and how
-  users route between SSN and non-SSN paths. The brief's described flow (Idology → split by failure
-  type → LexisNexis / Persona-SSN vs ACRO / Persona-IDV → manual review) is a *hypothesis to confirm*,
-  and the `checks_run` distribution above already suggests it largely does not run as described.
-- **The two LexisNexis routes.** `ProviderA_Lexis_Nexis` (149,364) and `ProviderB_Lexis_Nexis`
-  (15,998) both write to `lexis_nexis_result` but are different integration paths. ProviderB's
-  non-verification rate is 3.4× ProviderA's. Working out how each is routed and whether they behave
-  differently is explicitly part of Task 1.
-- **SSN vs non-SSN failure classification.** The brief says Idology failures are logged by reason,
-  but there is no reason column. `reviewer_comment` is populated on only 74,428 rows (2.96%) and is
-  the only free-text signal available — check whether it can classify failure type, and say so
-  honestly if it cannot.
-- **PERSONA_IDV's 14.37% non-verification rate** is the worst of any named source, on a small
-  population (2,513). Worth explaining before Task 2 leans on document/selfie verification.
-- **Quantify the prize:** of the 101,159 users who failed Idology and were never routed onward, how
-  many would plausibly have cleared a secondary check? Pass rates of the secondary providers on
-  comparable populations are the input. This estimate is what sizes the Task 2 recommendation.
-- Also owed by the brief: name the data caveats hit and how they were handled (§Traps above covers
-  this — it needs writing up for the presentation, not re-discovering).
+- **Waterfall reconstructed from column co-occurrence** (a non-null provider column = that check
+  ran). The brief's described flow mostly holds, with five confirmed divergences: an undocumented
+  second entry point at `ProviderA_Lexis_Nexis` (3.7% of traffic, skips Idology, ~100% pass — a
+  control question, not just a routing one); Idology passes that still get a non-blocking LexisNexis
+  check; the 35.1%-of-failures routing gap (bucket B above, the main finding); the "older accounts →
+  Persona-SSN" rule showing **no** age or vintage signal in the data (not reproducible, said so
+  honestly rather than guessed); manual review reaching only 30.2% of eligible users.
+- **The two LexisNexis routes are confirmed to play different roles**, not the same check twice:
+  ProviderA sits in *primary* position (93,319 of 149,364 users never saw Idology), ProviderB in
+  *secondary/SSN* position (11,677 of 15,998 arrive after an Idology failure).
+- **SSN vs non-SSN failure classification**: `reviewer_comment` (74,428 rows, 2.96%) was pattern-matched
+  into a reason taxonomy — usable for the *reviewed* population only, explicitly not extrapolated to
+  the whole book (stated as caveat, since the stranded population has zero comments).
+- **PERSONA_IDV** clears 86.3% of the failures it's tried on (vs 30.7% without it) but runs on <1%
+  of Idology failures — flagged as under-deployed, not as a quality problem.
+- **The prize is quantified**, not guessed: the 101,201 stranded users, routed at the *observed*
+  recovery rate of comparable routed-onward users (48.09%), would recover ~48,649 people, taking the
+  rate from 7.93% to ~6.0%. Stated plainly as a comparison-group estimate, not a guarantee.
+
+## Open threads for Task 2 (redesigned waterfall) and Task 3 (build docs)
+
+- No provider **cost or latency** data exists in this dataset — Task 2's cost/friction trade-offs
+  need to be argued qualitatively or with stated assumptions, not computed from data that isn't here.
+- The Idology-bypass control question (a "primary" check with a ~100% pass rate) is the one open
+  item with genuine *risk* implications rather than conversion ones — worth flagging explicitly in
+  Task 2 rather than folding into the routing fix.
+- The 48,649-person recovery estimate should be presented with its caveat attached every time it's
+  quoted, not just the first time — it's a projection from a comparable group, not a controlled result.
