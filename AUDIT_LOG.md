@@ -35,7 +35,8 @@ order.
 - [8. Defects found and fixed](#8-defects-found-and-fixed-during-this-work) — two real bugs, caught and corrected
 - [9. Task 1 — funnel analysis](#9-task-1--funnel-analysis-method-and-findings) — the actual answer
 - [Open questions, quirks and how they were handled](#open-questions-quirks-and-how-they-were-handled) — **Q1–Q8, the traps in this dataset**
-- [10. Task 2 — redesigned waterfall](#10-task-2--redesigned-waterfall) — the sanctions-check evidence behind the redesign
+- [10. Full flow audit](#10-full-flow-audit--every-path-in-the-data-classified-valid-or-invalid) — every path in the data, valid vs invalid, all 37 enumerated
+- [11. Task 2 — redesigned waterfall](#11-task-2--redesigned-waterfall) — the sanctions-check evidence behind the redesign
 - [Reproducing this](#reproducing-this) — how to re-run it yourself
 - [Run history](#run-history) — timestamped log auto-appended by the notebooks
 
@@ -76,7 +77,7 @@ nobody exits without verifying or being seen by a human. One new thing came out 
 sanctions/PEP mention in this dataset sits inside an Idology FAIL with no structured field to tell it
 apart from an ordinary mismatch, and the stranded population from finding 2 has **zero** reviewer
 comments — meaning today's design has no visibility into whether any of them included an undetected
-sanctions signal. See §10.
+sanctions signal. See §11 (and §10 for a full audit of every flow in the data, valid vs invalid).
 
 ---
 
@@ -489,7 +490,116 @@ isolates the effect of routing.
 
 ---
 
-## 10. Task 2 — redesigned waterfall
+## 10. Full flow audit — every path in the data, classified valid or invalid
+
+Prompted by a direct question: users exist who failed LexisNexis and then *also* had Persona-SSN
+run — is that a documented flow? Answering it properly required going further than Task 1's routing
+tables (which only listed paths ≥1,000 users and didn't classify each one against the brief). This
+section enumerates **every** distinct path — all 37 of them — and classifies each one against the
+brief's literal text, with no threshold cutoff.
+
+### Method
+
+Every user's flow is fully described by six flags: which of `idology`, `lexis_nexis`, `persona_ssn`,
+`acro`, `persona_idv` ran (non-null), plus whether `manual_review` ran, plus Idology's own outcome
+(`PASS` / `FAIL` / null-i.e.-skipped). Grouping on all six gives every distinct path that actually
+occurs, with an exact user count and verification rate per path — reproducible with:
+
+```sql
+select case when idology_result is null then 'SKIP' else idology_result end as idology,
+       (lexis_nexis_result is not null)::int as lexis, (persona_ssn_result is not null)::int as p_ssn,
+       (acro_result is not null)::int as acro, (persona_idv_result is not null)::int as p_idv,
+       (manual_review_result is not null)::int as manual,
+       count(*) as users, count(*) filter (where is_verified) as verified
+  from kyc.kyc_users where not is_test_user
+ group by 1,2,3,4,5,6 order by users desc;
+```
+
+Each of the 37 resulting paths was then classified against the brief's exact text (quoted in full at
+the top of §9's Part 2) using this rule set, applied in order:
+
+1. Idology never ran (`SKIP`) → **invalid**. Step 1 requires it runs on everyone.
+2. Idology `PASS` and nothing else ran → **valid**. "If the user passes, they are verified and exit
+   the waterfall" — exactly what happens.
+3. Idology `PASS` but a further check ran anyway → **invalid**. The same sentence says *exit* — a
+   further check contradicts it outright, independent of the eventual outcome.
+4. Idology `FAIL`, and no downstream check and no manual review ran → **invalid**. Nothing in Step 2
+   or Step 3 describes a dead end; some downstream action is always implied.
+5. Idology `FAIL`, straight to manual review with no automated secondary check attempted →
+   **borderline**. Step 3 catches failures of automated checks that ran — this skips Step 2's routing
+   decision entirely rather than exhausting it, which the brief doesn't describe either way.
+6. Idology `FAIL`, exactly one SSN-path check (LexisNexis *or* Persona-SSN) ran, optionally followed
+   by manual review → **valid**. Matches Path A precisely — one check per the standard/older-account
+   split, safety net if it fails.
+7. Idology `FAIL`, exactly one non-SSN-path check (ACRO *or* Persona IDV) ran, optionally followed by
+   manual review → **valid**. Matches Path B precisely, same logic.
+8. Idology `FAIL`, one SSN-path check **and** one non-SSN-path check both ran → **valid, via the
+   "crucial rule"** — "if these providers surface a secondary non-SSN issue, the user moves to the
+   non-SSN track" describes exactly this crossover.
+9. Idology `FAIL`, **both** SSN-path checks ran (LexisNexis *and* Persona-SSN) → **undocumented, not
+   clearly invalid**. The brief frames these two as alternatives selected by account-age segment, not
+   a retry sequence — so this isn't the documented design — but nothing forbids it either, and (see
+   below) it isn't harmful in practice.
+10. Idology `FAIL`, **both** non-SSN-path checks ran (ACRO *and* Persona IDV) → same reasoning as #9,
+    mirrored for Path B.
+11. Anything touching three or more of the five downstream checks → **undocumented, mixed** — too
+    tangled to attribute to a single rule; vanishingly small in volume (22 users total).
+
+### Result
+
+| Category | Users | % of all | Verified |
+|---|---:|---:|---:|
+| **Valid** — matches a documented rule exactly | 2,146,162 | 85.33% | 96.33% |
+| **Valid** — via the "crucial rule" crossover | 8,583 | 0.34% | 54.90% |
+| *Valid subtotal* | *2,154,745* | *85.67%* | — |
+| Undocumented, SSN-path double-check (LexisNexis **and** Persona-SSN) | 8,695 | 0.35% | 99.95% |
+| Undocumented, non-SSN-path double-check (ACRO **and** Persona IDV) | 31 | 0.00% | 80.65% |
+| Undocumented, 3+ checks mixed | 22 | 0.00% | 100.00% |
+| **Invalid** — Idology `PASS` but the waterfall continued anyway | 131,538 | 5.23% | 99.81%\* |
+| **Invalid** — Idology skipped entirely (the undocumented bypass, §9 Finding 5) | 94,183 | 3.74% | 99.08% |
+| **Invalid** — stranded: Idology `FAIL`, nothing else ran at all | 101,162 | 4.02% | 0.00% |
+| **Borderline** — Idology `FAIL`, straight to manual review, Step 2 skipped | 24,779 | 0.99% | 41.14% |
+| **Total** | 2,515,155 | 100% | 92.07% |
+
+\* Aggregate verification on this row is misleading — see below.
+
+Every number here is exactly reproducible; nothing is estimated. (2,515,155 = the full dataset less
+107 test accounts, matching Task 1's population throughout.)
+
+### What each finding means, and whether Task 2 already fixes it
+
+- **Stranded (101,162) and the Step-2 skip (24,779) — Task 1's central finding, already fixed.**
+  Task 2's reason classifier (L1.5) and guaranteed routing tree eliminate both: every Idology failure
+  now gets a reason class and a defined fallback chain ending in manual review, so neither "nothing
+  ran" nor "skipped straight to a human with no automated attempt" can happen by design.
+- **The undocumented Idology bypass (94,183) — already fixed.** Task 2 makes Idology the sole,
+  mandatory L1 for 100% of applicants (TASK2_WATERFALL_DESIGN.md, Finding 5).
+- **The undocumented double-check cascades (8,695 + 31 + 22 = 8,748) — already fixed, by being
+  formalised rather than removed.** These aren't leaks: the SSN cascade recovers 99.95% of the users
+  it touches, and the non-SSN cascade 80.65% — both close to the best automated recovery rates
+  anywhere in the funnel. Task 2's redesign turns exactly this pattern into official policy (L2a→L2b
+  on the SSN path, L2→L3 on the non-SSN path), applied consistently to every failure instead of an
+  unexplained ~8,700-user subset. What's undocumented today becomes the documented design.
+- **Idology `PASS` but the waterfall continued anyway (131,538) — a genuine gap Task 2 did not
+  originally address, now fixed.** Aggregate verification on this bucket (99.81%) hides a small,
+  concerning tail: **201 users passed Idology, had further checks and/or manual review run anyway,
+  and only 37.3% (75 of 201) ended up verified** — a direct contradiction of "if the user passes,
+  they are verified," not merely wasted processing. Added as an explicit hard rule in
+  TASK2_WATERFALL_DESIGN.md: a clean Idology `PASS` (no sanctions flag) terminates the waterfall
+  immediately, full stop — no further automated check may run regardless of what triggered it today.
+
+### The specific question this started from
+
+*Users who failed LexisNexis and then also had Persona-SSN run — is that valid?* Not per a literal
+reading of the brief (LexisNexis and Persona-SSN are presented as alternatives chosen by account
+segment, not a retry chain) — but it isn't forbidden either, and unlike the true leaks above, it
+isn't costing anyone anything: 8,657 of these 8,695 users (99.6%) end up verified. Classified as
+*undocumented but not broken*, and, per the paragraph above, it's precisely the pattern Task 2's
+redesign formalises rather than removes.
+
+---
+
+## 11. Task 2 — redesigned waterfall
 
 Deliverables: [TASK2_WATERFALL_DESIGN.md](TASK2_WATERFALL_DESIGN.md) (full text, every number's
 derivation) and [The Waterfall, Rebuilt](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d)

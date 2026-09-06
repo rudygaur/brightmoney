@@ -227,7 +227,8 @@ Done — full logic and every number's derivation in
 [TASK2_WATERFALL_DESIGN.md](TASK2_WATERFALL_DESIGN.md), diagram version at
 [The Waterfall, Rebuilt](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d).
 Design exercise built on Task 1's findings — no new tables, no notebook, one supporting SQL check
-(AUDIT_LOG.md §10).
+(AUDIT_LOG.md §11; §10 there is a full audit of every flow in the data, valid vs invalid — see
+"Task 2 findings" below).
 
 - **The core move:** a reason classifier (new L1.5) tags every Idology FAIL as `SSN_MISMATCH` /
   `IDENTITY_ATTR_MISMATCH` / `SANCTIONS_HIT` / `NO_DATA`, and the routing tree guarantees every class
