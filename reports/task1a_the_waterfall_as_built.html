@@ -557,60 +557,6 @@
   </div>
 </section>
 
-<section>
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">How users route — the crossover rule</span>
-      <p>
-        The design states that if an SSN-path provider surfaces a secondary non-SSN issue, the user
-        moves to the non-SSN track. That rule is real — and it leaks in both directions.
-      </p>
-    </div>
-
-    <div class="xo">
-      <div class="xo-card lead">
-        <span class="xo-cond">LexisNexis returned FAIL</span>
-        <span class="xo-pct num">19.47%</span>
-        <span class="xo-den">6,963 of 35,761 crossed over</span>
-      </div>
-      <div class="xo-card">
-        <span class="xo-cond">LexisNexis returned PASS</span>
-        <span class="xo-pct num">9.50%</span>
-        <span class="xo-den">1,633 of 17,197 crossed over</span>
-      </div>
-      <div class="xo-card">
-        <span class="xo-cond">Persona-SSN leg only</span>
-        <span class="xo-pct num">0.45%</span>
-        <span class="xo-den">9 of 2,015 crossed over</span>
-      </div>
-    </div>
-
-    <div class="xo-read">
-      <b>Directionally confirmed, mechanically leaky.</b> A failed SSN check is twice as likely to
-      cross over as a passed one, which is the documented rule showing up in the data. But the rule
-      does not explain a 9.5% crossover rate on users whose SSN check <em>passed</em>, and it is
-      effectively absent from the Persona-SSN leg, where 9 users in 2,015 ever cross. The crossover
-      is implemented on the LexisNexis leg and essentially not implemented on the other.
-    </div>
-
-    <div class="body-copy" style="margin-top:26px">
-      <p>
-        <b>What this cannot establish: direction.</b> With no timestamps, a user holding both a
-        LexisNexis and an ACRO result is evidence that both checks ran — not that one preceded the
-        other. I read these 8,605 as SSN→non-SSN because that is the documented direction and
-        because the reverse is much rarer in the population (7.7% of ACRO failures also carry an SSN
-        check, against 19.5% the other way). That is an inference from asymmetry, not a measurement.
-      </p>
-      <p>
-        One documented rule is <b>not reproducible at all</b>. The brief routes “older accounts” to
-        legacy Persona-SSN. Tested both readings: mean age is 34.9 for Persona-SSN users against
-        34.7 for everyone else, and the route fires on 0.42–0.44% of users in every enrolment year
-        including 2026 — flat, where a legacy route being wound down would decay. Neither age nor
-        vintage drives it. The field that does is not in this extract.
-      </p>
-    </div>
-  </div>
-</section>
 
 <section>
   <div class="wrap">
