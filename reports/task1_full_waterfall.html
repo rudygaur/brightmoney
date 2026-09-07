@@ -1,0 +1,367 @@
+<title>The Full Waterfall, As Built</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================= TOKENS =============================
+     Inherited verbatim from the Task 1 / Task 2 reports so this section
+     folds into the same document family. Do not fork the palette. */
+  :root{
+    color-scheme: light;
+    --font-display:'Archivo',"Arial Narrow",sans-serif;
+    --font-body:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+
+    --ink:#12161d;
+    --ink-soft:#4c5768;
+    --ink-faint:#8a94a6;
+    --paper:#f5f6f9;
+    --surface:#ffffff;
+    --surface-2:#eef0f4;
+    --line:#dde1e8;
+
+    --accent:#1d5aad;
+    --accent-2:#3f7fd1;
+    --accent-soft:#e8f0fb;
+    --critical:#c93636;
+    --critical-soft:#fbeaea;
+    --warning:#c98500;
+    --warning-soft:#fbf1de;
+    --node:#3a4256;
+
+    --shadow: 0 1px 2px rgba(18,22,29,.04), 0 8px 24px -12px rgba(18,22,29,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
+      --paper:#10131a; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
+      --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+      --critical:#e2635f; --critical-soft:#3a1f1e;
+      --warning:#eda100; --warning-soft:#3a2c10;
+      --node:#5c6884;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
+    --paper:#10131a; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
+    --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+    --critical:#e2635f; --critical-soft:#3a1f1e;
+    --warning:#eda100; --warning-soft:#3a2c10;
+    --node:#5c6884;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent-soft); color:var(--ink); }
+  a{ color:var(--accent); }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
+  @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  h1,h2,h3{ font-family:var(--font-display); font-weight:800; letter-spacing:-.01em; text-wrap:balance; margin:0; color:var(--ink); }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:11.5px; font-weight:600; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent);
+  }
+  .num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+  code{ font-family:var(--font-mono); background:var(--surface-2); padding:1px 5px; border-radius:4px; font-size:.88em; }
+
+  /* ============================= MASTHEAD ============================= */
+  header.masthead{ border-bottom:1px solid var(--line); padding:56px 0 40px; }
+  header.masthead h1{ font-size:clamp(30px,4.6vw,46px); line-height:1.06; margin-top:14px; }
+  header.masthead .thesis{ margin-top:16px; font-size:17px; color:var(--ink-soft); max-width:70ch; line-height:1.55; }
+  .scope-note{ margin-top:16px; font-size:12.5px; color:var(--ink-faint); line-height:1.6; max-width:80ch; }
+
+  /* ============================= FIGURE ============================= */
+  main{ padding:48px 0 60px; }
+  figure{ margin:0; }
+  .fig-frame{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:24px 20px 14px; box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .fig-frame svg{ width:100%; min-width:1040px; height:auto; display:block; }
+  figcaption{
+    margin-top:16px; padding:16px 18px; background:var(--surface-2); border-radius:8px;
+    font-size:13.5px; color:var(--ink-soft); line-height:1.6;
+  }
+  figcaption b{ color:var(--ink); }
+
+  /* diagram type + marks, all theme-token driven — same vocabulary as Part A/B */
+  .dg text{ font-family:var(--font-body); }
+  .dg .bx{ fill:var(--surface); stroke:var(--node); stroke-width:1.4; }
+  .dg .bx-accent{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.6; }
+  .dg .bx-crit{ fill:var(--critical-soft); stroke:var(--critical); stroke-width:1.6; }
+  .dg .bx-warn{ fill:var(--warning-soft); stroke:var(--warning); stroke-width:1.6; }
+  .dg .t-name{ font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+  .dg .t-name.on-accent{ fill:var(--accent); }
+  .dg .t-name.on-crit{ fill:var(--critical); }
+  .dg .t-name.on-warn{ fill:var(--warning); }
+  .dg .t-name.on-plain{ fill:var(--ink-faint); }
+  .dg .t-val{ font-family:var(--font-display); font-weight:800; font-size:15px; fill:var(--ink); }
+  .dg .t-sub{ font-size:11px; fill:var(--ink-soft); }
+  .dg .t-edge{ font-family:var(--font-mono); font-size:11px; fill:var(--ink-soft); font-weight:500; }
+  .dg .t-edge-em{ font-family:var(--font-mono); font-size:11px; fill:var(--warning); font-weight:600; }
+  .dg .t-note{ font-size:10.5px; fill:var(--ink-faint); font-style:italic; }
+  .dg .ln{ stroke:var(--node); stroke-width:1.3; fill:none; }
+  .dg .ln-cross{ stroke:var(--warning); stroke-width:1.8; fill:none; }
+  .dg .ln-dead{ stroke:var(--critical); stroke-width:1.3; fill:none; stroke-dasharray:4 3; }
+  .dg .ah{ fill:var(--node); }
+  .dg .ah-cross{ fill:var(--warning); }
+  .dg .ah-dead{ fill:var(--critical); }
+
+  /* ============================= LEGEND ============================= */
+  .legend{ display:flex; flex-wrap:wrap; gap:20px; margin-top:18px; font-size:12.5px; color:var(--ink-soft); }
+  .legend span{ display:inline-flex; align-items:center; gap:7px; }
+  .legend i{ width:12px; height:12px; border-radius:3px; display:inline-block; flex:none; border:1.5px solid; }
+
+  /* ============================= FOOTER ============================= */
+  footer{ padding:36px 0 64px; }
+  footer .prov{ padding:14px 16px; background:var(--surface-2); border-radius:8px; font-family:var(--font-body); font-size:12.5px; color:var(--ink-soft); line-height:1.6; }
+  footer .prov b{ color:var(--ink); }
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <span class="eyebrow">Task 1 · Full Diagram</span>
+    <h1>The Full Waterfall, As Built</h1>
+    <p class="thesis">
+      Part A (<i>The Waterfall As Built</i>) and Part B (<i>Genuine vs. Avoidable</i>) each show a
+      piece of the current system. This page is the whole thing in one picture — every entry point,
+      the non-blocking L2 check, the SSN/non-SSN branch and its crossover, and every path down to
+      manual review, on a single canvas, so the full shape of the routing gap is visible at once
+      rather than assembled from several diagrams.
+    </p>
+    <p class="scope-note">
+      Every number on this page is sourced from figures already established and verified in Part A
+      and Part B — nothing here is computed fresh. Denominator: <b class="num">2,515,155</b> users,
+      test accounts excluded.
+    </p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <figure>
+      <div class="fig-frame">
+        <svg class="dg" viewBox="0 0 1300 1030" role="img"
+             aria-label="Full flow of the as-built KYC waterfall: 2,515,155 enrolled users enter at Idology (96.26%), LexisNexis (3.71%), no check at all (843), or direct to Persona-IDV (18). Idology PASS (2,132,944) verifies almost entirely, with LexisNexis running non-blocking on 130,713 of them. Idology FAIL (288,028) splits into SSN path only (46,368), crossover (8,605), non-SSN path only (107,114), and neither path ran (125,941, split into 101,162 stranded and 24,779 straight to manual review). Manual review receives 74,353 total and passes 32.30% of them. Terminal states are VERIFIED and NOT VERIFIED.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah"/>
+            </marker>
+            <marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah-cross"/>
+            </marker>
+            <marker id="ahd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah-dead"/>
+            </marker>
+          </defs>
+
+          <!-- ENROLLED -->
+          <rect x="560" y="16" width="180" height="52" rx="7" class="bx"/>
+          <text x="650" y="36" text-anchor="middle" class="t-name on-plain">ENROLLED</text>
+          <text x="650" y="55" text-anchor="middle" class="t-val">2,515,155</text>
+
+          <!-- fan to 4 entry points -->
+          <path d="M 650 68 L 650 92 L 220 92 L 220 140" class="ln" marker-end="url(#ah)"/>
+          <path d="M 650 68 L 650 92 L 520 92 L 520 140" class="ln" marker-end="url(#ah)"/>
+          <path d="M 650 68 L 650 92 L 800 92 L 800 140" class="ln" marker-end="url(#ah)"/>
+          <path d="M 650 68 L 650 92 L 1020 92 L 1020 140" class="ln" marker-end="url(#ah)"/>
+          <text x="212" y="115" text-anchor="end" class="t-edge">96.26%</text>
+          <text x="528" y="115" text-anchor="start" class="t-edge">3.71%</text>
+          <text x="808" y="115" text-anchor="start" class="t-edge">0.03%</text>
+          <text x="1028" y="115" text-anchor="start" class="t-edge">0.001%</text>
+
+          <!-- L1 IDOLOGY -->
+          <rect x="80" y="140" width="280" height="66" rx="7" class="bx-accent"/>
+          <text x="220" y="162" text-anchor="middle" class="t-name on-accent">L1 · IDOLOGY</text>
+          <text x="220" y="182" text-anchor="middle" class="t-val">2,420,972</text>
+          <text x="220" y="198" text-anchor="middle" class="t-sub">the documented front door</text>
+
+          <!-- LexisNexis side door -->
+          <rect x="400" y="140" width="240" height="66" rx="7" class="bx-warn"/>
+          <text x="520" y="160" text-anchor="middle" class="t-name on-warn">LEXISNEXIS SIDE DOOR</text>
+          <text x="520" y="178" text-anchor="middle" class="t-val">93,322</text>
+          <text x="520" y="196" text-anchor="middle" class="t-sub">never sees Idology · 99.998% verify</text>
+
+          <!-- No check at all -->
+          <rect x="680" y="140" width="200" height="66" rx="7" class="bx-crit"/>
+          <text x="780" y="160" text-anchor="middle" class="t-name on-crit">NO CHECK AT ALL</text>
+          <text x="780" y="178" text-anchor="middle" class="t-val">843</text>
+          <text x="780" y="196" text-anchor="middle" class="t-sub">0 verified</text>
+
+          <!-- Persona-IDV direct -->
+          <rect x="920" y="140" width="190" height="66" rx="7" class="bx-crit"/>
+          <text x="1015" y="160" text-anchor="middle" class="t-name on-crit">PERSONA-IDV DIRECT</text>
+          <text x="1015" y="178" text-anchor="middle" class="t-val">18</text>
+          <text x="1015" y="196" text-anchor="middle" class="t-sub">PASSed there · 0 verified</text>
+
+          <text x="1150" y="230" text-anchor="middle" class="t-note">21 further users enter by paths too small to chart</text>
+
+          <!-- L1 splits into PASS / FAIL -->
+          <path d="M 160 206 C 130 240 110 260 100 288" class="ln" marker-end="url(#ah)"/>
+          <path d="M 300 206 C 420 250 500 265 550 288" class="ln" marker-end="url(#ah)"/>
+          <text x="100" y="250" text-anchor="middle" class="t-edge">PASS · 88.10%</text>
+          <text x="470" y="250" text-anchor="middle" class="t-edge">FAIL · 11.90%</text>
+
+          <!-- IDOLOGY PASS -->
+          <rect x="20" y="290" width="280" height="66" rx="7" class="bx-accent"/>
+          <text x="160" y="312" text-anchor="middle" class="t-name on-accent">IDOLOGY PASS</text>
+          <text x="160" y="332" text-anchor="middle" class="t-val">2,132,944</text>
+          <text x="160" y="348" text-anchor="middle" class="t-sub">2,001,406 exit immediately</text>
+
+          <!-- IDOLOGY FAIL -->
+          <rect x="480" y="290" width="280" height="66" rx="7" class="bx-crit"/>
+          <text x="620" y="312" text-anchor="middle" class="t-name on-crit">IDOLOGY FAIL</text>
+          <text x="620" y="332" text-anchor="middle" class="t-val">288,028</text>
+          <text x="620" y="348" text-anchor="middle" class="t-sub">the routing decision</text>
+
+          <!-- non-blocking L2 note -->
+          <rect x="790" y="290" width="230" height="66" rx="6" fill="var(--surface-2)" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="905" y="308" text-anchor="middle" class="t-note">L2 also runs anyway on 130,713</text>
+          <text x="905" y="322" text-anchor="middle" class="t-note">of the PASS group — non-blocking:</text>
+          <text x="905" y="336" text-anchor="middle" class="t-note">57,822 FAIL LexisNexis, verify</text>
+          <text x="905" y="350" text-anchor="middle" class="t-note">regardless</text>
+
+          <!-- PASS -> VERIFIED (early) -->
+          <path d="M 300 295 C 500 200 950 200 1040 300" class="ln" marker-end="url(#ah)"/>
+
+          <!-- VERIFIED (early exit) -->
+          <rect x="1040" y="290" width="220" height="70" rx="8" class="bx-accent"/>
+          <text x="1150" y="315" text-anchor="middle" class="t-name on-accent">VERIFIED</text>
+          <text x="1150" y="338" text-anchor="middle" class="t-sub">Idology PASS branch,</text>
+          <text x="1150" y="351" text-anchor="middle" class="t-sub">~all of it</text>
+
+          <!-- fan from IDOLOGY FAIL to branch row -->
+          <path d="M 520 356 C 350 390 220 400 130 418" class="ln" marker-end="url(#ah)"/>
+          <path d="M 580 356 C 480 390 400 400 350 418" class="ln-cross" marker-end="url(#ahc)"/>
+          <path d="M 620 356 C 600 385 590 400 580 418" class="ln" marker-end="url(#ah)"/>
+          <path d="M 700 356 C 800 390 830 400 850 418" class="ln" marker-end="url(#ah)"/>
+          <text x="230" y="400" text-anchor="middle" class="t-edge">16.10%</text>
+          <text x="440" y="400" text-anchor="middle" class="t-edge-em">2.99%</text>
+          <text x="618" y="400" text-anchor="middle" class="t-edge">37.19%</text>
+          <text x="790" y="400" text-anchor="middle" class="t-edge">43.73%</text>
+
+          <!-- branch row: SSN | crossover | non-SSN | neither -->
+          <rect x="20" y="420" width="220" height="76" rx="7" class="bx-accent"/>
+          <text x="130" y="442" text-anchor="middle" class="t-name on-accent">SSN PATH ONLY</text>
+          <text x="130" y="462" text-anchor="middle" class="t-val">46,368</text>
+          <text x="130" y="480" text-anchor="middle" class="t-sub">45.20% recovered</text>
+
+          <rect x="270" y="420" width="170" height="76" rx="7" class="bx-warn"/>
+          <text x="355" y="442" text-anchor="middle" class="t-name on-warn">CROSSOVER</text>
+          <text x="355" y="462" text-anchor="middle" class="t-val">8,605</text>
+          <text x="355" y="480" text-anchor="middle" class="t-sub">55.01% recovered</text>
+
+          <rect x="470" y="420" width="220" height="76" rx="7" class="bx-accent"/>
+          <text x="580" y="442" text-anchor="middle" class="t-name on-accent">NON-SSN PATH ONLY</text>
+          <text x="580" y="462" text-anchor="middle" class="t-val">107,114</text>
+          <text x="580" y="480" text-anchor="middle" class="t-sub">50.39% recovered</text>
+
+          <rect x="720" y="420" width="260" height="76" rx="7" class="bx-crit"/>
+          <text x="850" y="442" text-anchor="middle" class="t-name on-crit">NEITHER PATH RAN</text>
+          <text x="850" y="462" text-anchor="middle" class="t-val">125,941</text>
+          <text x="850" y="480" text-anchor="middle" class="t-sub">8.10% recovered</text>
+
+          <!-- NEITHER splits -->
+          <path d="M 800 496 C 790 520 780 540 775 560" class="ln-dead" marker-end="url(#ahd)"/>
+          <path d="M 900 496 C 920 520 940 540 950 560" class="ln" marker-end="url(#ah)"/>
+
+          <rect x="680" y="562" width="190" height="70" rx="7" class="bx-crit"/>
+          <text x="775" y="584" text-anchor="middle" class="t-name on-crit">STRANDED</text>
+          <text x="775" y="604" text-anchor="middle" class="t-val">101,162</text>
+          <text x="775" y="620" text-anchor="middle" class="t-sub">0.01% recovered — dead end</text>
+
+          <rect x="880" y="562" width="180" height="70" rx="7" class="bx"/>
+          <text x="970" y="584" text-anchor="middle" class="t-name on-plain">STRAIGHT TO L4</text>
+          <text x="970" y="604" text-anchor="middle" class="t-val">24,779</text>
+          <text x="970" y="620" text-anchor="middle" class="t-sub">41.1% recovered at L4</text>
+
+          <!-- recovered arrows: dip below the stranded/straight-to-l4 row, sweep right -->
+          <path d="M 220 496 C 220 660 500 690 1040 640" class="ln" marker-end="url(#ah)"/>
+          <path d="M 400 496 C 400 660 600 700 1040 660" class="ln-cross" marker-end="url(#ahc)"/>
+          <path d="M 640 496 C 640 640 800 680 1040 680" class="ln" marker-end="url(#ah)"/>
+
+          <!-- VERIFIED (recovered) -->
+          <rect x="1040" y="612" width="220" height="70" rx="8" class="bx-accent"/>
+          <text x="1150" y="636" text-anchor="middle" class="t-name on-accent">VERIFIED</text>
+          <text x="1150" y="658" text-anchor="middle" class="t-sub">recovered — automated</text>
+          <text x="1150" y="671" text-anchor="middle" class="t-sub">or via L4</text>
+
+          <!-- L4-bound arrows -->
+          <path d="M 150 496 C 150 620 300 700 420 748" class="ln" marker-end="url(#ah)"/>
+          <path d="M 330 496 C 330 600 400 680 460 748" class="ln-cross" marker-end="url(#ahc)"/>
+          <path d="M 550 496 C 550 600 540 680 530 748" class="ln" marker-end="url(#ah)"/>
+          <text x="205" y="700" text-anchor="middle" class="t-edge">6,502</text>
+          <text x="365" y="670" text-anchor="middle" class="t-edge-em">4,334</text>
+          <text x="500" y="650" text-anchor="middle" class="t-edge">38,738</text>
+
+          <!-- STRANDED -> NOT VERIFIED -->
+          <path d="M 820 632 C 850 750 840 880 830 944" class="ln-dead" marker-end="url(#ahd)"/>
+
+          <!-- STRAIGHT TO L4 -> L4 box -->
+          <path d="M 920 632 C 880 690 780 720 680 755" class="ln" marker-end="url(#ah)"/>
+          <text x="840" y="695" text-anchor="middle" class="t-edge">24,779</text>
+
+          <!-- L4 MANUAL REVIEW -->
+          <rect x="380" y="752" width="300" height="76" rx="7" class="bx"/>
+          <text x="530" y="776" text-anchor="middle" class="t-name on-plain">L4 · MANUAL REVIEW</text>
+          <text x="530" y="798" text-anchor="middle" class="t-val">74,353</text>
+          <text x="530" y="816" text-anchor="middle" class="t-sub">the safety net — 32.30% pass rate</text>
+
+          <!-- L4 splits -->
+          <path d="M 680 775 C 950 760 1080 720 1150 684" class="ln" marker-end="url(#ah)"/>
+          <path d="M 460 828 C 500 880 650 920 760 946" class="ln-dead" marker-end="url(#ahd)"/>
+          <text x="900" y="745" text-anchor="middle" class="t-edge">PASS · 32.30%</text>
+          <text x="560" y="895" text-anchor="middle" class="t-edge" fill="var(--critical)">FAIL · 67.70%</text>
+
+          <!-- NOT VERIFIED -->
+          <rect x="700" y="946" width="260" height="60" rx="8" class="bx-crit"/>
+          <text x="830" y="969" text-anchor="middle" class="t-name on-crit">NOT VERIFIED</text>
+          <text x="830" y="990" text-anchor="middle" class="t-sub">stranded + L4 FAIL + 2 side-door misses</text>
+        </svg>
+      </div>
+      <figcaption>
+        <b>Read it top to bottom.</b> Blue = verified outcome or a check working as documented. Red =
+        dead end or a documented rule being violated. Amber = the crossover leg specifically. Two
+        things this single view makes obvious that no individual diagram in Part A does on its own:
+        first, that <b>101,162 stranded users and 24,779 users sent straight to manual review are the
+        same structural failure</b> (Idology fails, no path runs) with two different endings, only one
+        of which the current design's own safety net catches; second, that <b>manual review is the
+        single point every recovery path funnels through</b> once automated recovery fails, and its
+        32.30% pass rate is therefore the ceiling on how much of the 43.7% &ldquo;neither path ran&rdquo;
+        population any fix can realistically save without changing L4 itself.
+      </figcaption>
+
+      <div class="legend">
+        <span><i style="background:var(--accent-soft); border-color:var(--accent)"></i>Verified outcome / working as documented</span>
+        <span><i style="background:var(--critical-soft); border-color:var(--critical)"></i>Dead end / documented rule violated</span>
+        <span><i style="background:var(--warning-soft); border-color:var(--warning)"></i>The crossover leg</span>
+        <span><i style="background:var(--surface); border-color:var(--node)"></i>Structural / neutral</span>
+      </div>
+    </figure>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="prov">
+      <b>Every figure here is a cross-reference, not a new computation.</b> Entry-point and inventory
+      numbers: Part A (<i>The Waterfall As Built</i>). Branch, crossover and manual-review-inflow
+      numbers: Part A's routing reconstruction, re-verified directly against <code>kyc.kyc_users</code>
+      for this page (see <code>TASK1_REPORT_DRAFT.md</code> for the exact queries). Bucket/outcome
+      framing: Part B (<i>Genuine vs. Avoidable</i>). Denominator throughout: 2,515,155 users, 107
+      flagged <code>Test_user</code> accounts excluded.
+    </div>
+  </div>
+</footer>
