@@ -166,6 +166,8 @@
   svg.flow .box{ fill:var(--surface-2); stroke:var(--line); stroke-width:1.3; }
   svg.flow .box-spine{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.3; }
   svg.flow .box-manual{ fill:var(--warning-soft); stroke:var(--warning); stroke-width:1.5; }
+  svg.flow .diamond{ fill:var(--surface); stroke:var(--ink-soft); stroke-width:1.6; }
+  svg.flow .lbl-diamond{ font-size:13px; font-weight:600; }
   svg.flow .pill-verified{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.3; }
   svg.flow .pill-verified text{ fill:var(--accent); font-weight:700; }
   svg.flow .pill-reject{ fill:var(--critical-soft); stroke:var(--critical); stroke-width:1.5; }
@@ -383,137 +385,180 @@
     <div class="sec-head">
       <span class="eyebrow">The full mechanism</span>
       <h2>How a user moves through the redesigned waterfall</h2>
-      <p>Read top to bottom. Blue = the automated path, still fast and free to the user. Red = sanctions/PEP &mdash; hard-routed to a human immediately, never resolved by another automated check. Amber = manual/compliance review, the terminal stop for every path.</p>
+      <p>Read top to bottom. Rectangles are automated checks; diamonds are decisions. Blue = pass, verified. Red = a sanctions/PEP/OFAC flag &mdash; hard-routed to a human immediately, at <b>every</b> check, not just the first. Amber = manual/compliance review, the terminal stop for every path.</p>
     </div>
     <div class="diagram-frame">
-      <p class="lede"><b>Every arrow ends somewhere defined.</b> That is the entire redesign &mdash; nothing here is a new check; it&rsquo;s a guarantee that existing checks are always reached.</p>
+      <p class="lede"><b>Every arrow ends somewhere defined.</b> That is the entire redesign &mdash; nothing here is a new check; it&rsquo;s a guarantee that existing checks are always reached, and that a sanctions/PEP/OFAC hit at <b>any</b> stage &mdash; not only Idology &mdash; skips every remaining automated fallback and goes straight to a human.</p>
       <figure>
-        <svg class="flow" viewBox="0 0 1300 1000" role="img" aria-label="Decision tree of the redesigned KYC waterfall: Idology runs on every applicant; a sanctions or PEP flag routes immediately to manual review; a clean pass verifies immediately; an SSN mismatch routes to LexisNexis for standard accounts or Persona SSN for legacy accounts, as alternatives not a chain, and a failure on either crosses to the ACRO / Persona IDV non-SSN track if it surfaces a secondary non-SSN issue -- the brief's crucial rule -- or otherwise goes to manual review directly; an identity attribute mismatch routes through ACRO then Persona IDV; any remaining failure reaches manual review, which either verifies the user or issues a final hard reject.">
+        <svg class="flow" viewBox="0 0 1700 1700" role="img" aria-label="Flowchart of the redesigned KYC waterfall, straight orthogonal connectors and diamonds for every decision: Idology runs on every applicant, and its outcome diamond routes a sanctions, PEP or OFAC flag immediately to manual review, a clean pass to verified, or a plain fail onward to the reason classifier. The classifier splits into an SSN mismatch lane and an identity-attribute mismatch lane. The SSN lane asks whether the account is legacy, routing to LexisNexis for standard accounts or Persona-SSN for legacy accounts as alternatives, not a chain; each of those has its own outcome diamond with a sanctions/PEP/OFAC branch straight to manual review, a pass to verified, or a fail into a shared crucial-rule diamond asking whether a secondary non-SSN issue surfaced -- if yes it crosses to the non-SSN track, if no it goes to manual review. The identity-attribute lane and the crucial-rule crossover both feed ACRO, whose outcome diamond again branches to verified, to manual review on a sanctions/PEP/OFAC flag, or on to Persona-IDV on a plain fail; Persona-IDV's outcome diamond has the same three branches, with its fail going to manual review. Manual review's own outcome diamond issues either verified or a final hard reject. Every automated check -- Idology, LexisNexis, Persona-SSN, ACRO and Persona-IDV -- has its own sanctions/PEP/OFAC branch straight to manual review, not just Idology.">
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"></path>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"></path>
+    </marker>
+    <marker id="ahp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+    </marker>
+    <marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--critical)"></path>
     </marker>
   </defs>
 
   <!-- L1 Idology -->
-  <rect class="box-spine" x="480" y="20" width="340" height="64" rx="8"></rect>
-  <text class="lbl-box" x="650" y="46" text-anchor="middle">L1 &middot; Idology</text>
-  <text class="lbl-box-sub" x="650" y="66" text-anchor="middle">runs on 100% of applicants &mdash; no exceptions</text>
+  <rect class="box-spine" x="650" y="20" width="320" height="70" rx="6"></rect>
+  <text class="lbl-box" x="810" y="50" text-anchor="middle">L1 &middot; Idology</text>
+  <text class="lbl-box-sub" x="810" y="70" text-anchor="middle">runs on 100% of applicants</text>
+  <path class="edge" d="M810,90 L810,142" marker-end="url(#ah)"></path>
 
-  <!-- sanctions off-ramp -->
-  <path class="edge-sanctions" d="M480,52 C 350,52 200,52 120,52 L120,90" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="300" y="44" text-anchor="middle" fill="#c93636">sanctions / PEP flag</text>
-  <rect class="pill-sanctions" x="20" y="92" width="200" height="50" rx="7"></rect>
-  <text x="120" y="122" text-anchor="middle" font-size="13" font-weight="700" fill="#c93636">Sanctions / PEP hit</text>
+  <!-- Idology-outcome diamond -->
+  <polygon class="diamond" points="810,142 950,190 810,238 670,190"></polygon>
+  <text class="lbl-diamond" x="810" y="185" text-anchor="middle">Outcome?</text>
+  <text class="lbl-diamond" x="810" y="202" text-anchor="middle" font-size="10.5" font-family="monospace" fill="var(--ink-faint)">incl. sanctions/PEP/OFAC</text>
 
-  <!-- clean pass off-ramp -->
-  <path class="edge-pass" d="M820,52 C 950,52 1050,52 1180,52 L1180,90" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="1000" y="44" text-anchor="middle" fill="#1d5aad">PASS, clean</text>
-  <rect class="pill-verified" x="1080" y="92" width="200" height="50" rx="7"></rect>
-  <text x="1180" y="122" text-anchor="middle" font-size="13" font-weight="700" fill="#1d5aad">VERIFIED</text>
+  <path class="edge-sanctions" d="M670,190 L15,190" marker-end="url(#ahs)"></path>
+  <text class="lbl-arrow" x="330" y="182" text-anchor="middle" fill="var(--critical)">sanctions / PEP / OFAC</text>
 
-  <!-- sanctions long connector down to manual review, hugging the far-left margin -->
-  <path class="edge-sanctions" d="M40,142 L40,840 L410,840" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="25" y="500" text-anchor="middle" fill="#c93636" transform="rotate(-90 25 500)">immediate &mdash; skips every automated fallback</text>
+  <path class="edge-pass" d="M950,190 L1030,190" marker-end="url(#ahp)"></path>
+  <rect class="pill-verified" x="1030" y="165" width="160" height="50" rx="7"></rect>
+  <text x="1110" y="195" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">VERIFIED</text>
 
-  <!-- down to classifier -->
-  <path class="edge" d="M650,84 L650,168" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="745" y="130" text-anchor="middle">FAIL, no sanctions flag</text>
+  <path class="edge" d="M810,238 L810,330" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="880" y="295" text-anchor="middle">FAIL, no flag</text>
 
-  <!-- classifier -->
-  <rect class="box" x="490" y="170" width="320" height="64" rx="8"></rect>
-  <text class="lbl-box" x="650" y="196" text-anchor="middle">L1.5 &middot; Reason classifier</text>
-  <text class="lbl-box-sub" x="650" y="216" text-anchor="middle">SSN vs identity-attribute vs no-data</text>
+  <!-- L1.5 classifier -->
+  <rect class="box" x="650" y="330" width="320" height="70" rx="6"></rect>
+  <text class="lbl-box" x="810" y="360" text-anchor="middle">L1.5 &middot; Reason classifier</text>
+  <text class="lbl-box-sub" x="810" y="380" text-anchor="middle">SSN vs identity-attr vs no-data</text>
+  <path class="edge" d="M810,400 L810,448" marker-end="url(#ah)"></path>
 
-  <!-- no-data dashed annotation -->
-  <rect class="note-box" x="545" y="248" width="210" height="38" rx="6"></rect>
-  <text class="note-text" x="650" y="271" text-anchor="middle">NO_DATA: try both lanes below</text>
+  <!-- classification diamond -->
+  <polygon class="diamond" points="810,448 965,500 810,552 655,500"></polygon>
+  <text class="lbl-diamond" x="810" y="505" text-anchor="middle">Which reason?</text>
 
-  <!-- fan to two lanes -->
-  <path class="edge" d="M560,234 C 460,265 350,285 280,304" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="400" y="272" text-anchor="middle">SSN_MISMATCH</text>
-  <path class="edge" d="M740,234 C 850,265 910,290 950,316" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="860" y="272" text-anchor="middle">IDENTITY_ATTR_MISMATCH</text>
+  <rect class="note-box" x="730" y="580" width="160" height="38" rx="5"></rect>
+  <text class="note-text" x="810" y="602" text-anchor="middle">NO_DATA: try both lanes</text>
 
-  <!-- === LEFT LANE: SSN path -- legacy split, alternatives not a chain === -->
-  <text class="lbl-arrow" x="280" y="296" text-anchor="middle">legacy account? (def. TBD)</text>
-  <path class="edge" d="M255,308 C 220,330 195,360 190,393" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="207" y="352" text-anchor="middle">no</text>
-  <path class="edge" d="M305,308 C 340,330 365,360 375,393" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="352" y="352" text-anchor="middle">yes</text>
+  <path class="edge" d="M655,500 L350,500 L350,616" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="470" y="492" text-anchor="middle">SSN_MISMATCH</text>
 
-  <rect class="box" x="100" y="395" width="170" height="70" rx="8"></rect>
-  <text class="lbl-box" x="185" y="425" text-anchor="middle">L2a &middot; LexisNexis</text>
-  <text class="lbl-box-sub" x="185" y="445" text-anchor="middle">standard accounts</text>
+  <path class="edge" d="M965,500 L1300,500 L1300,800" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="1150" y="492" text-anchor="middle">IDENTITY_ATTR_MISMATCH</text>
 
-  <rect class="box" x="290" y="395" width="170" height="70" rx="8"></rect>
-  <text class="lbl-box" x="375" y="425" text-anchor="middle">L2b &middot; Persona-SSN</text>
-  <text class="lbl-box-sub" x="375" y="445" text-anchor="middle">legacy accounts only</text>
+  <!-- legacy diamond -->
+  <polygon class="diamond" points="350,616 470,660 350,704 230,660"></polygon>
+  <text class="lbl-diamond" x="350" y="655" text-anchor="middle">Legacy account?</text>
+  <text class="lbl-diamond" x="350" y="672" text-anchor="middle" font-size="10" font-family="monospace" fill="var(--ink-faint)">(def. TBD)</text>
 
-  <path class="edge-pass" d="M215,465 C 215,475 220,481 232,485" marker-end="url(#arrow)"></path>
-  <path class="edge-pass" d="M345,465 C 345,475 340,481 328,485" marker-end="url(#arrow)"></path>
-  <rect class="pill-verified" x="185" y="485" width="190" height="46" rx="7"></rect>
-  <text x="280" y="513" text-anchor="middle" font-size="13" font-weight="700" fill="#1d5aad">VERIFIED</text>
-  <text class="lbl-arrow" x="215" y="479" text-anchor="middle" fill="#1d5aad">PASS</text>
-  <text class="lbl-arrow" x="345" y="479" text-anchor="middle" fill="#1d5aad">PASS</text>
+  <path class="edge" d="M230,660 L200,730 L180,730 L180,800" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="165" y="720" text-anchor="middle">no</text>
 
-  <path class="edge" d="M115,465 C 95,505 95,545 145,580" marker-end="url(#arrow)"></path>
-  <path class="edge" d="M445,465 C 465,505 465,545 415,580" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="80" y="515" text-anchor="middle">FAIL</text>
-  <text class="lbl-arrow" x="480" y="515" text-anchor="middle">FAIL</text>
+  <path class="edge" d="M470,660 L500,730 L600,730 L600,800" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="535" y="720" text-anchor="middle">yes</text>
 
-  <rect class="note-box" x="140" y="580" width="280" height="52" rx="6"></rect>
-  <text class="note-text" x="280" y="601" text-anchor="middle">secondary non-SSN issue?</text>
-  <text class="note-text" x="280" y="620" text-anchor="middle" font-style="italic">(the brief's "crucial rule")</text>
+  <!-- L2a / L2b -->
+  <rect class="box" x="60" y="800" width="240" height="70" rx="6"></rect>
+  <text class="lbl-box" x="180" y="830" text-anchor="middle">L2a &middot; LexisNexis</text>
+  <text class="lbl-box-sub" x="180" y="850" text-anchor="middle">standard accounts</text>
+  <path class="edge" d="M180,870 L180,912" marker-end="url(#ah)"></path>
 
-  <path class="edge" d="M280,632 L280,800 C280,845 350,875 410,875" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="300" y="740" text-anchor="middle">no &rarr; manual review</text>
+  <rect class="box" x="480" y="800" width="240" height="70" rx="6"></rect>
+  <text class="lbl-box" x="600" y="830" text-anchor="middle">L2b &middot; Persona-SSN</text>
+  <text class="lbl-box-sub" x="600" y="850" text-anchor="middle">legacy accounts only</text>
+  <path class="edge" d="M600,870 L600,912" marker-end="url(#ah)"></path>
 
-  <path class="edge-pass" d="M420,603 C 550,530 700,440 865,385" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="565" y="560" text-anchor="middle" fill="#1d5aad">yes &rarr; cross to non-SSN track</text>
+  <!-- L2a-outcome / L2b-outcome diamonds -->
+  <polygon class="diamond" points="180,912 285,960 180,1008 75,960"></polygon>
+  <text class="lbl-diamond" x="180" y="965" text-anchor="middle" font-size="11.5">Outcome?</text>
 
-  <!-- === RIGHT LANE: identity-attribute path === -->
-  <rect class="box" x="860" y="320" width="200" height="70" rx="8"></rect>
-  <text class="lbl-box" x="960" y="350" text-anchor="middle">L2 &middot; ACRO</text>
-  <text class="lbl-box-sub" x="960" y="370" text-anchor="middle">automated, cheap, fast</text>
+  <polygon class="diamond" points="600,912 705,960 600,1008 495,960"></polygon>
+  <text class="lbl-diamond" x="600" y="965" text-anchor="middle" font-size="11.5">Outcome?</text>
 
-  <path class="edge-pass" d="M860,357 L832,357" marker-end="url(#arrow)"></path>
-  <rect class="pill-verified" x="680" y="334" width="150" height="46" rx="7"></rect>
-  <text x="755" y="362" text-anchor="middle" font-size="13" font-weight="700" fill="#1d5aad">VERIFIED</text>
-  <text class="lbl-arrow" x="845" y="348" text-anchor="middle" fill="#1d5aad">PASS</text>
+  <path class="edge-pass" d="M285,960 L330,960" marker-end="url(#ahp)"></path>
+  <path class="edge-pass" d="M495,960 L450,960" marker-end="url(#ahp)"></path>
+  <rect class="pill-verified" x="330" y="935" width="120" height="50" rx="7"></rect>
+  <text x="390" y="965" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">VERIFIED</text>
 
-  <path class="edge" d="M960,390 L960,460" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="925" y="428" text-anchor="middle">FAIL</text>
+  <path class="edge-sanctions" d="M75,960 L15,960" marker-end="url(#ahs)"></path>
+  <path class="edge-sanctions" d="M650,984 L650,1050 L15,1050" marker-end="url(#ahs)"></path>
+  <text class="lbl-arrow" x="500" y="1043" text-anchor="middle" fill="var(--critical)">sanctions / PEP / OFAC</text>
 
-  <rect class="box" x="860" y="460" width="200" height="70" rx="8"></rect>
-  <text class="lbl-box" x="960" y="490" text-anchor="middle">L3 &middot; Persona &mdash; IDV mode</text>
-  <text class="lbl-box-sub" x="960" y="510" text-anchor="middle">document + selfie</text>
+  <path class="edge" d="M180,1008 L180,1090 L390,1090"></path>
+  <path class="edge" d="M600,1008 L600,1090 L390,1090"></path>
+  <path class="edge" d="M390,1090 L390,1168" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="130" y="1080" text-anchor="middle">FAIL</text>
+  <text class="lbl-arrow" x="650" y="1080" text-anchor="middle">FAIL</text>
 
-  <path class="edge-pass" d="M860,497 L832,497" marker-end="url(#arrow)"></path>
-  <rect class="pill-verified" x="680" y="474" width="150" height="46" rx="7"></rect>
-  <text x="755" y="502" text-anchor="middle" font-size="13" font-weight="700" fill="#1d5aad">VERIFIED</text>
-  <text class="lbl-arrow" x="845" y="488" text-anchor="middle" fill="#1d5aad">PASS</text>
+  <!-- crucial-rule diamond -->
+  <polygon class="diamond" points="390,1168 530,1220 390,1272 250,1220"></polygon>
+  <text class="lbl-diamond" x="390" y="1210" text-anchor="middle" font-size="11.5">Secondary non-SSN issue?</text>
+  <text class="lbl-diamond" x="390" y="1227" text-anchor="middle" font-size="10" font-family="monospace" fill="var(--ink-faint)">the "crucial rule"</text>
 
-  <path class="edge" d="M960,530 L960,700 C960,790 940,857 890,857" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="990" y="650" text-anchor="middle">FAIL &rarr; manual review</text>
+  <path class="edge" d="M390,1272 L15,1272" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="180" y="1264" text-anchor="middle">no &rarr; manual review</text>
 
-  <!-- Manual / compliance review -->
-  <rect class="box-manual" x="410" y="820" width="480" height="74" rx="8"></rect>
-  <text class="lbl-box" x="650" y="850" text-anchor="middle">L4 &middot; Manual / compliance review</text>
-  <text class="lbl-box-sub" x="650" y="870" text-anchor="middle">final decision authority &mdash; every path ends here if unresolved</text>
+  <path class="edge-pass" d="M530,1220 L950,1220 L950,835 L1180,835" marker-end="url(#ahp)"></path>
+  <text class="lbl-arrow" x="750" y="1212" text-anchor="middle" fill="var(--accent)">yes &rarr; cross to non-SSN track</text>
 
-  <!-- manual outcomes -->
-  <path class="edge-pass" d="M580,894 L580,930" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="540" y="916" text-anchor="middle" fill="#1d5aad">PASS</text>
-  <rect class="pill-verified" x="500" y="932" width="160" height="44" rx="7"></rect>
-  <text x="580" y="960" text-anchor="middle" font-size="13" font-weight="700" fill="#1d5aad">VERIFIED</text>
+  <!-- ACRO -->
+  <rect class="box" x="1180" y="800" width="240" height="70" rx="6"></rect>
+  <text class="lbl-box" x="1300" y="830" text-anchor="middle">L2 &middot; ACRO</text>
+  <text class="lbl-box-sub" x="1300" y="850" text-anchor="middle">automated, cheap, fast</text>
+  <path class="edge" d="M1300,870 L1300,912" marker-end="url(#ah)"></path>
 
-  <path class="edge" d="M720,894 L720,930" marker-end="url(#arrow)" stroke="#c93636"></path>
-  <text class="lbl-arrow" x="765" y="916" text-anchor="middle" fill="#c93636">FAIL</text>
-  <rect class="pill-reject" x="680" y="932" width="180" height="44" rx="7"></rect>
-  <text x="770" y="960" text-anchor="middle" font-size="13" font-weight="700" fill="#c93636">HARD REJECT</text>
+  <!-- ACRO-outcome diamond -->
+  <polygon class="diamond" points="1300,912 1405,960 1300,1008 1195,960"></polygon>
+  <text class="lbl-diamond" x="1300" y="965" text-anchor="middle" font-size="11.5">Outcome?</text>
+
+  <path class="edge-pass" d="M1195,960 L1150,960" marker-end="url(#ahp)"></path>
+  <rect class="pill-verified" x="1000" y="935" width="150" height="50" rx="7"></rect>
+  <text x="1075" y="965" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">VERIFIED</text>
+
+  <path class="edge-sanctions" d="M1405,960 L1685,960" marker-end="url(#ahs)"></path>
+
+  <path class="edge" d="M1300,1008 L1300,1090" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="1350" y="1060" text-anchor="middle">FAIL</text>
+
+  <!-- L3 -->
+  <rect class="box" x="1180" y="1090" width="240" height="70" rx="6"></rect>
+  <text class="lbl-box" x="1300" y="1120" text-anchor="middle">L3 &middot; Persona &mdash; IDV</text>
+  <text class="lbl-box-sub" x="1300" y="1140" text-anchor="middle">document + selfie</text>
+  <path class="edge" d="M1300,1160 L1300,1202" marker-end="url(#ah)"></path>
+
+  <!-- L3-outcome diamond -->
+  <polygon class="diamond" points="1300,1202 1405,1250 1300,1298 1195,1250"></polygon>
+  <text class="lbl-diamond" x="1300" y="1255" text-anchor="middle" font-size="11.5">Outcome?</text>
+
+  <path class="edge-pass" d="M1195,1250 L1150,1250" marker-end="url(#ahp)"></path>
+  <rect class="pill-verified" x="1000" y="1225" width="150" height="50" rx="7"></rect>
+  <text x="1075" y="1255" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">VERIFIED</text>
+
+  <path class="edge-sanctions" d="M1405,1250 L1685,1250" marker-end="url(#ahs)"></path>
+
+  <path class="edge" d="M1300,1298 L1300,1465 L1100,1465" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="1340" y="1390" text-anchor="middle">FAIL</text>
+
+  <!-- buses: every sanctions/PEP/OFAC branch, from every check, converges here -->
+  <path class="edge-sanctions" d="M15,190 L15,1465 L600,1465" marker-end="url(#ahs)"></path>
+  <path class="edge-sanctions" d="M1685,960 L1685,1465 L1100,1465" marker-end="url(#ahs)"></path>
+
+  <!-- L4 manual review -->
+  <rect class="box-manual" x="600" y="1420" width="500" height="90" rx="8"></rect>
+  <text class="lbl-box" x="850" y="1455" text-anchor="middle">L4 &middot; Manual / compliance review</text>
+  <text class="lbl-box-sub" x="850" y="1478" text-anchor="middle">final decision authority &mdash; every unresolved path ends here</text>
+  <path class="edge" d="M850,1510 L850,1562" marker-end="url(#ah)"></path>
+
+  <!-- L4-outcome diamond -->
+  <polygon class="diamond" points="850,1562 962,1610 850,1658 738,1610"></polygon>
+  <text class="lbl-diamond" x="850" y="1615" text-anchor="middle">Outcome?</text>
+
+  <path class="edge-pass" d="M738,1610 L700,1610" marker-end="url(#ahp)"></path>
+  <rect class="pill-verified" x="540" y="1585" width="160" height="50" rx="7"></rect>
+  <text x="620" y="1615" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">VERIFIED</text>
+
+  <path class="edge-sanctions" d="M962,1610 L1000,1610" marker-end="url(#ahs)"></path>
+  <rect class="pill-reject" x="1000" y="1585" width="180" height="50" rx="7"></rect>
+  <text x="1090" y="1615" text-anchor="middle" font-size="13" font-weight="700" fill="var(--critical)">HARD REJECT</text>
         </svg>
-        <figcaption>Every arrow terminates at VERIFIED or a human decision &mdash; no path exits on an automated FAIL alone.</figcaption>
+        <figcaption>Every arrow terminates at VERIFIED or a human decision &mdash; no path exits on an automated FAIL alone, and a sanctions/PEP/OFAC flag at any of the five checks skips straight to manual review.</figcaption>
       </figure>
     </div>
   </div>
