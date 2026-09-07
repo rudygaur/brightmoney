@@ -24,3 +24,5 @@ it's Idology raising a sanctions/PEP/OFAC watchlist flag ("PA hit - Sanctions...
 | Non-SSN path — Idology FAIL, ACRO FAIL | 24,921 | 51.28% |
 | SSN path — Idology FAIL, LexisNexis FAIL | 21,447 | 44.13% |
 | Mixed — Idology FAIL, LexisNexis FAIL, ACRO FAIL | 1,099 | 2.26% |
+
+8. manual review is the only check that appears alongside all the others. to be added at each step failure for OFAC and PEP
