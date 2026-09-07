@@ -413,7 +413,7 @@
   <text x="1180" y="122" text-anchor="middle" font-size="13" font-weight="700" fill="#1d5aad">VERIFIED</text>
 
   <!-- sanctions long connector down to manual review, hugging the far-left margin -->
-  <path class="edge-sanctions" d="M40,142 L40,855 L500,855" marker-end="url(#arrow)"></path>
+  <path class="edge-sanctions" d="M40,142 L40,840 L410,840" marker-end="url(#arrow)"></path>
   <text class="lbl-arrow" x="25" y="500" text-anchor="middle" fill="#c93636" transform="rotate(-90 25 500)">immediate &mdash; skips every automated fallback</text>
 
   <!-- down to classifier -->
@@ -436,41 +436,41 @@
   <text class="lbl-arrow" x="860" y="272" text-anchor="middle">IDENTITY_ATTR_MISMATCH</text>
 
   <!-- === LEFT LANE: SSN path -- legacy split, alternatives not a chain === -->
-  <text class="lbl-arrow" x="280" y="300" text-anchor="middle">legacy account? (def. TBD)</text>
-  <path class="edge" d="M262,312 C 235,318 210,320 190,320" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="220" y="310" text-anchor="middle">no</text>
-  <path class="edge" d="M298,312 C 325,318 350,320 375,320" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="345" y="310" text-anchor="middle">yes</text>
+  <text class="lbl-arrow" x="280" y="296" text-anchor="middle">legacy account? (def. TBD)</text>
+  <path class="edge" d="M255,308 C 220,330 195,360 190,393" marker-end="url(#arrow)"></path>
+  <text class="lbl-arrow" x="207" y="352" text-anchor="middle">no</text>
+  <path class="edge" d="M305,308 C 340,330 365,360 375,393" marker-end="url(#arrow)"></path>
+  <text class="lbl-arrow" x="352" y="352" text-anchor="middle">yes</text>
 
-  <rect class="box" x="100" y="320" width="170" height="70" rx="8"></rect>
-  <text class="lbl-box" x="185" y="350" text-anchor="middle">L2a &middot; LexisNexis</text>
-  <text class="lbl-box-sub" x="185" y="370" text-anchor="middle">standard accounts</text>
+  <rect class="box" x="100" y="395" width="170" height="70" rx="8"></rect>
+  <text class="lbl-box" x="185" y="425" text-anchor="middle">L2a &middot; LexisNexis</text>
+  <text class="lbl-box-sub" x="185" y="445" text-anchor="middle">standard accounts</text>
 
-  <rect class="box" x="290" y="320" width="170" height="70" rx="8"></rect>
-  <text class="lbl-box" x="375" y="350" text-anchor="middle">L2b &middot; Persona-SSN</text>
-  <text class="lbl-box-sub" x="375" y="370" text-anchor="middle">legacy accounts only</text>
+  <rect class="box" x="290" y="395" width="170" height="70" rx="8"></rect>
+  <text class="lbl-box" x="375" y="425" text-anchor="middle">L2b &middot; Persona-SSN</text>
+  <text class="lbl-box-sub" x="375" y="445" text-anchor="middle">legacy accounts only</text>
 
-  <path class="edge-pass" d="M215,390 C 215,400 220,406 232,410" marker-end="url(#arrow)"></path>
-  <path class="edge-pass" d="M345,390 C 345,400 340,406 328,410" marker-end="url(#arrow)"></path>
-  <rect class="pill-verified" x="185" y="410" width="190" height="46" rx="7"></rect>
-  <text x="280" y="438" text-anchor="middle" font-size="13" font-weight="700" fill="#1d5aad">VERIFIED</text>
-  <text class="lbl-arrow" x="215" y="404" text-anchor="middle" fill="#1d5aad">PASS</text>
-  <text class="lbl-arrow" x="345" y="404" text-anchor="middle" fill="#1d5aad">PASS</text>
+  <path class="edge-pass" d="M215,465 C 215,475 220,481 232,485" marker-end="url(#arrow)"></path>
+  <path class="edge-pass" d="M345,465 C 345,475 340,481 328,485" marker-end="url(#arrow)"></path>
+  <rect class="pill-verified" x="185" y="485" width="190" height="46" rx="7"></rect>
+  <text x="280" y="513" text-anchor="middle" font-size="13" font-weight="700" fill="#1d5aad">VERIFIED</text>
+  <text class="lbl-arrow" x="215" y="479" text-anchor="middle" fill="#1d5aad">PASS</text>
+  <text class="lbl-arrow" x="345" y="479" text-anchor="middle" fill="#1d5aad">PASS</text>
 
-  <path class="edge" d="M115,390 C 95,430 95,470 145,505" marker-end="url(#arrow)"></path>
-  <path class="edge" d="M445,390 C 465,430 465,470 415,505" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="80" y="440" text-anchor="middle">FAIL</text>
-  <text class="lbl-arrow" x="480" y="440" text-anchor="middle">FAIL</text>
+  <path class="edge" d="M115,465 C 95,505 95,545 145,580" marker-end="url(#arrow)"></path>
+  <path class="edge" d="M445,465 C 465,505 465,545 415,580" marker-end="url(#arrow)"></path>
+  <text class="lbl-arrow" x="80" y="515" text-anchor="middle">FAIL</text>
+  <text class="lbl-arrow" x="480" y="515" text-anchor="middle">FAIL</text>
 
-  <rect class="note-box" x="140" y="505" width="280" height="52" rx="6"></rect>
-  <text class="note-text" x="280" y="526" text-anchor="middle">secondary non-SSN issue?</text>
-  <text class="note-text" x="280" y="545" text-anchor="middle" font-style="italic">(the brief's "crucial rule")</text>
+  <rect class="note-box" x="140" y="580" width="280" height="52" rx="6"></rect>
+  <text class="note-text" x="280" y="601" text-anchor="middle">secondary non-SSN issue?</text>
+  <text class="note-text" x="280" y="620" text-anchor="middle" font-style="italic">(the brief's "crucial rule")</text>
 
-  <path class="edge" d="M280,557 L280,800 C280,832 350,855 500,855" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="300" y="700" text-anchor="middle">no &rarr; manual review</text>
+  <path class="edge" d="M280,632 L280,800 C280,845 350,875 410,875" marker-end="url(#arrow)"></path>
+  <text class="lbl-arrow" x="300" y="740" text-anchor="middle">no &rarr; manual review</text>
 
-  <path class="edge-pass" d="M420,528 C 550,470 700,420 865,385" marker-end="url(#arrow)"></path>
-  <text class="lbl-arrow" x="545" y="497" text-anchor="middle" fill="#1d5aad">yes &rarr; cross to non-SSN track</text>
+  <path class="edge-pass" d="M420,603 C 550,530 700,440 865,385" marker-end="url(#arrow)"></path>
+  <text class="lbl-arrow" x="565" y="560" text-anchor="middle" fill="#1d5aad">yes &rarr; cross to non-SSN track</text>
 
   <!-- === RIGHT LANE: identity-attribute path === -->
   <rect class="box" x="860" y="320" width="200" height="70" rx="8"></rect>
@@ -494,11 +494,11 @@
   <text x="755" y="502" text-anchor="middle" font-size="13" font-weight="700" fill="#1d5aad">VERIFIED</text>
   <text class="lbl-arrow" x="845" y="488" text-anchor="middle" fill="#1d5aad">PASS</text>
 
-  <path class="edge" d="M960,530 L960,700 C960,780 870,855 800,855" marker-end="url(#arrow)"></path>
+  <path class="edge" d="M960,530 L960,700 C960,790 940,857 890,857" marker-end="url(#arrow)"></path>
   <text class="lbl-arrow" x="990" y="650" text-anchor="middle">FAIL &rarr; manual review</text>
 
   <!-- Manual / compliance review -->
-  <rect class="box-manual" x="500" y="820" width="300" height="74" rx="8"></rect>
+  <rect class="box-manual" x="410" y="820" width="480" height="74" rx="8"></rect>
   <text class="lbl-box" x="650" y="850" text-anchor="middle">L4 &middot; Manual / compliance review</text>
   <text class="lbl-box-sub" x="650" y="870" text-anchor="middle">final decision authority &mdash; every path ends here if unresolved</text>
 
