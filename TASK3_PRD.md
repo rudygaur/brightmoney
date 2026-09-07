@@ -142,13 +142,15 @@ own flag and is measured separately (M3b) so the two effects are never confused.
 **In scope**
 
 1. **L1.5 reason classifier** — a deterministic rule layer (not a vendor) that tags every primary-check
-   failure with exactly one reason class, plus a separable sanctions/PEP flag and a secondary-issue signal.
+   failure with exactly one reason class, plus a separable sanctions/PEP/OFAC flag and a secondary-issue
+   signal.
 2. **Orchestration rewrite** — mandatory L1, unconditional PASS-exit, guaranteed terminal state, retry
    and timeout handling, one feature flag per behavioural change.
 3. **Provider role cleanup** — the two LexisNexis integrations unified into one secondary role (L2a);
    Persona-SSN (L2b) and Persona IDV (L3) exposed as distinct callable tiers; the LexisNexis primary
    entry point removed.
-4. **Sanctions/PEP split** — independent flag with an immediate compliance route.
+4. **Sanctions/PEP/OFAC split** — an independent flag at **every** tier, not only L1, each with an
+   immediate compliance route.
 5. **The SSN→non-SSN crossover**, as an explicit branch rather than an emergent behaviour.
 6. **Manual review** — routing, capacity model, and full reason/path metadata on every case.
 7. **Event log, dashboards, and alerts** (specified in the ARD).
@@ -171,13 +173,13 @@ own flag and is measured separately (M3b) so the two effects are never confused.
 
 | Tier | Check | Role in v2 | Change from today |
 |---|---|---|---|
-| **L1** | Idology | Mandatory primary identity check for **100%** of applicants. Emits identity result **and** a separate sanctions/PEP flag. | Closes D2. Sanctions signal is no longer folded into PASS/FAIL. |
-| **L1.5** | Reason classifier *(new, internal)* | Maps every L1 FAIL to exactly one of `SANCTIONS_HIT`, `SSN_MISMATCH`, `IDENTITY_ATTR_MISMATCH`, `NO_DATA`. Also emits the secondary-non-SSN-issue signal that drives the crossover. | New. Drives all routing below. |
-| **L2a** | LexisNexis (single integration) | SSN-path check for **standard** accounts. | Two integrations unified; no longer usable as a primary. |
-| **L2b** | Persona — SSN mode | SSN-path check for **legacy** accounts. An *alternative* to L2a, never a chain — each applicant gets exactly one. | Restores the documented standard/legacy split. Gate definition is an open dependency (§8). |
-| **L2** | ACRO | Secondary identity-attribute check, and the landing point for the crossover. | Same role, now reliably reached. |
-| **L3** | Persona — IDV mode | Highest-assurance automated fallback. Placed **last** on the non-SSN path because it is the most expensive and the only step with real user friction. | Promoted from 0.87% of failures to the standard second non-SSN fallback. |
-| **L4** | Manual / compliance review | Two entry points: automation exhausted, or an immediate sanctions/PEP route. Final decision authority. | Reaching L4 becomes a guarantee, not a possibility. |
+| **L1** | Idology | Mandatory primary identity check for **100%** of applicants. Emits identity result **and** a separate sanctions/PEP/OFAC flag. | Closes D2. Sanctions signal is no longer folded into PASS/FAIL. |
+| **L1.5** | Reason classifier *(new, internal)* | Maps every non-sanctions L1 FAIL to exactly one of `SSN_MISMATCH`, `IDENTITY_ATTR_MISMATCH`, `NO_DATA`. Also emits the secondary-non-SSN-issue signal that drives the crossover. A sanctions/PEP/OFAC flag from L1 skips L1.5 entirely. | New. Drives all routing below. |
+| **L2a** | LexisNexis (single integration) | SSN-path check for **standard** accounts. Also emits a sanctions/PEP/OFAC flag; a hit ⇒ L4 immediately. | Two integrations unified; no longer usable as a primary. |
+| **L2b** | Persona — SSN mode | SSN-path check for **legacy** accounts. An *alternative* to L2a, never a chain — each applicant gets exactly one. Also emits a sanctions/PEP/OFAC flag; a hit ⇒ L4 immediately. | Restores the documented standard/legacy split. Gate definition is an open dependency (§8). |
+| **L2** | ACRO | Secondary identity-attribute check, and the landing point for the crossover. Also emits a sanctions/PEP/OFAC flag; a hit ⇒ L4 immediately. | Same role, now reliably reached. |
+| **L3** | Persona — IDV mode | Highest-assurance automated fallback. Placed **last** on the non-SSN path because it is the most expensive and the only step with real user friction. Also emits a sanctions/PEP/OFAC flag; a hit ⇒ L4 immediately. | Promoted from 0.87% of failures to the standard second non-SSN fallback. |
+| **L4** | Manual / compliance review | Two entry points: automation exhausted on the assigned path, or an immediate sanctions/PEP/OFAC route from **any** tier, not only L1. Final decision authority. | Reaching L4 becomes a guarantee, not a possibility. |
 
 ### 5.2 Routing rules, in priority order
 
@@ -214,18 +216,27 @@ own flag and is measured separately (M3b) so the two effects are never confused.
                                         └─────────────────────┘
 ```
 
+*(Sanctions/PEP/OFAC branches for L2a, L2b, ACRO and IDV omitted above to keep the ASCII tree
+readable — each works exactly like L1's. See Figure 1 for the full tree, every branch drawn.)*
+
 1. **L1 runs on every applicant.** No bypass, no exception.
-2. **Sanctions/PEP flag ⇒ L4 compliance immediately**, regardless of the identity result, skipping all
-   automated fallbacks. Compliance decides; a FAIL there is a hard reject.
+2. **A sanctions/PEP/OFAC flag ⇒ L4 compliance immediately, at any tier** (L1, L2a, L2b, ACRO or
+   IDV), skipping every remaining automated fallback. Compliance decides; a FAIL there is a hard
+   reject.
 3. **Clean PASS with no flag ⇒ VERIFIED, flow terminates.** Nothing downstream may fire. *(Fixes D3.)*
 4. **FAIL with no flag ⇒ L1.5 assigns exactly one reason class**, which sets the path:
    - `SSN_MISMATCH` → legacy ? **L2b Persona-SSN** : **L2a LexisNexis** — exactly one, never both.
-     PASS ⇒ verified. FAIL ⇒ **crossover check**: a secondary non-SSN issue surfaced? Yes → non-SSN
-     track (ACRO → IDV → L4). No → L4.
-   - `IDENTITY_ATTR_MISMATCH` → **L2 ACRO** → (FAIL) **L3 IDV** → (FAIL) **L4**.
-   - `NO_DATA` → applicable SSN check **and** ACRO in parallel → any PASS verifies; both FAIL →
-     **L3 IDV** → (FAIL) **L4**.
+     PASS ⇒ verified; sanctions/PEP/OFAC ⇒ L4. Otherwise, FAIL ⇒ **crossover check**: a secondary
+     non-SSN issue surfaced? Yes → non-SSN track (ACRO → IDV → L4). No → L4.
+   - `IDENTITY_ATTR_MISMATCH` → **L2 ACRO** → (FAIL) **L3 IDV** → (FAIL) **L4**. Sanctions/PEP/OFAC
+     at either step ⇒ L4.
+   - `NO_DATA` → applicable SSN check **and** ACRO in parallel → any PASS verifies; sanctions/PEP/OFAC
+     ⇒ L4; both FAIL → **L3 IDV** → (FAIL) **L4**. (Same sanctions rule throughout.)
 5. **L4 is the last stop on every path.** PASS ⇒ verified; FAIL ⇒ hard reject.
+
+**Figure 1 — the same tree, every branch drawn.**
+
+![The redesigned KYC waterfall: a flowchart with a decision diamond at every branch, showing the sanctions/PEP/OFAC route from all five checks — Idology, LexisNexis, Persona-SSN, ACRO and Persona-IDV — converging on manual review.](reports/assets/redesigned_waterfall_diagram.png)
 
 ### 5.3 Stop conditions
 
@@ -233,7 +244,7 @@ own flag and is measured separately (M3b) so the two effects are never confused.
 |---|---|---|
 | **VERIFIED** | Any tier returns PASS on the applicant's assigned path, sanctions flag absent or cleared | Symmetric with hard reject — once set, nothing may re-open it |
 | **HARD REJECT** | (a) compliance confirms a sanctions/PEP match, or (b) every automated check on the assigned path failed **and** a human declined | (a) is a legal decline, never a routing problem. (b) is the genuine-decline floor. |
-| **IN MANUAL REVIEW** | Automation exhausted, or sanctions flag raised | Transitional — must resolve to VERIFIED or HARD REJECT |
+| **IN MANUAL REVIEW** | Automation exhausted, or a sanctions/PEP/OFAC flag raised at any tier | Transitional — must resolve to VERIFIED or HARD REJECT |
 
 **Deliberately not a stop condition:** an automated FAIL on its own, at any tier. Every path reaches a
 human before a final no. This *strengthens* our control posture relative to today, where 48,598
@@ -285,15 +296,20 @@ L1 FAIL, no sanctions flag → L1.5 classifies → routed per §5.2.
 | `IDENTITY_ATTR_MISMATCH` | L2 ACRO → L3 IDV → L4 | Silent until L3 |
 | `NO_DATA` | SSN check + ACRO in parallel → L3 IDV → L4 | Silent until L3 |
 
+Every check above also screens for sanctions/PEP/OFAC (§5.2 rule 2); a hit routes straight to L4, same
+as an L1 hit. Not broken out per-check here — the applicant experience doesn't change, silent either way.
+
 Only **L3 Persona IDV** is visible to the applicant: an in-app prompt for a document photo and a
 selfie, 60–120 seconds of effort. It is deliberately last, so anyone who clears at the cheap,
 frictionless ACRO step never sees it.
 
 ### 7.3 Escalation
 
-- **Sanctions/PEP flag → L4 compliance queue immediately**, p95 ≤4h to queue, ahead of all automated
-  fallbacks. Sized for a mostly-false-positive load: of 9,994 flagged cases in the baseline, **79.0%
-  cleared**. Compliance decides; FAIL is a hard reject with no appeal path in v1.
+- **Sanctions/PEP/OFAC flag, any tier → L4 compliance queue immediately**, p95 ≤4h to queue, ahead of
+  all automated fallbacks. Sized for a mostly-false-positive load: of 9,994 flagged cases in the
+  baseline, **79.0% cleared**. Compliance decides; FAIL is a hard reject with no appeal path in v1.
+  That sizing is the L1-only baseline (§8, A1) — re-baseline once L2a/L2b/ACRO/IDV sanctions volume is
+  known.
 - **Automation exhausted → L4 identity review queue**, with full case metadata (FR-10).
 - **Provider outage → hold, do not decide** (FR-8).
 - **Queue breach** — if L4 depth exceeds the phase's capacity model, the rollout ramp halts
@@ -316,7 +332,7 @@ forced in week 2, before any classifier code is written.
 
 | # | Assumption | Status | If it fails |
 |---|---|---|---|
-| **A1** | Idology's API returns structured reason fields and a separable sanctions/PEP flag | **Unconfirmed — verify first** | Fall back to §7.4 |
+| **A1** | Idology's API returns structured reason fields and a separable sanctions/PEP/OFAC flag, **and each of LexisNexis, Persona-SSN, ACRO and Persona-IDV can independently return that same flag** | **Unconfirmed for all five.** Idology is a known vendor-API question; the other four have **zero data evidence** either way — every flagged case in the dataset sits inside an Idology FAIL | Fall back to §7.4 for Idology. Any provider that can't return the flag drops its sanctions branch and reverts to identity-only routing — coverage stays at L1 |
 | **A2** | "Legacy account" has an operational definition (a cutover date, product cohort, or explicit flag) | **Undefined.** No signal in our data — age, enrollment vintage and bank partner all fail to reproduce it | Ship v1 routing **all** `SSN_MISMATCH` → L2a, logged as a documented deviation. Add L2b when Account Services can define the gate. |
 | **A3** | Manual review capacity can grow ~2.4× on the rollout timeline | Gating constraint — see Project Plan | Ramp slows. Capacity, not code, sets the pace. |
 | **A4** | Real provider unit costs and latency SLAs | Not in our data; all cost figures are illustrative unit costs on **real volumes** | Cost thresholds re-set before Phase 2 |
