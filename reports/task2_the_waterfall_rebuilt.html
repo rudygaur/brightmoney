@@ -315,7 +315,7 @@
       </div>
       <div class="al-item leak" data-tip="94,183 users where idology_result is null. 3.74% of 2,515,155.">
         <div class="al-swatch"></div>
-        <div><h4>Leak &mdash; Idology skipped &middot; 3.74%</h4><p><b>94,183 users</b> never saw the primary check at all &mdash; an undocumented second entry point. Fixed: Idology becomes mandatory for 100% of applicants.</p></div>
+        <div><h4>Leak &mdash; Idology skipped &middot; 3.74%</h4><p><b>94,183 users</b> never saw the primary check at all &mdash; three undocumented entry points (LexisNexis, no check at all, direct-to-Persona-IDV), not one. Fixed: Idology becomes mandatory for 100% of applicants.</p></div>
       </div>
       <div class="al-item borderline" data-tip="24,779 users where idology_result='FAIL', manual_review_result is not null, and no automated secondary check (LexisNexis/ACRO/Persona) ran in between. 0.99% of 2,515,155.">
         <div class="al-swatch"></div>
@@ -600,7 +600,7 @@
       </div>
       <div class="cmp-row">
         <div class="cmp-tier">5</div>
-        <div class="cmp-col"><div class="cmp-head">Task 1 finding</div><p>ProviderA_Lexis_Nexis acted as an undocumented second entry point &mdash; <span class="tt" data-tip="94,183 &divide; 2,515,155 = 3.74%.">94,183 users (3.7%)</span> never saw Idology, and this route passed ~99% of what it saw. A control question, not just routing.</p></div>
+        <div class="cmp-col"><div class="cmp-head">Task 1 finding</div><p><span class="tt" data-tip="94,183 &divide; 2,515,155 = 3.74%. Of those, 93,322 entered via LexisNexis (ProviderA_Lexis_Nexis for all but 1 -- verifying 99.998%, not 100%), 843 via no check at all, and 18 via a direct Persona-IDV check -- three distinct doors, not one, none of them Idology.">94,183 users (3.7%)</span> never saw Idology &mdash; not one undocumented entry point but three: LexisNexis (93,322, mostly ProviderA_Lexis_Nexis), no check at all (843), and a direct-to-Persona-IDV path (18). A control question, not just routing.</p></div>
         <div class="cmp-col response"><div class="cmp-head">Redesign response</div><p>Idology becomes the sole, mandatory L1. ProviderA/B are unified into one documented secondary role, reached only after a real primary check.</p></div>
       </div>
       <div class="cmp-row">
@@ -683,7 +683,7 @@
       <div class="pcr-card removed">
         <h4>Removed</h4>
         <ul>
-          <li>The 3.7% Idology-skip entry point (ProviderA acting as an undocumented primary)</li>
+          <li>The 3.7% Idology-skip entry points &mdash; three of them: LexisNexis (mostly ProviderA) acting as an undocumented primary, no check at all, and a direct-to-Persona-IDV path</li>
           <li>The possibility of a check running after a clean PASS</li>
           <li>The SSN-side double-check (LexisNexis <i>and</i> Persona-SSN on the same person) &mdash; the legacy/standard split makes this structurally impossible, correcting this document&rsquo;s own earlier draft</li>
         </ul>
