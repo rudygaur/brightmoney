@@ -87,6 +87,11 @@
   .scope-table td:first-child{ color:var(--ink-faint); font-family:var(--font-mono); font-size:11.5px; letter-spacing:.02em; white-space:nowrap; }
   .scope-table td:nth-child(2){ font-family:var(--font-display); font-weight:800; color:var(--ink); white-space:nowrap; }
   .scope-table td:last-child{ color:var(--ink-soft); line-height:1.5; }
+  .method-note{
+    margin-top:28px; padding:16px 18px; background:var(--surface-2); border-left:3px solid var(--ink-faint);
+    border-radius:0 8px 8px 0; font-size:13.5px; color:var(--ink-soft); line-height:1.6; max-width:none;
+  }
+  .method-note b{ color:var(--ink); }
 
   /* ============================= SECTIONS ============================= */
   section{ padding:60px 0; border-bottom:1px solid var(--line); }
@@ -242,20 +247,11 @@
     <table class="scope-table">
       <tbody>
         <tr>
-          <td>Source table</td>
-          <td class="num"><code>kyc.kyc_users</code></td>
-          <td>2,515,262 raw rows</td>
-        </tr>
-        <tr>
-          <td>Test accounts excluded</td>
-          <td class="num">107</td>
-          <td>Flagged via <code>is_test_user</code>, never deleted — the exclusion is reversible and
-            stated, not baked in.</td>
-        </tr>
-        <tr>
           <td>Analysis denominator</td>
           <td class="num">2,515,155</td>
-          <td>Used for every figure on this page unless noted otherwise below.</td>
+          <td><code>kyc.kyc_users</code>, 2,515,262 raw rows less 107 flagged <code>Test_user</code>
+            accounts (never deleted, exclusion stated not baked in). Used for every figure below
+            unless noted otherwise.</td>
         </tr>
         <tr>
           <td>Idology-outcome denominator</td>
@@ -273,9 +269,6 @@
     <div class="sec-head">
       <span class="eyebrow">Which checks fire — entry</span>
       <h2>Where users enter the waterfall</h2>
-      <p>
-        The brief describes one front door. There are two, and the second one is undocumented.
-      </p>
       <p style="margin-top:14px;">
         <b>The documented design is broadly the design that runs</b> — but three things in it are not
         what the brief describes. There is a second front door. An Idology pass does not always end
@@ -339,11 +332,12 @@
       </figcaption>
     </figure>
 
-    <p class="scope-note">
-      Method note: with no per-check timestamps, order above is inferred from column co-occurrence,
-      <code>kyc_source</code> attribution and Idology's near-universality, not observed directly —
-      and a null provider column is only an upper bound on “did not run,” not a guarantee, since at
-      least 11,695 users carry a reviewer comment naming a check whose result was never written back.
+    <p class="method-note">
+      <b>Method note.</b> With no per-check timestamps, order above is inferred from column
+      co-occurrence, <code>kyc_source</code> attribution and Idology's near-universality, not observed
+      directly — and a null provider column is only an upper bound on &ldquo;did not run,&rdquo; not a
+      guarantee, since at least 11,695 users carry a reviewer comment naming a check whose result was
+      never written back.
     </p>
   </div>
 </section>
