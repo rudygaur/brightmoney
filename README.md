@@ -25,6 +25,7 @@ to measure. Full story: **[The Waterfall, Rebuilt](https://claude.ai/code/artifa
 |---|---|
 | See why users fail, as charts, no setup required | **[Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018)** (Task 1 report) |
 | See the fix, as a diagram, no setup required | **[The Waterfall, Rebuilt](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d)** (Task 2 report) |
+| View either report offline, or as it looked as of a given commit | [reports/](reports/) — static HTML snapshots of both, committed alongside the code they're derived from |
 | See exactly how the data was loaded, cleaned, and analysed, with every number's derivation | The notebooks below — every loading decision, defect, and caveat is documented inline, next to the code |
 | Read the redesign's full logic and cost trade-offs | [TASK2_WATERFALL_DESIGN.md](TASK2_WATERFALL_DESIGN.md) |
 | Run the SQL myself / verify a number | Set up Postgres below, then run the notebooks |
@@ -43,6 +44,9 @@ notebooks/
   02_task1_funnel_analysis.ipynb             the funnel analysis, plus the full flow-path audit
                                               behind Task 2 — everything in plain English + SQL
 TASK2_WATERFALL_DESIGN.md                    the redesigned waterfall: logic, stop conditions, cost
+reports/                                     static HTML snapshots of both published reports, as
+                                              committed — not regenerated automatically, so they can
+                                              lag the live claude.ai/code/artifact links between updates
 .env.example                                 copy to .env and fill in your Postgres connection
 ```
 

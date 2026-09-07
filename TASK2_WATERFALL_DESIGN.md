@@ -17,9 +17,12 @@ human. Modelled effect: **7.93% → roughly 6.0%**, most of the way to the 5% ba
 gap closed by two smaller, lower-confidence changes (deploying Persona IDV properly, and retiring an
 undocumented bypass) rather than by loosening anything.
 
-Every change below is tied to a numbered Task 1 finding. None of them weaken a fraud, sanctions, or
-PEP control — two of them **strengthen** one, and the reasoning for that is new evidence found while
-building this design (see Finding 6).
+Every change below is tied to a numbered finding — from Task 1, or self-identified while building or
+reviewing this design (Findings 6–8). None of them weaken a fraud, sanctions, or PEP control — two of
+them **strengthen** one, and the reasoning for that is new evidence found while building this design
+(see Finding 6). The SSN path also restores the brief's standard-vs-legacy split rather than
+collapsing it, and makes the brief's SSN↔non-SSN "crucial rule" an explicit part of the tree instead
+of an accident of sequencing (Findings 4 and 8).
 
 ---
 
@@ -54,8 +57,12 @@ misread as a problem:** it's users who failed one SSN-path check and then also h
 SSN-path check run (LexisNexis and Persona-SSN both), or the equivalent on the non-SSN side (ACRO and
 Persona IDV both). The brief presents each pair as alternatives chosen by account segment, not a
 retry chain, so this isn't literally the documented design — but it isn't a leak either: it resolves
-at a 99.89% rate, among the best in the entire funnel. §2 below turns exactly this pattern into
-official policy (L2a→L2b, L2→L3) rather than removing it.
+at a 99.89% rate, among the best in the entire funnel. §2 below turns the non-SSN half of this pattern
+(L2→L3, ACRO then Persona IDV) into official sequential policy. The SSN half — LexisNexis *and*
+Persona-SSN both running on the same person — is **not** carried forward: on reflection this document
+originally turned it into an L2a→L2b chain for everyone, which is not what the brief specifies and not
+what this redesign now does. §2 and §5 (Finding 4) restore the brief's original either/or split
+instead.
 
 **Every leak and the borderline case is addressed in the redesign below** — three were already fixed
 in earlier drafts of this document; the "PASS didn't exit" leak surfaced only during this audit and
@@ -68,10 +75,10 @@ adds one new rule (Finding 7, §5).
 | Tier | Check | Role in the redesign | What changes vs. today |
 |---|---|---|---|
 | **L1** | Idology | Mandatory identity check (name/DOB/address/SSN) **for 100% of applicants, no exceptions.** Also the current carrier of sanctions/PEP signal (see Finding 6) — that signal is split out into its own always-checked flag rather than left folded into a bare PASS/FAIL. | Closes the 3.7% undocumented bypass (Finding 5). |
-| **L1.5** | Reason classifier *(new — a rule layer, not a vendor)* | Tags every Idology FAIL with one of: `SANCTIONS_HIT`, `SSN_MISMATCH`, `IDENTITY_ATTR_MISMATCH` (name/address/DOB), `NO_DATA`. Drives all routing below. | This is the single engineering prerequisite the whole redesign depends on — see Finding 1 and the Open Items section. |
-| **L2a** | LexisNexis (one integration) | Secondary SSN/identity check for `SSN_MISMATCH`. | Unifies `ProviderA_Lexis_Nexis` and `ProviderB_Lexis_Nexis` into one documented secondary role — no more silent primary-position usage (Finding 5). |
-| **L2b** | Persona — SSN mode | Second SSN-path fallback, for anyone who fails L2a. | Currently gated by an undocumented "older accounts" rule that isn't reproducible from the data (Task 1, §2.5). Redesign makes it a standard fallback for **everyone** on the SSN path, dropping the unexplained carve-out. |
-| **L2** | ACRO | Secondary identity-attribute check for `IDENTITY_ATTR_MISMATCH` — automated, cheap, fast. | Unchanged in role; now reliably reached (Finding 1) instead of reached only when volume happened to be routed. |
+| **L1.5** | Reason classifier *(new — a rule layer, not a vendor)* | Tags every Idology FAIL with one of: `SANCTIONS_HIT`, `SSN_MISMATCH`, `IDENTITY_ATTR_MISMATCH` (name/address/DOB), `NO_DATA`. Drives all routing below. Also carries the brief's "crucial rule": if the SSN-path check surfaces a secondary non-SSN issue, re-route to the non-SSN track instead of falling to manual review. | This is the single engineering prerequisite the whole redesign depends on — see Finding 1 and the Open Items section. |
+| **L2a** | LexisNexis (one integration) | SSN-path check for **standard (non-legacy) accounts** with `SSN_MISMATCH`. | Unifies `ProviderA_Lexis_Nexis` and `ProviderB_Lexis_Nexis` into one documented secondary role — no more silent primary-position usage (Finding 5). |
+| **L2b** | Persona — SSN mode | SSN-path check for **legacy accounts** with `SSN_MISMATCH` — an *alternative* to L2a, not a fallback after it: each user gets exactly one. | Restores the brief's original "standard → LexisNexis, older accounts → legacy Persona-SSN" split (Finding 4). **Open dependency:** Task 1 found no reproducible signal (age, enrollment vintage, or bank partner) that identifies "legacy" in this dataset — the operational definition of the flag is an engineering/ops item for Task 3, not invented here. |
+| **L2** | ACRO | Secondary identity-attribute check for `IDENTITY_ATTR_MISMATCH` — automated, cheap, fast. Also the landing point for the crucial-rule crossover from the SSN path (see L1.5). | Unchanged in role; now reliably reached (Finding 1) instead of reached only when volume happened to be routed. |
 | **L3** | Persona — IDV mode (document + selfie) | Highest-assurance automated check: the fallback for anyone who fails L2 (ACRO) *or* whose reason is `NO_DATA`. | Promoted from "almost never used" (<1% of Idology failures, Task 1 §4.1) to "the standard second non-SSN fallback" — deliberately still placed *after* the cheaper ACRO check, not before, because it is the highest-cost, highest-friction step in the whole waterfall (Finding 3). |
 | **L4** | Manual / compliance review | Two entry points: (a) anyone who exhausts every automated fallback on their assigned path, (b) **immediately** for any `SANCTIONS_HIT`, bypassing further automated attempts entirely. Final decision authority. | Today reaches only 30.2% of users who exhausted automation (Task 1 §2.6). Redesign makes reaching L4 a *guarantee*, not a possibility — the safety net actually catches everyone it's meant to. |
 
@@ -101,23 +108,54 @@ adds one new rule (Finding 7, §5).
                     │                          SSN_MISMATCH        IDENTITY_ATTR_MISMATCH        NO_DATA
               PASS  │  FAIL                          │                      │                      │
                     │                                ▼                      ▼                      ▼
-                    ▼                        ┌───────────────┐      ┌───────────────┐   ┌─────────────────────┐
-          ┌──────────────┐                   │ L2a LexisNexis │      │  L2 ACRO       │   │ Run L2a + L2 in     │
-          │   VERIFIED    │                   └───────┬────────┘      └───────┬────────┘   │ parallel (both      │
-          │  (if PASS)    │                     PASS   │  FAIL           PASS  │  FAIL      │ cheap/automated)    │
-          │      or       │                            │                      │            └──────────┬───────────┘
-          │ HARD REJECT   │                            ▼                      ▼                        │
-          │ (if FAIL —    │                     ┌───────────────┐      ┌───────────────┐          any PASS → VERIFIED
-          │  genuine      │                     │ L2b Persona-SSN│      │ L3 Persona IDV │          both FAIL ↓
-          │  decline)     │                     └───────┬────────┘      └───────┬────────┘   ┌─────────────────────┐
-          └──────────────┘                        PASS   │  FAIL           PASS  │  FAIL      │  L3 Persona IDV      │
-                                                    ▼      ▼                 ▼      ▼          └──────────┬───────────┘
-                                              VERIFIED   L4 Manual    VERIFIED   L4 Manual         PASS │      │ FAIL
-                                                          review                  review               ▼      ▼
-                                                             │                       │             VERIFIED  L4 Manual
-                                                             ▼                       ▼                          review
-                                                     PASS→VERIFIED           PASS→VERIFIED
-                                                     FAIL→HARD REJECT        FAIL→HARD REJECT
+                    ▼                        see "SSN_MISMATCH        ┌───────────────┐   ┌─────────────────────┐
+          ┌──────────────┐                    detail" below           │  L2 ACRO       │   │ Run applicable SSN- │
+          │   VERIFIED    │                                            └───────┬────────┘   │ path check (L2a/L2b │
+          │  (if PASS)    │                                              PASS  │  FAIL       │ by segment) + L2    │
+          │      or       │                                                    │             │ ACRO in parallel    │
+          │ HARD REJECT   │                                                    ▼             └──────────┬───────────┘
+          │ (if FAIL —    │                                            ┌───────────────┐           any PASS → VERIFIED
+          │  genuine      │                                            │ L3 Persona IDV │           both FAIL ↓
+          │  decline)     │                                            └───────┬────────┘      ┌─────────────────────┐
+          └──────────────┘                                               PASS  │  FAIL          │  L3 Persona IDV      │
+                                                                                 ▼                └──────────┬───────────┘
+                                                                           VERIFIED   L4 Manual        PASS │      │ FAIL
+                                                                                       review               ▼      ▼
+                                                                                          │             VERIFIED  L4 Manual
+                                                                                          ▼                          review
+                                                                                  PASS→VERIFIED
+                                                                                  FAIL→HARD REJECT
+```
+
+**`SSN_MISMATCH` detail — the legacy split and the brief's "crucial rule" crossover:**
+
+```
+                            SSN_MISMATCH
+                                 │
+                     legacy account? (definition TBD —
+                     no signal for this exists in the
+                     current dataset; see Open Items)
+                     │                              │
+                yes  │                          no  │
+                     ▼                              ▼
+          ┌────────────────────┐          ┌────────────────────┐
+          │ L2b Persona-SSN     │          │ L2a LexisNexis      │      exactly ONE of these
+          └──────────┬──────────┘          └──────────┬──────────┘      runs — alternatives,
+               PASS   │  FAIL                    PASS  │  FAIL          not a chain
+                      │                                │
+                      └───────────► VERIFIED ◄─────────┘
+                                         ▲
+                            (either check, on PASS)
+
+                On FAIL (either check) — the brief's "crucial rule":
+                does the result surface a secondary NON-SSN issue?
+                     │                              │
+                yes  │                          no  │
+                     ▼                              ▼
+          cross to the non-SSN track           L4 Manual review
+          (L2 ACRO → if FAIL, L3 Persona        directly — no second
+          IDV → if FAIL, L4 Manual review)      SSN-path check to
+                                                 fall back to
 ```
 
 **In words, in priority order:**
@@ -131,12 +169,28 @@ adds one new rule (Finding 7, §5).
    checks on them anyway, and 201 of those end up *not verified* despite having passed. That cannot
    happen once PASS terminates the flow unconditionally.)
 4. **Idology FAIL → the reason classifier assigns a class**, which sets the path:
-   - `SSN_MISMATCH` → LexisNexis → (if fail) Persona-SSN → (if fail) manual review.
-   - `IDENTITY_ATTR_MISMATCH` → ACRO → (if fail) Persona IDV → (if fail) manual review.
-   - `NO_DATA` (the classifier can't confidently bucket it) → LexisNexis and ACRO both run → any
-     PASS verifies; if both fail, Persona IDV as a single highest-assurance attempt → (if fail)
-     manual review.
+   - `SSN_MISMATCH` → **is the account legacy?** (the brief's own split — this dataset can't
+     reproduce who counts; see Finding 4 and Open Items.) Legacy → Persona-SSN (L2b). Standard →
+     LexisNexis (L2a). **Exactly one runs, never both** — they are alternatives, matching the
+     brief, not a retry chain.
+     - PASS on either → verified, exit.
+     - FAIL on either → **the crucial rule**: does the result surface a secondary non-SSN issue?
+       - Yes → cross to the non-SSN track: ACRO (L2) → (if FAIL) Persona IDV (L3) → (if FAIL)
+         manual review.
+       - No (still an SSN issue) → manual review directly. There is no second SSN-path check to
+         fall back to, since legacy and standard are alternatives, not a chain.
+   - `IDENTITY_ATTR_MISMATCH` → ACRO (L2) → (if fail) Persona IDV (L3) → (if fail) manual review.
+   - `NO_DATA` (the classifier can't confidently bucket it) → the applicable SSN-path check (L2a or
+     L2b, by the same legacy split above) and ACRO (L2) run in parallel → any PASS verifies; if both
+     fail, Persona IDV as a single highest-assurance attempt → (if fail) manual review.
 5. **Manual review is the last stop for every path.** PASS verifies; FAIL is a hard reject.
+
+**Why the crossover matters, not just as a brief-compliance box to tick:** it is already observed
+working in today's data — 8,583 users (0.34% of the whole book) hit it and recover at **54.9%**,
+versus essentially 0% for users stranded with no fallback at all. A routing tree that fixes
+"stranded" but drops this rule would still be quietly discarding people a real secondary signal
+could have caught. See Finding 8 below — this gap was found reviewing this document's own first
+draft, not carried over from Task 1.
 
 ---
 
@@ -165,10 +219,11 @@ is as final as a hard reject; nothing downstream may re-open it (Finding 7).
 | **1** | 101,162 users (50.7% of all non-verifications) failed Idology and were never routed onward; comparable routed users recovered at 48.09% vs. essentially 0% stranded (3 of the 101,162 verified anyway despite it). **The single highest-leverage finding.** | The reason classifier (L1.5) and the routing tree above guarantee every failure gets a path. "Stranded" becomes structurally impossible. |
 | **2** | Manual review reached only 30.2% of users eligible for it (Task 1 §2.6) — the safety net had a hole exactly where the design says it should catch people. | Every path now terminates at manual review if automation doesn't resolve it. Coverage goes from "sometimes" to "always." |
 | **3** | Persona IDV clears 86.3% of the failures it's tried on vs. 30.7% without it, but ran on under 1% of Idology failures (Task 1 §4.1) — the best tool, barely used. | Promoted to the standard second non-SSN fallback (L3) — but deliberately kept *after* the cheaper ACRO check, because it's also the highest-cost, highest-friction step (see §6). |
-| **4** | The documented "older accounts → legacy Persona-SSN" rule showed no age or account-vintage signal anywhere in the data (Task 1 §2.5) — not reproducible, and reported honestly as unresolved rather than guessed. | Retired. Persona-SSN (L2b) is now a standard fallback for every SSN-path failure, not a segment nobody can define. |
+| **4** | The documented "older accounts → legacy Persona-SSN" rule showed no age or account-vintage signal anywhere in the data (Task 1 §2.5) — not reproducible, and reported honestly as unresolved rather than guessed. | **Restored, not retired.** The brief specifies legacy accounts route to Persona-SSN and standard accounts to LexisNexis as *alternatives* — that split is kept here by decision. But the gate is flagged honestly, not guessed: since no reproducible signal identifies "legacy" in this dataset, its operational definition is an open dependency for Task 3 (§8), not invented here just to make the diagram close. |
 | **5** | `ProviderA_Lexis_Nexis` was acting as an undocumented second primary entry point — 94,183 users (3.7%) never saw Idology at all, and this route passed ~99% of what it saw (Task 1 §2.1, §2.4) — flagged as a control question, not just a routing curiosity. | Idology becomes the sole, mandatory L1. `ProviderA`/`ProviderB` are unified into one documented secondary role (L2a), reached only *after* a real primary check. |
 | **6** | *New evidence, found while building this design* (§ below) — sanctions/PEP screening rides entirely on the same undifferentiated Idology FAIL signal as ordinary identity mismatches, and **zero of the 101,162 stranded users have any reviewer comment at all** — meaning today's design has no visibility into whether any of them included an undetected sanctions or PEP signal. | Sanctions/PEP is split into its own always-checked flag (L1.5) with a **hard, immediate route to compliance** — skipping automated fallbacks rather than waiting for them to fail first. This is why the redesign is risk-*positive*, not just risk-neutral: it closes a blind spot the current design has no way to even measure. |
 | **7** | *New evidence, from the §1 flow audit* — 131,538 users get a clean Idology PASS and the waterfall runs further checks on them anyway, contradicting "if the user passes, they are verified and exit the waterfall" outright. A small tail of 201 of them end up **not verified despite having passed.** | PASS becomes an unconditional stop, symmetric with the hard-reject stop conditions in §4. No downstream check — automated or manual — may run once Idology returns a clean PASS. |
+| **8** | *Self-identified gap, found reviewing this document's own first draft* — the brief's "crucial rule" (an SSN-path check surfacing a secondary non-SSN issue moves the user to the non-SSN track) is already real and working in today's data: 8,583 users (0.34% of the book) hit it, recovering at 54.9% — far above the ~0% seen among stranded users. The first draft of this redesign's routing tree never actually drew this rule in; each track dead-ended into manual review independently. | Added explicitly: on an SSN-path FAIL, the classifier re-checks for a non-SSN signal before falling to manual review. A positive signal crosses the user into the non-SSN track (ACRO → Persona IDV) instead. See §3's "SSN_MISMATCH detail." |
 
 ### Finding 6, in detail
 
@@ -222,6 +277,28 @@ integration that doesn't respect an upstream PASS), the fix is the same regardle
 PASS an unconditional exit**, not just a default one. §4 states this as a rule with the same weight
 as a hard-reject stop condition.
 
+### Finding 8, in detail
+
+Found reviewing this document's own first draft against the brief's literal text, not in the Task 1
+notebook. The brief's Step 2 states a "crucial rule": *"if these providers surface a secondary
+non-SSN issue, the user moves to the non-SSN track."* That rule already exists in today's system —
+it isn't hypothetical:
+
+- **8,583 users** (0.34% of the whole 2,515,155-person book) match the pattern "Idology FAIL, at
+  least one SSN-path check *and* at least one non-SSN check ran" — the audit in §1 counts these as
+  **valid**, matching the brief exactly.
+- They recover at **54.9%** — dramatically better than the ~0% recovery rate of users stranded with
+  no fallback at all, and closer to the ~48% recovery rate of the general routed-onward population
+  from Task 1.
+
+The first draft of this redesign's routing tree built two clean, parallel tracks (SSN and non-SSN)
+that each independently dead-ended into manual review on failure — technically closing "stranded,"
+but silently dropping the one rule that lets a genuinely misclassified failure correct itself. That
+is not a hypothetical risk: it is a rule the brief specifies by name, and the data confirms it works.
+§3's "SSN_MISMATCH detail" now makes it an explicit, first-class rule instead of an accident of which
+checks happened to fire. The brief does not specify a mirror rule for the non-SSN track surfacing an
+SSN issue, so this redesign does not invent one — only the direction the brief actually states.
+
 ---
 
 ## 6. Cost, latency, and friction — explicit trade-offs
@@ -248,6 +325,13 @@ into a budget conversation — the volumes are load-bearing, the unit costs are 
    additional provider calls**. At a blended illustrative $1.00–1.50/call: **roughly +$120K–240K per
    year** (annualised over the dataset's ~3.4-year window). This is cheap relative to the next two
    effects, and it's the direct cost of Finding 1's fix.
+   **Caveat added with Findings 4 and 8:** this split was modelled before the legacy gate and the
+   crucial-rule crossover were made explicit. Directionally, restoring the legacy gate means most
+   *standard* stranded users now get exactly one SSN-path call (LexisNexis) instead of a
+   LexisNexis→Persona-SSN chain, which shifts a modest amount of volume out of this effect and into
+   Effect 2 (they reach manual review one call sooner); the crossover adds calls back in the other
+   direction for the subset that lands in non-SSN track. Net effect is likely small but unmodelled —
+   re-derive this split against the corrected routing tree before using it in a budget conversation.
 
 2. **A large jump in manual review volume — the real trade-off.** Every path in this redesign
    terminates at manual review instead of sometimes reaching it. Adding Task 1's Bucket C (48,598
@@ -279,9 +363,9 @@ anyone commits to a headcount plan.
 
 | | |
 |---|---|
-| **Preserved** | Idology as the universal L1. Manual review as final decision authority. The brief's four-tier L1→L2/L3→L4 structure. The genuine-rejection floor (Bucket D, ~24.4%) — not targeted for reduction, because Task 1 found no evidence it's addressable without weakening a control. |
-| **Changed** | LexisNexis unified into one documented SSN-path role. Persona-SSN loses its unreproducible "legacy" gate. Sanctions/PEP becomes an always-checked, independently-routed flag rather than a signal folded into ordinary FAILs. Manual review triage is made a guarantee, not a possibility. The undocumented SSN and non-SSN double-check cascades (§1, "undocumented, not broken") become official policy instead of an unexplained ~8,700-user subset. |
-| **Removed** | The 3.7% Idology-skip entry point (`ProviderA` acting as an undocumented primary). The unexplained "older accounts" Persona-SSN carve-out. The possibility of a check running after a clean PASS (Finding 7). |
+| **Preserved** | Idology as the universal L1. Manual review as final decision authority. The brief's four-tier L1→L2/L3→L4 structure. The brief's standard-vs-legacy split for the SSN path (LexisNexis vs. Persona-SSN, as alternatives) — kept as designed, though this dataset can't reproduce which accounts count as "legacy" (§8). The brief's SSN→non-SSN "crucial rule" crossover — now an explicit rule in the routing tree instead of an accident of which checks happened to fire (Finding 8). The genuine-rejection floor (Bucket D, ~24.4%) — not targeted for reduction, because Task 1 found no evidence it's addressable without weakening a control. |
+| **Changed** | LexisNexis unified into one documented SSN-path role. Sanctions/PEP becomes an always-checked, independently-routed flag rather than a signal folded into ordinary FAILs. Manual review triage is made a guarantee, not a possibility. The non-SSN double-check cascade (§1, "undocumented, not broken") becomes official sequential policy (L2→L3). The SSN-side double-check (LexisNexis *and* Persona-SSN on the same person) is **not** carried forward — restoring the brief's either/or split means it becomes structurally impossible rather than official policy, correcting this document's own earlier draft. |
+| **Removed** | The 3.7% Idology-skip entry point (`ProviderA` acting as an undocumented primary). The possibility of a check running after a clean PASS (Finding 7). |
 
 ---
 
@@ -289,9 +373,18 @@ anyone commits to a headcount plan.
 
 - **The reason classifier (L1.5) is the load-bearing engineering dependency.** This design assumes
   Idology's response carries (or can be made to carry) structured fields distinguishing an SSN
-  mismatch from a name/address/DOB mismatch from a sanctions hit. Task 1 found this classification
-  isn't reliably reconstructable from the data as it stands today (`reviewer_comment` covers only
-  2.96% of users). Confirming what Idology's actual API response contains is the first build item.
+  mismatch from a name/address/DOB mismatch from a sanctions hit, *and* — for the crucial-rule
+  crossover (Finding 8) — a signal for when an SSN-path check surfaces a secondary non-SSN issue.
+  Task 1 found this classification isn't reliably reconstructable from the data as it stands today
+  (`reviewer_comment` covers only 2.96% of users). Confirming what Idology's and LexisNexis's/
+  Persona-SSN's actual API responses contain is the first build item.
+- **"Legacy account" needs an operational definition.** §2 and Finding 4 restore the brief's
+  standard-vs-legacy split for the SSN path, but Task 1 could not find a signal in this dataset
+  (age, enrollment date, bank partner) that reproduces which accounts qualify — this is a policy
+  decision being preserved, not a proxy computed here. Before build, confirm with account services
+  or engineering what actually defines "legacy" (an enrollment cutover date, a specific product or
+  partner cohort, or an explicit flag from another system) so L2b's gate has a real condition to
+  evaluate rather than an undefined one.
 - **The manual review volume increase (~2.4×) is the biggest open risk in this design.** It's sized
   from Task 1's real proportions but illustrative unit costs — the actual staffing plan needs real
   numbers, and probably a phased rollout (Task 3) rather than turning this on for 100% of traffic on
