@@ -26,3 +26,4 @@ it's Idology raising a sanctions/PEP/OFAC watchlist flag ("PA hit - Sanctions...
 | Mixed — Idology FAIL, LexisNexis FAIL, ACRO FAIL | 1,099 | 2.26% |
 
 8. manual review is the only check that appears alongside all the others. to be added at each step failure for OFAC and PEP
+9. Two integrity notes: 2 of 149,364 ProviderA_Lexis_Nexis rows credit that source without a matching PASS in the column

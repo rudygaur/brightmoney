@@ -1,0 +1,757 @@
+
+<!-- saved from url=(0097)file:///Users/anu/Documents/brightmoney/brightmoney-repo/reports/task2_the_waterfall_rebuilt.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>The Waterfall, Rebuilt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="./Task 2 Redesigned Waterfall_files/css2" rel="stylesheet">
+<style>
+  /* Tokens inherited from The Waterfall As Built (Part A) and Where the Funnel Breaks (Part B).
+     One document family — Task 2 adds exactly two tokens: --good (a terminal verified exit)
+     and its soft ground, because "every PASS is terminal" is the rule this document turns on. */
+  :root{
+    color-scheme: light;
+    --font-display:'Archivo',"Arial Narrow",sans-serif;
+    --font-body:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ink:#12161d; --ink-soft:#4c5768; --ink-faint:#8a94a6;
+    --paper:#f5f6f9; --surface:#ffffff; --surface-2:#eef0f4; --line:#dde1e8;
+    --accent:#1d5aad; --accent-2:#3f7fd1; --accent-soft:#e8f0fb;
+    --critical:#c93636; --critical-soft:#fbeaea;
+    --warning:#c98500; --warning-soft:#fbf1de;
+    --good:#0e7355; --good-soft:#e1f2ec;
+    --node:#3a4256;
+    --shadow: 0 1px 2px rgba(18,22,29,.04), 0 8px 24px -12px rgba(18,22,29,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
+      --paper:#10131a; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
+      --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+      --critical:#e2635f; --critical-soft:#3a1f1e;
+      --warning:#eda100; --warning-soft:#3a2c10;
+      --good:#42c095; --good-soft:#0f3229;
+      --node:#5c6884;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
+    --paper:#10131a; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
+    --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+    --critical:#e2635f; --critical-soft:#3a1f1e;
+    --warning:#eda100; --warning-soft:#3a2c10;
+    --good:#42c095; --good-soft:#0f3229;
+    --node:#5c6884;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ margin:0; background:var(--paper); color:var(--ink);
+        font-family:var(--font-body); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+  ::selection{ background:var(--accent-soft); color:var(--ink); }
+  a{ color:var(--accent); }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
+  @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
+
+  h1,h2,h3{ font-family:var(--font-display); font-weight:800; letter-spacing:-.01em; text-wrap:balance; margin:0; color:var(--ink); }
+  .eyebrow{ font-family:var(--font-mono); font-size:11.5px; font-weight:600; letter-spacing:.14em;
+            text-transform:uppercase; color:var(--accent); }
+  .num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+  code{ font-family:var(--font-mono); background:var(--surface-2); padding:1px 5px; border-radius:4px; font-size:.86em; }
+
+  /* ---------------- page frame: this document is exactly five pages ---------------- */
+  .page{ max-width:980px; margin:0 auto 30px; padding:34px 40px 40px; background:var(--surface);
+         border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); }
+  .page:first-of-type{ margin-top:30px; }
+  .prail{ display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+          border-bottom:1px solid var(--line); padding-bottom:11px; margin-bottom:24px; }
+  .prail .pno{ font-family:var(--font-mono); font-size:11px; letter-spacing:.13em;
+               text-transform:uppercase; color:var(--ink-faint); white-space:nowrap; }
+  h2.ptitle{ font-size:20px; }
+  .page > * + h3{ margin-top:26px; }
+  h3{ font-size:15.5px; margin-bottom:11px; }
+  p{ margin:0 0 13px; }
+  .lede{ font-size:15px; color:var(--ink-soft); line-height:1.62; max-width:70ch; }
+  .lede b{ color:var(--ink); }
+  .fine{ font-size:12.5px; color:var(--ink-faint); line-height:1.6; max-width:78ch; }
+  .fine b{ color:var(--ink-soft); }
+
+  /* ---------------- masthead ---------------- */
+  .mast h1{ font-size:clamp(32px,5vw,46px); line-height:1.04; margin:12px 0 0; }
+  .answer{ margin-top:16px; font-size:17.5px; line-height:1.5; color:var(--ink); max-width:64ch; font-weight:500; }
+  .answer b{ color:var(--accent); font-family:var(--font-display); font-weight:900; }
+
+  .stat-compare{ margin-top:26px; display:flex; border:1px solid var(--line); border-radius:10px;
+                 overflow:hidden; background:var(--surface); flex-wrap:wrap; }
+  .stat-compare > div{ flex:1 1 170px; padding:16px 18px; }
+  .stat-compare > div + div{ border-left:1px solid var(--line); }
+  .stat-label{ font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); }
+  .stat-value{ font-family:var(--font-display); font-weight:900; font-size:33px; line-height:1; margin-top:7px; }
+  .stat-value.critical{ color:var(--critical); }
+  .stat-value.good{ color:var(--good); }
+  .stat-sub{ margin-top:5px; font-size:12px; color:var(--ink-faint); }
+  .stat-compare .delta{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center;
+                        justify-content:center; padding:16px 20px; background:var(--good-soft); }
+  .delta .d-num{ font-family:var(--font-display); font-weight:900; font-size:23px; color:var(--good); white-space:nowrap; }
+  .delta .d-cap{ font-size:11px; color:var(--good); text-align:center; margin-top:3px; max-width:13ch; line-height:1.3; }
+
+  /* ---------------- tables ---------------- */
+  .tw{ overflow-x:auto; margin:0 0 6px; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th{ text-align:left; font-family:var(--font-mono); font-size:9.5px; letter-spacing:.11em;
+      text-transform:uppercase; color:var(--ink-faint); font-weight:600;
+      padding:0 10px 8px 0; border-bottom:1px solid var(--line); vertical-align:bottom; }
+  td{ padding:9px 10px 9px 0; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.5; color:var(--ink-soft); }
+  td:first-child, th:first-child{ padding-left:0; }
+  td.r, th.r{ text-align:right; padding-right:0; font-variant-numeric:tabular-nums; }
+  td b{ color:var(--ink); font-weight:600; }
+  tr.total td{ border-bottom:none; border-top:2px solid var(--ink); font-weight:600; color:var(--ink); padding-top:11px; }
+  tr.base td{ background:var(--surface-2); }
+  .step{ font-family:var(--font-display); font-weight:900; font-size:14px; color:var(--accent); }
+
+  .pill{ display:inline-block; font-family:var(--font-mono); font-size:9px; letter-spacing:.07em;
+         text-transform:uppercase; padding:2px 7px; border-radius:20px; white-space:nowrap;
+         border:1px solid currentColor; font-weight:600; }
+  .pill.hi{ color:var(--good); } .pill.med{ color:var(--warning); } .pill.lo{ color:var(--critical); }
+
+  /* ---------------- callouts ---------------- */
+  .flag{ margin:20px 0 0; padding:15px 17px; border-left:3px solid var(--warning);
+         background:var(--warning-soft); border-radius:0 8px 8px 0; }
+  .flag h4{ margin:0 0 6px; font-family:var(--font-display); font-weight:800; font-size:13.5px; color:var(--ink); }
+  .flag p{ margin:0; font-size:13px; color:var(--ink-soft); line-height:1.58; }
+  .flag p + p{ margin-top:8px; }
+  .flag.acc{ border-left-color:var(--accent); background:var(--accent-soft); }
+
+  .sens{ display:flex; gap:0; margin-top:14px; border:1px solid var(--line); border-radius:9px; overflow:hidden; background:var(--surface); }
+  .sens > div{ flex:1; padding:11px 12px; text-align:center; }
+  .sens > div + div{ border-left:1px solid var(--line); }
+  .sens .sv{ font-family:var(--font-display); font-weight:900; font-size:19px; line-height:1; }
+  .sens .sl{ font-family:var(--font-mono); font-size:9.5px; color:var(--ink-faint); margin-top:5px; letter-spacing:.05em; }
+  .sens .hit{ color:var(--good); } .sens .miss{ color:var(--critical); } .sens .ok{ color:var(--accent); }
+
+  /* ---------------- rules list (a real ordered sequence) ---------------- */
+  ol.rules{ margin:0; padding:0; list-style:none; counter-reset:r; }
+  ol.rules > li{ counter-increment:r; position:relative; padding:0 0 15px 40px; }
+  ol.rules > li::before{ content:counter(r); position:absolute; left:0; top:1px;
+    width:25px; height:25px; border-radius:50%; background:var(--accent); color:#fff;
+    font-family:var(--font-display); font-weight:900; font-size:12.5px;
+    display:flex; align-items:center; justify-content:center; }
+  ol.rules > li b{ color:var(--ink); }
+  ol.rules > li{ font-size:13.5px; color:var(--ink-soft); line-height:1.58; }
+  ol.rules ul{ margin:7px 0 0; padding-left:17px; font-size:12.5px; }
+  ol.rules ul li{ margin-bottom:4px; }
+
+  /* ---------------- diagram ---------------- */
+  figure{ margin:0; }
+  .figwrap{ overflow-x:auto; border:1px solid var(--line); border-radius:11px;
+            background:var(--surface); padding:16px; }
+  .figwrap svg{ display:block; width:100%; min-width:840px; height:auto; }
+  figcaption{ margin-top:13px; font-size:12.5px; color:var(--ink-faint); line-height:1.6; max-width:82ch; }
+  figcaption b{ color:var(--ink-soft); }
+  .legend{ display:flex; flex-wrap:wrap; gap:8px 20px; margin-top:14px; padding-top:13px; border-top:1px solid var(--line); }
+  .lg{ display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--ink-soft); }
+  .lg i{ width:15px; height:11px; border-radius:3px; border:1.5px solid; flex:none; display:block; }
+  .lg i.i-good{ border-color:var(--good); background:var(--good-soft); }
+  .lg i.i-new{ border-color:var(--accent); background:var(--accent-soft); border-style:dashed; }
+  .lg i.i-warn{ border-color:var(--warning); background:var(--warning-soft); }
+  .lg i.i-crit{ border-color:var(--critical); background:var(--critical-soft); }
+  .lg i.i-std{ border-color:var(--line); background:var(--surface-2); }
+
+  /* ---- flow diagram (page 2): decision-tree styles, ported from The Waterfall, Rebuilt ---- */
+  svg.flow{ width:100%; height:auto; display:block; overflow:visible; color:var(--ink); }
+  svg.flow text{ font-family:var(--font-body); fill:currentColor; }
+  svg.flow .lbl-arrow{ font-size:11px; font-family:var(--font-mono); fill:var(--ink-faint); }
+  svg.flow .lbl-box{ font-size:13px; font-weight:600; }
+  svg.flow .lbl-box-sub{ font-size:10.5px; font-family:var(--font-mono); fill:var(--ink-faint); }
+  svg.flow .box{ fill:var(--surface-2); stroke:var(--line); stroke-width:1.3; }
+  svg.flow .box-spine{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.3; }
+  svg.flow .box-manual{ fill:var(--warning-soft); stroke:var(--warning); stroke-width:1.5; }
+  svg.flow .diamond{ fill:var(--surface); stroke:var(--ink-soft); stroke-width:1.6; }
+  svg.flow .lbl-diamond{ font-size:13px; font-weight:600; }
+  svg.flow .pill-verified{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.3; }
+  svg.flow .pill-verified text{ fill:var(--accent); font-weight:700; }
+  svg.flow .pill-reject{ fill:var(--critical-soft); stroke:var(--critical); stroke-width:1.5; }
+  svg.flow .pill-reject text{ fill:var(--critical); font-weight:700; }
+  svg.flow .pill-sanctions{ fill:var(--critical-soft); stroke:var(--critical); stroke-width:1.3; }
+  svg.flow .pill-sanctions text{ fill:var(--critical); font-weight:700; }
+  svg.flow .edge{ stroke:var(--ink-faint); stroke-width:1.4; fill:none; }
+  svg.flow .edge-sanctions{ stroke:var(--critical); stroke-width:1.6; fill:none; }
+  svg.flow .edge-pass{ stroke:var(--accent); stroke-width:1.4; fill:none; }
+  svg.flow .edge-dashed{ stroke:var(--ink-faint); stroke-width:1.2; fill:none; stroke-dasharray:3 3; }
+  svg.flow .note-box{ fill:none; stroke:var(--ink-faint); stroke-width:1; stroke-dasharray:2 3; }
+  svg.flow .note-text{ font-size:10.5px; font-family:var(--font-mono); fill:var(--ink-faint); }
+
+  /* SVG classes live here, not inside the <svg>, so the drawing stays self-contained. */
+  .d-box{ fill:var(--surface); stroke:var(--line); stroke-width:1.5; }
+  .d-box.key{ stroke:var(--accent); stroke-width:2; }
+  .d-band{ fill:var(--surface-2); stroke:var(--line); stroke-width:1.5; }
+  .d-new{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5; stroke-dasharray:5 3; }
+  .d-good{ fill:var(--good-soft); stroke:var(--good); stroke-width:1.5; }
+  .d-crit{ fill:var(--critical-soft); stroke:var(--critical); stroke-width:1.5; }
+  .d-warn{ fill:var(--warning-soft); stroke:var(--warning); stroke-width:1.5; }
+  .d-t{ font-family:var(--font-display); font-weight:800; font-size:13px; fill:var(--ink); }
+  .d-s{ font-family:var(--font-body); font-size:10.5px; fill:var(--ink-soft); }
+  .d-m{ font-family:var(--font-mono); font-size:9px; letter-spacing:.08em; fill:var(--ink-faint); font-weight:600; }
+  .f-good{ fill:var(--good); } .f-crit{ fill:var(--critical); }
+  .f-warn{ fill:var(--warning); } .f-acc{ fill:var(--accent); } .f-ink{ fill:var(--ink); }
+  .d-line{ stroke:var(--node); stroke-width:1.6; fill:none; }
+  .d-line.good{ stroke:var(--good); }
+  .d-line.crit{ stroke:var(--critical); }
+  .d-line.warn{ stroke:var(--warning); stroke-dasharray:5 3; }
+  .mk{ fill:var(--node); } .mk-good{ fill:var(--good); }
+  .mk-crit{ fill:var(--critical); } .mk-warn{ fill:var(--warning); }
+
+  /* ---------------- three-up cards ---------------- */
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:4px; }
+  @media (max-width:820px){ .grid3{ grid-template-columns:1fr; } }
+  .c3{ border:1px solid var(--line); border-radius:9px; padding:14px 15px; background:var(--surface); }
+  .c3 .k{ font-family:var(--font-mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); }
+  .c3 .v{ font-family:var(--font-display); font-weight:900; font-size:24px; margin-top:6px; line-height:1; color:var(--ink); }
+  .c3 .v.crit{ color:var(--critical); } .c3 .v.acc{ color:var(--accent); }
+  .c3 p{ margin:8px 0 0; font-size:12px; color:var(--ink-soft); line-height:1.5; }
+
+  .kv{ display:grid; grid-template-columns:118px 1fr; gap:9px 16px; font-size:13px; }
+  .kv dt{ font-family:var(--font-mono); font-size:9.5px; letter-spacing:.09em; text-transform:uppercase;
+          color:var(--ink-faint); padding-top:3px; }
+  .kv dd{ margin:0; color:var(--ink-soft); line-height:1.55; }
+  .kv dd b{ color:var(--ink); }
+
+  .foot{ margin-top:26px; padding-top:14px; border-top:1px solid var(--line);
+         font-size:11.5px; color:var(--ink-faint); line-height:1.6; }
+  .foot b{ color:var(--ink-soft); }
+
+  @media print{
+    body{ background:#fff; }
+    .page{ max-width:none; margin:0; padding:0; border:none; border-radius:0; box-shadow:none;
+           break-after:page; page-break-after:always; }
+    .page:last-of-type{ break-after:auto; page-break-after:auto; }
+    .figwrap svg{ min-width:0; }
+    @page{ size:A4 portrait; margin:13mm; }
+  }
+  @media (max-width:700px){ .page{ padding:22px 18px 26px; } }
+</style>
+
+<!-- ============================= PAGE 1 ============================= -->
+</head><body><section class="page mast">
+  <div class="prail">
+    <span class="eyebrow">Task 2 · The redesign</span>
+    <span class="pno">Page 1 / 5 — the answer</span>
+  </div>
+
+  <h1>The Waterfall, Rebuilt</h1>
+
+  <p class="answer">The current waterfall loses more users to <b>routing</b> than to <b>risk</b>.
+  Six changes fix that — none weakens a fraud, sanctions or PEP control, and two strengthen one.
+  Modelled effect: <b>7.93% → 5.00%</b>.</p>
+
+  <div class="stat-compare">
+    <div>
+      <div class="stat-label">Today</div>
+      <div class="stat-value critical num">7.93%</div>
+      <div class="stat-sub num">199,421 of 2,515,155 not verified</div>
+    </div>
+    <div>
+      <div class="stat-label">Redesign, modelled</div>
+      <div class="stat-value good num">5.00%</div>
+      <div class="stat-sub num">125,758 — at the bar, not under it</div>
+    </div>
+    <div class="delta">
+      <div class="d-num num">73,663</div>
+      <div class="d-cap">users recovered</div>
+    </div>
+  </div>
+
+  <h3>What each change is worth</h3>
+  <p class="fine" style="margin-bottom:14px;">Applied in order of confidence, not size. Every user
+  count below is measured against <code>kyc.kyc_users</code> (2,515,155 rows, 107 test accounts
+  excluded); every <i>recovery</i> is a projection from an observed comparison group and is labelled
+  as such. Rows are disjoint — each user is claimed once.</p>
+
+  <div class="tw"><table>
+    <thead><tr>
+      <th style="width:26px;"></th><th>Change</th><th>Mechanism, and the Task&nbsp;1 population it acts on</th>
+      <th class="r">Users</th><th class="r">Rate after</th><th class="r">Confidence</th>
+    </tr></thead>
+    <tbody>
+      <tr class="base"><td></td><td><b>Today</b></td><td>The waterfall as built</td>
+        <td class="r num">—</td><td class="r num"><b>7.93%</b></td><td class="r"><span class="pill hi">Measured</span></td></tr>
+      <tr><td class="step">1</td><td><b>Every Idology FAIL gets a reason class and a path</b></td>
+        <td>101,162 users failed the primary check and nothing else ran. They recover at 0.01%; users
+        routed onward from the same starting line recover at 48.09%.</td>
+        <td class="r num">+48,647</td><td class="r num">5.99%</td><td class="r"><span class="pill hi">High</span></td></tr>
+      <tr><td class="step">2</td><td><b>Any PASS is a terminal exit</b></td>
+        <td>1,295 users hold a provider PASS, were never seen by a human, and are declined anyway.
+        A deterministic defect, not a projection.</td>
+        <td class="r num">+1,295</td><td class="r num">5.94%</td><td class="r"><span class="pill hi">High</span></td></tr>
+      <tr><td class="step">3</td><td><b>An automated attempt before the human, not instead of one</b></td>
+        <td>24,779 Idology failures went straight to manual review with no automated Step&nbsp;2. They
+        recover at 41.14% against 48.09% for failures that got an automated path — a 6.95&nbsp;pt gap.</td>
+        <td class="r num">+1,722</td><td class="r num">5.87%</td><td class="r"><span class="pill med">Medium</span></td></tr>
+      <tr><td class="step">4</td><td><b>Manual review guaranteed once automation is exhausted</b></td>
+        <td>47,470 users failed every automated check that ran and never reached a human. Sized on the
+        incremental lift review provides (17.84% vs 10.44%), not its headline 32.30% clear rate.</td>
+        <td class="r num">+3,945</td><td class="r num">5.72%</td><td class="r"><span class="pill med">Medium</span></td></tr>
+      <tr><td class="step">5</td><td><b>100% of applicants enter at L1</b></td>
+        <td>843 users had no check of any kind run, and a 93,319-user side door bypassed Idology
+        entirely. Idology clears 88.10% of who it sees.</td>
+        <td class="r num">+743</td><td class="r num">5.69%</td><td class="r"><span class="pill hi">High</span></td></tr>
+      <tr><td class="step">6</td><td><b>Persona&nbsp;IDV becomes the standard non-SSN fallback</b></td>
+        <td>62,978 users fail ACRO today; 27 of them were ever offered the document check. Under the
+        redesign ~92,000 reach it, and it must convert <b>18.8%</b> of them.</td>
+        <td class="r num">+17,311</td><td class="r num">5.00%</td><td class="r"><span class="pill lo">Directional</span></td></tr>
+      <tr class="total"><td></td><td>Redesigned waterfall</td><td>Six changes, no control loosened</td>
+        <td class="r num">73,663</td><td class="r num">5.00%</td><td class="r"></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="flag">
+    <h4>The one number I would not defend as measured — and what happens if it is wrong</h4>
+    <p>Changes 1–5 are grounded in observed comparison groups and land at <b>5.69%</b>. Change 6 is
+    the residual: it is <b>calibrated to close the remaining gap</b>, not derived independently, and
+    saying otherwise would be dressing an assumption as a finding. What it assumes is that Persona
+    IDV converts 18.8% of the ~92,000 users who would reach it. Today it converts 86.32% — but on a
+    hand-picked cohort of 2,507 people someone already expected to finish a document upload, so that
+    figure is selection-biased upward and 18.8% is the discounted ask, against a 30.72% baseline for
+    Idology failures who never see it.</p>
+    <p>Even so, the bar moves if the discount is wrong. At a 10% conversion the redesign lands at
+    5.32%, not 5.00% — still a 2.6&nbsp;point improvement, still short of the brief. That is the
+    first thing a phased rollout should measure.</p>
+  </div>
+
+  <div class="sens">
+    <div><div class="sv num miss">5.69%</div><div class="sl">IDV converts 0%</div></div>
+    <div><div class="sv num miss">5.32%</div><div class="sl">at 10%</div></div>
+    <div><div class="sv num hit">5.00%</div><div class="sl">at 18.8% — the ask</div></div>
+    <div><div class="sv num ok">4.77%</div><div class="sl">at 25%</div></div>
+    <div><div class="sv num ok">4.59%</div><div class="sl">at 30%</div></div>
+  </div>
+
+  <div class="foot"><b>Sources.</b> Every figure re-verified directly against <code>kyc.kyc_users</code>
+  for this document. Findings cited as Task&nbsp;1 come from <i>The Waterfall As Built</i> (Part A —
+  the routing reconstruction) and <i>Genuine vs. Avoidable</i> / <i>Where the Funnel Breaks</i>
+  (Part B — the rate and its drivers). Where a number appears in both, it is computed once and
+  cross-referenced.</div>
+</section>
+
+<!-- ============================= PAGE 2 ============================= -->
+<section class="page">
+  <div class="prail">
+    <span class="eyebrow">The full mechanism</span>
+    <span class="pno">Page 2 / 5 &mdash; the waterfall diagram</span>
+  </div>
+  <h2 class="ptitle">How a user moves through the redesigned waterfall</h2>
+  <p class="lede" style="margin-bottom:14px;">Read top to bottom. Rectangles are automated checks; diamonds are decisions. Blue = pass, verified. Red = a sanctions/PEP/OFAC flag &mdash; hard-routed to a human immediately, at <b>every</b> check, not just the first. Amber = manual/compliance review, the terminal stop for every path.</p>
+  <p class="lede" style="margin-bottom:18px;"><b>Every arrow ends somewhere defined.</b> That is the entire redesign &mdash; nothing here is a new check; it&rsquo;s a guarantee that existing checks are always reached, and that a sanctions/PEP/OFAC hit at <b>any</b> stage &mdash; not only Idology &mdash; skips every remaining automated fallback and goes straight to a human.</p>
+
+  <figure>
+    <div class="figwrap">
+        <svg class="flow" viewBox="0 0 1700 1700" role="img" aria-label="Flowchart of the redesigned KYC waterfall, straight orthogonal connectors and diamonds for every decision: Idology runs on every applicant, and its outcome diamond routes a sanctions, PEP or OFAC flag immediately to manual review, a clean pass to verified, or a plain fail onward to the reason classifier. The classifier splits into an SSN mismatch lane and an identity-attribute mismatch lane. The SSN lane asks whether the account is legacy, routing to LexisNexis for standard accounts or Persona-SSN for legacy accounts as alternatives, not a chain; each of those has its own outcome diamond with a sanctions/PEP/OFAC branch straight to manual review, a pass to verified, or a fail into a shared crucial-rule diamond asking whether a secondary non-SSN issue surfaced -- if yes it crosses to the non-SSN track, if no it goes to manual review. The identity-attribute lane and the crucial-rule crossover both feed ACRO, whose outcome diamond again branches to verified, to manual review on a sanctions/PEP/OFAC flag, or on to Persona-IDV on a plain fail; Persona-IDV's outcome diamond has the same three branches, with its fail going to manual review. Manual review's own outcome diamond issues either verified or a final hard reject. Every automated check -- Idology, LexisNexis, Persona-SSN, ACRO and Persona-IDV -- has its own sanctions/PEP/OFAC branch straight to manual review, not just Idology.">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"></path>
+    </marker>
+    <marker id="ahp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+    </marker>
+    <marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--critical)"></path>
+    </marker>
+  </defs>
+
+  <!-- L1 Idology -->
+  <rect class="box-spine" x="650" y="20" width="320" height="70" rx="6"></rect>
+  <text class="lbl-box" x="810" y="50" text-anchor="middle">L1 &middot; Idology</text>
+  <text class="lbl-box-sub" x="810" y="70" text-anchor="middle">runs on 100% of applicants</text>
+  <path class="edge" d="M810,90 L810,142" marker-end="url(#ah)"></path>
+
+  <!-- Idology-outcome diamond -->
+  <polygon class="diamond" points="810,142 950,190 810,238 670,190"></polygon>
+  <text class="lbl-diamond" x="810" y="185" text-anchor="middle">Outcome?</text>
+  <text class="lbl-diamond" x="810" y="202" text-anchor="middle" font-size="10.5" font-family="monospace" fill="var(--ink-faint)">incl. sanctions/PEP/OFAC</text>
+
+  <path class="edge-sanctions" d="M670,190 L15,190" marker-end="url(#ahs)"></path>
+  <text class="lbl-arrow" x="330" y="182" text-anchor="middle" fill="var(--critical)">sanctions / PEP / OFAC</text>
+
+  <path class="edge-pass" d="M950,190 L1030,190" marker-end="url(#ahp)"></path>
+  <rect class="pill-verified" x="1030" y="165" width="160" height="50" rx="7"></rect>
+  <text x="1110" y="195" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">VERIFIED</text>
+
+  <path class="edge" d="M810,238 L810,330" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="880" y="295" text-anchor="middle">FAIL, no flag</text>
+
+  <!-- L1.5 classifier -->
+  <rect class="box" x="650" y="330" width="320" height="70" rx="6"></rect>
+  <text class="lbl-box" x="810" y="360" text-anchor="middle">L1.5 &middot; Reason classifier</text>
+  <text class="lbl-box-sub" x="810" y="380" text-anchor="middle">SSN vs identity-attr vs no-data</text>
+  <path class="edge" d="M810,400 L810,448" marker-end="url(#ah)"></path>
+
+  <!-- classification diamond -->
+  <polygon class="diamond" points="810,448 965,500 810,552 655,500"></polygon>
+  <text class="lbl-diamond" x="810" y="505" text-anchor="middle">Which reason?</text>
+
+  <rect class="note-box" x="730" y="580" width="160" height="38" rx="5"></rect>
+  <text class="note-text" x="810" y="602" text-anchor="middle">NO_DATA: try both lanes</text>
+
+  <path class="edge" d="M655,500 L350,500 L350,616" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="470" y="492" text-anchor="middle">SSN_MISMATCH</text>
+
+  <path class="edge" d="M965,500 L1300,500 L1300,800" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="1150" y="492" text-anchor="middle">IDENTITY_ATTR_MISMATCH</text>
+
+  <!-- legacy diamond -->
+  <polygon class="diamond" points="350,616 470,660 350,704 230,660"></polygon>
+  <text class="lbl-diamond" x="350" y="655" text-anchor="middle">Legacy account?</text>
+  <text class="lbl-diamond" x="350" y="672" text-anchor="middle" font-size="10" font-family="monospace" fill="var(--ink-faint)">(def. TBD)</text>
+
+  <path class="edge" d="M230,660 L200,730 L180,730 L180,800" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="165" y="720" text-anchor="middle">no</text>
+
+  <path class="edge" d="M470,660 L500,730 L600,730 L600,800" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="535" y="720" text-anchor="middle">yes</text>
+
+  <!-- L2a / L2b -->
+  <rect class="box" x="60" y="800" width="240" height="70" rx="6"></rect>
+  <text class="lbl-box" x="180" y="830" text-anchor="middle">L2a &middot; LexisNexis</text>
+  <text class="lbl-box-sub" x="180" y="850" text-anchor="middle">standard accounts</text>
+  <path class="edge" d="M180,870 L180,912" marker-end="url(#ah)"></path>
+
+  <rect class="box" x="480" y="800" width="240" height="70" rx="6"></rect>
+  <text class="lbl-box" x="600" y="830" text-anchor="middle">L2b &middot; Persona-SSN</text>
+  <text class="lbl-box-sub" x="600" y="850" text-anchor="middle">legacy accounts only</text>
+  <path class="edge" d="M600,870 L600,912" marker-end="url(#ah)"></path>
+
+  <!-- L2a-outcome / L2b-outcome diamonds -->
+  <polygon class="diamond" points="180,912 285,960 180,1008 75,960"></polygon>
+  <text class="lbl-diamond" x="180" y="965" text-anchor="middle" font-size="11.5">Outcome?</text>
+
+  <polygon class="diamond" points="600,912 705,960 600,1008 495,960"></polygon>
+  <text class="lbl-diamond" x="600" y="965" text-anchor="middle" font-size="11.5">Outcome?</text>
+
+  <path class="edge-pass" d="M285,960 L330,960" marker-end="url(#ahp)"></path>
+  <path class="edge-pass" d="M495,960 L450,960" marker-end="url(#ahp)"></path>
+  <rect class="pill-verified" x="330" y="935" width="120" height="50" rx="7"></rect>
+  <text x="390" y="965" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">VERIFIED</text>
+
+  <path class="edge-sanctions" d="M75,960 L15,960" marker-end="url(#ahs)"></path>
+  <path class="edge-sanctions" d="M650,984 L650,1050 L15,1050" marker-end="url(#ahs)"></path>
+  <text class="lbl-arrow" x="500" y="1043" text-anchor="middle" fill="var(--critical)">sanctions / PEP / OFAC</text>
+
+  <path class="edge" d="M180,1008 L180,1090 L390,1090"></path>
+  <path class="edge" d="M600,1008 L600,1090 L390,1090"></path>
+  <path class="edge" d="M390,1090 L390,1168" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="130" y="1080" text-anchor="middle">FAIL</text>
+  <text class="lbl-arrow" x="650" y="1080" text-anchor="middle">FAIL</text>
+
+  <!-- crucial-rule diamond -->
+  <polygon class="diamond" points="390,1168 530,1220 390,1272 250,1220"></polygon>
+  <text class="lbl-diamond" x="390" y="1210" text-anchor="middle" font-size="11.5">Secondary non-SSN issue?</text>
+  <text class="lbl-diamond" x="390" y="1227" text-anchor="middle" font-size="10" font-family="monospace" fill="var(--ink-faint)">the "crucial rule"</text>
+
+  <path class="edge" d="M390,1272 L15,1272" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="180" y="1264" text-anchor="middle">no &rarr; manual review</text>
+
+  <path class="edge-pass" d="M530,1220 L950,1220 L950,835 L1180,835" marker-end="url(#ahp)"></path>
+  <text class="lbl-arrow" x="750" y="1212" text-anchor="middle" fill="var(--accent)">yes &rarr; cross to non-SSN track</text>
+
+  <!-- ACRO -->
+  <rect class="box" x="1180" y="800" width="240" height="70" rx="6"></rect>
+  <text class="lbl-box" x="1300" y="830" text-anchor="middle">L2 &middot; ACRO</text>
+  <text class="lbl-box-sub" x="1300" y="850" text-anchor="middle">automated, cheap, fast</text>
+  <path class="edge" d="M1300,870 L1300,912" marker-end="url(#ah)"></path>
+
+  <!-- ACRO-outcome diamond -->
+  <polygon class="diamond" points="1300,912 1405,960 1300,1008 1195,960"></polygon>
+  <text class="lbl-diamond" x="1300" y="965" text-anchor="middle" font-size="11.5">Outcome?</text>
+
+  <path class="edge-pass" d="M1195,960 L1150,960" marker-end="url(#ahp)"></path>
+  <rect class="pill-verified" x="1000" y="935" width="150" height="50" rx="7"></rect>
+  <text x="1075" y="965" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">VERIFIED</text>
+
+  <path class="edge-sanctions" d="M1405,960 L1685,960" marker-end="url(#ahs)"></path>
+
+  <path class="edge" d="M1300,1008 L1300,1090" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="1350" y="1060" text-anchor="middle">FAIL</text>
+
+  <!-- L3 -->
+  <rect class="box" x="1180" y="1090" width="240" height="70" rx="6"></rect>
+  <text class="lbl-box" x="1300" y="1120" text-anchor="middle">L3 &middot; Persona &mdash; IDV</text>
+  <text class="lbl-box-sub" x="1300" y="1140" text-anchor="middle">document + selfie</text>
+  <path class="edge" d="M1300,1160 L1300,1202" marker-end="url(#ah)"></path>
+
+  <!-- L3-outcome diamond -->
+  <polygon class="diamond" points="1300,1202 1405,1250 1300,1298 1195,1250"></polygon>
+  <text class="lbl-diamond" x="1300" y="1255" text-anchor="middle" font-size="11.5">Outcome?</text>
+
+  <path class="edge-pass" d="M1195,1250 L1150,1250" marker-end="url(#ahp)"></path>
+  <rect class="pill-verified" x="1000" y="1225" width="150" height="50" rx="7"></rect>
+  <text x="1075" y="1255" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">VERIFIED</text>
+
+  <path class="edge-sanctions" d="M1405,1250 L1685,1250" marker-end="url(#ahs)"></path>
+
+  <path class="edge" d="M1300,1298 L1300,1465 L1100,1465" marker-end="url(#ah)"></path>
+  <text class="lbl-arrow" x="1340" y="1390" text-anchor="middle">FAIL</text>
+
+  <!-- buses: every sanctions/PEP/OFAC branch, from every check, converges here -->
+  <path class="edge-sanctions" d="M15,190 L15,1465 L600,1465" marker-end="url(#ahs)"></path>
+  <path class="edge-sanctions" d="M1685,960 L1685,1465 L1100,1465" marker-end="url(#ahs)"></path>
+
+  <!-- L4 manual review -->
+  <rect class="box-manual" x="600" y="1420" width="500" height="90" rx="8"></rect>
+  <text class="lbl-box" x="850" y="1455" text-anchor="middle">L4 &middot; Manual / compliance review</text>
+  <text class="lbl-box-sub" x="850" y="1478" text-anchor="middle">final decision authority &mdash; every unresolved path ends here</text>
+  <path class="edge" d="M850,1510 L850,1562" marker-end="url(#ah)"></path>
+
+  <!-- L4-outcome diamond -->
+  <polygon class="diamond" points="850,1562 962,1610 850,1658 738,1610"></polygon>
+  <text class="lbl-diamond" x="850" y="1615" text-anchor="middle">Outcome?</text>
+
+  <path class="edge-pass" d="M738,1610 L700,1610" marker-end="url(#ahp)"></path>
+  <rect class="pill-verified" x="540" y="1585" width="160" height="50" rx="7"></rect>
+  <text x="620" y="1615" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">VERIFIED</text>
+
+  <path class="edge-sanctions" d="M962,1610 L1000,1610" marker-end="url(#ahs)"></path>
+  <rect class="pill-reject" x="1000" y="1585" width="180" height="50" rx="7"></rect>
+  <text x="1090" y="1615" text-anchor="middle" font-size="13" font-weight="700" fill="var(--critical)">HARD REJECT</text>
+        </svg>
+    </div>
+    <figcaption>Every arrow terminates at VERIFIED or a human decision &mdash; no path exits on an automated FAIL alone, and a sanctions/PEP/OFAC flag at any of the five checks skips straight to manual review.</figcaption>
+  </figure>
+</section>
+
+<!-- ============================= PAGE 3 ============================= -->
+<section class="page">
+  <div class="prail">
+    <span class="eyebrow">The decision logic</span>
+    <span class="pno">Page 3 / 5 — roles, routing, stop conditions</span>
+  </div>
+  <h2 class="ptitle">Who does what, in what order, and where it ends</h2>
+
+  <h3>The role of each provider</h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:52px;">Tier</th><th style="width:140px;">Check</th><th>Role in the redesign</th><th style="width:34%;">What changes, and why</th></tr></thead>
+    <tbody>
+      <tr><td><b>L1</b></td><td><b>Idology</b></td>
+        <td>The only front door. Identity, SSN and sanctions signal for <b>100% of applicants</b>, no exceptions.</td>
+        <td>Closes the 3.71% bypass where <code>ProviderA_Lexis_Nexis</code> acted as an alternative primary and passed 99.55% of what it saw — a check in primary position that filters almost nothing.</td></tr>
+      <tr><td><b>L1.5</b></td><td><b>Reason classifier</b><br><span class="fine">new — a rule layer, not a vendor</span></td>
+        <td>Tags every FAIL as <code>SANCTIONS_HIT</code>, <code>SSN_MISMATCH</code>, <code>IDENTITY_ATTR_MISMATCH</code> or <code>NO_DATA</code>, and carries the crossover signal. Drives all routing below.</td>
+        <td>The single engineering prerequisite the whole design rests on. Today a FAIL is one undifferentiated signal, which is exactly why 101,162 people had nowhere to go.</td></tr>
+      <tr><td><b>L2a</b></td><td><b>LexisNexis</b></td>
+        <td>SSN-path check for <b>standard</b> accounts. One documented secondary role.</td>
+        <td>Unifies two integrations that behave nothing alike: ProviderA sits in primary position, ProviderB is a genuine post-failure secondary. Only the secondary role survives.</td></tr>
+      <tr><td><b>L2b</b></td><td><b>Persona — SSN</b></td>
+        <td>SSN-path check for <b>legacy</b> accounts. An <i>alternative</i> to L2a, not a fallback after it — each user gets exactly one.</td>
+        <td>Keeps the brief’s standard-vs-legacy split rather than collapsing it. The gate is flagged, not guessed: no age or vintage signal in this data reproduces “legacy”.</td></tr>
+      <tr><td><b>L2</b></td><td><b>ACRO</b></td>
+        <td>Secondary identity-attribute check, and the landing point for the crossover from the SSN path. Cheap, fast, invisible to the user.</td>
+        <td>Role unchanged. Now reliably reached rather than reached only when volume happened to route there.</td></tr>
+      <tr><td><b>L3</b></td><td><b>Persona — IDV</b></td>
+        <td>Highest-assurance automated check: document plus selfie. The fallback for an ACRO failure or a <code>NO_DATA</code> case.</td>
+        <td>Promoted from 0.87% of Idology failures to the standard second non-SSN fallback — but deliberately <b>after</b> ACRO, because it is the costliest step and the only one the user feels.</td></tr>
+      <tr><td><b>L4</b></td><td><b>Manual /<br>compliance review</b></td>
+        <td>Final decision authority, with two entry points: anyone who exhausts automation on their path, and <b>immediately</b> any <code>SANCTIONS_HIT</code>.</td>
+        <td>Goes from a possibility to a guarantee. Today it reaches 30.2% of the people the design says it should catch.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Routing logic, in priority order</h3>
+  <ol class="rules">
+    <li><b>Idology runs on every applicant.</b> No bypass, no alternative primary, no exceptions.</li>
+    <li><b>A sanctions/PEP flag goes straight to compliance</b> — regardless of the identity match
+      result, skipping every automated fallback. This is the one route that gets <i>less</i>
+      automation, not more, and it is a deliberate strengthening: today the signal is folded into a
+      generic FAIL, so a stranded user’s watchlist status is not merely unresolved, it is unobserved.</li>
+    <li><b>A clean Idology PASS verifies the user and ends the flow.</b> Unconditionally. Nothing
+      downstream, automated or human, may reopen it.</li>
+    <li><b>An Idology FAIL is classified, and the class sets the path.</b>
+      <ul>
+        <li><code>SSN_MISMATCH</code> → legacy accounts to Persona-SSN, standard accounts to
+          LexisNexis; <b>exactly one runs</b>. PASS verifies. On FAIL, apply the brief’s crucial
+          rule: if the result surfaces a secondary non-SSN issue, cross to the non-SSN track;
+          otherwise go to L4. There is no second SSN check to fall back to, because the two are
+          alternatives.</li>
+        <li><code>IDENTITY_ATTR_MISMATCH</code> → ACRO, then on failure Persona IDV, then on failure L4.</li>
+        <li><code>NO_DATA</code> → the applicable SSN check and ACRO run <b>in parallel</b>; any PASS
+          verifies. If both fail, one Persona IDV attempt, then L4. Parallel rather than sequential
+          because the classifier has no basis for choosing a track, and running them in series would
+          double the latency for a case that is already the least informative.</li>
+      </ul></li>
+    <li><b>Manual review is the last stop on every path.</b> PASS verifies; FAIL is a hard reject.</li>
+  </ol>
+
+  <h3>Stop conditions — where a user is hard-rejected, and why</h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:36%;">Condition</th><th>Why it is final</th></tr></thead>
+    <tbody>
+      <tr><td><b>Confirmed sanctions / PEP / OFAC match, upheld by compliance review</b></td>
+        <td>A legal decline, not a conversion problem, and never resolvable by routing to a friendlier check. The control is noisy — of 9,994 flagged cases today, 78.7% are cleared as false positives — which is precisely why the human, not the automation, holds the authority to uphold it.</td></tr>
+      <tr><td><b>SSN mismatch upheld by manual review</b></td>
+        <td>The largest named rejection reason in the reviewer comments, and deliberately not a target. Manual review upholds it in ~99.9% of cases. Chasing this category means weakening SSN verification to buy a few hundred users — the wrong trade in a US KYC programme.</td></tr>
+      <tr><td><b>Every automated check on the assigned path exhausted, and manual review declines</b></td>
+        <td>The genuine-rejection floor: 48,655 users today, already assessed by two or more providers and a human. This design does not try to shrink it, because Task 1 found no evidence it is addressable without weakening a control.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="flag acc" style="margin-top:18px;">
+    <h4>Two things that are deliberately <i>not</i> stop conditions</h4>
+    <p><b>An automated FAIL, on its own, at any tier.</b> No user in this design receives a final no
+    without a human seeing the case. That is a strengthening of the control posture, not a loosening
+    of it — it is also what drives the manual-review cost on page 4.</p>
+    <p><b>And symmetrically: a clean PASS is as final as a hard reject.</b> Today 1,295 users hold a
+    provider PASS, were never reviewed by anyone, and are declined anyway. A rule that only binds in
+    the rejecting direction is not a rule.</p>
+  </div>
+</section>
+
+<!-- ============================= PAGE 4 ============================= -->
+<section class="page">
+  <div class="prail">
+    <span class="eyebrow">Adding checks is not free</span>
+    <span class="pno">Page 4 / 5 — cost, latency, friction</span>
+  </div>
+  <h2 class="ptitle">What this costs, and who pays it</h2>
+  <p class="lede">In one sentence: <b>this design buys ~21,600 verified users a year by asking human
+  reviewers to do roughly 2.25× the work, and by putting tens of thousands of people through a
+  document-and-selfie flow that almost nobody sees today.</b> The volumes below are real. The unit
+  costs are illustrative and clearly marked, because this dataset carries no provider pricing and no
+  per-check timestamps — collecting them is a Task 3 item.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>Check</th><th class="r">Unit cost <span style="text-transform:none;">(illustrative)</span></th><th class="r">Latency</th><th>Friction the user actually feels</th></tr></thead>
+    <tbody>
+      <tr><td><b>L1 Idology</b></td><td class="r num">$0.60</td><td class="r num">&lt;1s</td><td>None — invisible</td></tr>
+      <tr><td><b>L2a LexisNexis</b></td><td class="r num">$1.20</td><td class="r num">~2s</td><td>None — invisible</td></tr>
+      <tr><td><b>L2b Persona-SSN</b></td><td class="r num">$1.00</td><td class="r num">~2s</td><td>None — invisible</td></tr>
+      <tr><td><b>L2 ACRO</b></td><td class="r num">$0.90</td><td class="r num">~2s</td><td>None — invisible</td></tr>
+      <tr><td><b>L3 Persona IDV</b></td><td class="r num">$3.50</td><td class="r num">60–120s</td><td><b>High</b> — photo ID plus selfie. The only step in the entire waterfall the user has to do anything for, and the one that can lose them outright.</td></tr>
+      <tr><td><b>L4 Manual review</b></td><td class="r num">~$8 / case</td><td class="r num">hours–days</td><td>Indirect — the user waits, without knowing why</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Three cost effects, sized against real volumes</h3>
+  <div class="grid3">
+    <div class="c3">
+      <div class="k">1 · More automated calls</div>
+      <div class="v acc num">+$52–78K<span style="font-size:13px;font-weight:600;">/yr</span></div>
+      <p>Routing 101,162 stranded users through 1–2 fallbacks each, plus one automated attempt for the
+      24,779 sent straight to a human — roughly <b>52,000 extra provider calls a year</b>. The cheapest
+      of the three effects, and it buys the single largest recovery.</p>
+    </div>
+    <div class="c3">
+      <div class="k">2 · Persona IDV volume</div>
+      <div class="v acc num">+$92K<span style="font-size:13px;font-weight:600;">/yr</span></div>
+      <p>From 761 cases a year to roughly <b>27,000 — a 36× increase</b>. This is the friction cost as
+      much as the money: a 60–120s document flow, at that volume, is a real drop-off risk that
+      verification data alone cannot measure. It sits last in the path for exactly this reason.</p>
+    </div>
+    <div class="c3">
+      <div class="k">3 · Manual review — the real trade</div>
+      <div class="v crit num">+$219K<span style="font-size:13px;font-weight:600;">/yr</span></div>
+      <p>From ~21,800 cases a year to ~49,200 — <b>2.25×, or about 7.3 additional analyst FTEs</b>.
+      This is the largest number in the design and the one most worth challenging with real ops data
+      before anyone commits to a headcount plan.</p>
+    </div>
+  </div>
+
+  <h3>The trade, stated as a unit price</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Line</th><th class="r">Per year</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>Total incremental run cost</td><td class="r num"><b>$363–389K</b></td><td>Illustrative unit costs, real volumes, annualised over the dataset’s 3.41-year window</td></tr>
+      <tr><td>Users recovered</td><td class="r num"><b>21,602</b></td><td>73,663 over the window — the exact size of the overage against the 5% bar</td></tr>
+      <tr class="total"><td>Cost per recovered user</td><td class="r num">≈ $17</td><td>Against the lifetime value of a verified FinTech customer, this is not a close call — but it is a real budget line, not a free routing fix</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Latency and friction, honestly</h3>
+  <dl class="kv">
+    <dt>Best case</dt><dd>Unchanged. 88.10% of applicants clear Idology in under a second and exit — and under this design they exit <i>faster</i>, because nothing is permitted to run after a clean PASS. Today 130,713 passing users pick up a redundant provider call.</dd>
+    <dt>Worst case</dt><dd>Longer, and deliberately so: L1 → L2 → 60–120s of document capture → hours or days at L4. Set against the alternative, which is what 101,162 people get today — no second check, no human, and no answer at all.</dd>
+    <dt>Sanctions cases</dt><dd><b>Faster at zero extra cost.</b> All 9,994 flagged cases already reach a human eventually; routing them there immediately rather than after automated fallbacks removes wait, adds no volume.</dd>
+    <dt>Where friction<br>is avoided</dt><dd>ACRO runs before Persona IDV and clears 44.84% of what it sees. Every user resolved at that cheap, invisible step never sees a document upload — which is the whole argument for the ordering.</dd>
+  </dl>
+</section>
+
+<!-- ============================= PAGE 5 ============================= -->
+<section class="page">
+  <div class="prail">
+    <span class="eyebrow">Rationale</span>
+    <span class="pno">Page 5 / 5 — every change, tied to a finding</span>
+  </div>
+  <h2 class="ptitle">Nothing here is designed from taste</h2>
+  <p class="lede" style="margin-bottom:18px;">Each row is a change, the Task 1 finding that forced it,
+  and what it is worth. Changes 7 and 8 carry no recovery number: one is a control strengthening, the
+  other is a rule the brief specifies that the data confirms already works.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th style="width:26px;"></th><th style="width:33%;">Task 1 finding</th><th>Redesign response</th><th class="r" style="width:74px;">Worth</th></tr></thead>
+    <tbody>
+      <tr><td class="step">1</td>
+        <td>101,162 users failed Idology and were never routed onward — 50.8% of all non-verification, recovering 3 people. Comparable routed users recover at 48.09%, and stranding is uniform across every partner and year.</td>
+        <td>The L1.5 classifier plus the routing tree guarantee every failure a destination. “Stranded” becomes structurally impossible rather than merely rarer.</td>
+        <td class="r num">+48,647</td></tr>
+      <tr><td class="step">2</td>
+        <td>1,295 users hold a provider PASS, never saw a human, and are declined anyway. Separately, 130,713 users passed Idology and had a further check run regardless — 201 of them ended up not verified.</td>
+        <td>A PASS is an unconditional terminal exit, symmetric with the hard-reject stop conditions. Nothing may run after it.</td>
+        <td class="r num">+1,295</td></tr>
+      <tr><td class="step">3</td>
+        <td>24,779 Idology failures went straight to manual review with no automated Step 2, recovering 41.14% against 48.09% for failures that got an automated path first.</td>
+        <td>The automated path runs before the human, never instead of one. L4 is the backstop, not the first responder.</td>
+        <td class="r num">+1,722</td></tr>
+      <tr><td class="step">4</td>
+        <td>Manual review reached 30.2% of the users the design says it should catch; 47,470 failed every automated check that ran and never saw a human.</td>
+        <td>Every path terminates at L4. Coverage goes from “sometimes” to “always”.</td>
+        <td class="r num">+3,945</td></tr>
+      <tr><td class="step">5</td>
+        <td><code>ProviderA_Lexis_Nexis</code> operated as an undocumented second front door for 93,319 users (3.71%) who never saw Idology, passing 99.55% of them. A further 843 had no check of any kind.</td>
+        <td>Idology becomes the sole mandatory L1; the two LexisNexis integrations collapse into one documented secondary role reached only after a real primary check.</td>
+        <td class="r num">+743</td></tr>
+      <tr><td class="step">6</td>
+        <td>Persona IDV ran on 0.87% of Idology failures. 62,978 users failed ACRO and exactly 27 were ever offered the document check.</td>
+        <td>Promoted to the standard non-SSN fallback — placed after ACRO, not before, because it is the costliest and only high-friction step.</td>
+        <td class="r num">+17,311</td></tr>
+      <tr><td class="step">7</td>
+        <td>All 9,994 sanctions/PEP/OFAC-flagged cases are Idology failures, and the flag travels as part of an undifferentiated FAIL. None of the 101,162 stranded users carries a reviewer comment of any kind.</td>
+        <td>Sanctions becomes its own always-checked flag with an immediate, hard route to compliance. The defensible claim is not that hits are being missed — that is unprovable here — but that today’s design has <b>no visibility into that population at all</b>.</td>
+        <td class="r"><span class="pill hi">Control</span></td></tr>
+      <tr><td class="step">8</td>
+        <td>The brief’s “crucial rule” crossover already runs for 8,605 users and recovers 55.01% — the best-performing leg in the funnel. But it is absent from the Persona-SSN branch (0.45% vs 19.47%).</td>
+        <td>Made a first-class rule in the tree rather than an accident of which checks happened to fire, and applied to both SSN branches.</td>
+        <td class="r"><span class="pill hi">Brief</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Preserved, changed, removed</h3>
+  <dl class="kv">
+    <dt>Preserved</dt><dd>Idology as the universal L1. Manual review as final decision authority. The brief’s four-tier structure and its standard-vs-legacy SSN split. The SSN→non-SSN crossover. <b>And the genuine-rejection floor</b> — 48,655 users, ~24% of non-verification, deliberately not targeted.</dd>
+    <dt>Changed</dt><dd>Sanctions/PEP becomes an independently-routed flag rather than a signal folded into ordinary failures. Manual review becomes a guarantee. LexisNexis unifies into one secondary role. Persona IDV becomes a real fallback instead of a rarity.</dd>
+    <dt>Removed</dt><dd>The LexisNexis primary-position side door. The possibility of any check running after a clean PASS. The dead end where a failure leads nowhere.</dd>
+  </dl>
+
+  <h3>What would make this wrong — in the order I would go check</h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:30%;">Risk</th><th>Why it matters, and what I would do about it</th></tr></thead>
+    <tbody>
+      <tr><td><b>The L1.5 classifier may not be buildable as specified</b></td>
+        <td>The entire design assumes Idology’s response distinguishes an SSN mismatch from an identity-attribute mismatch from a sanctions hit — and that an SSN-path failure can surface a secondary non-SSN signal. That is an assumption about a vendor API, not a finding from this data. <b>Confirm what the actual API responses contain before anything else is built.</b> If they do not, the classifier needs a rules layer over the raw response codes, and that is a materially larger build.</td></tr>
+      <tr><td><b>Persona IDV may not convert at 18.8%</b></td>
+        <td>The load-bearing assumption on page 1. At 10% the design lands at 5.32% and misses the bar. Measure it first, on a routed sample, before sizing the vendor contract.</td></tr>
+      <tr><td><b>2.25× manual review is a hiring plan, not a config change</b></td>
+        <td>~7.3 additional FTEs cannot be stood up on day one. This needs a phased rollout with a triage rule that prioritises cases review can actually resolve — and the natural follow-on is a risk-based auto-decline layer, which needs labelled outcome data this system will only start generating once it is live.</td></tr>
+      <tr><td><b>“Legacy account” has no definition</b></td>
+        <td>The L2a/L2b gate is preserved from the brief, but no signal in this data — age, vintage, or partner — reproduces which accounts qualify. It needs a real condition from account services before build, not a proxy invented to make the diagram close.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="foot"><b>Denominator throughout.</b> 2,515,155 users — 2,515,262 rows less 107 flagged
+  <code>Test_user</code> accounts, excluded everywhere and never deleted. Idology outcome rates use
+  2,420,972 (the users it ran for); routing shares use 288,028 (Idology failures). Recovery figures
+  are comparison-group projections and are labelled as such wherever they appear.
+  <b>Companion documents:</b> <i>The Waterfall As Built</i> (Task 1 Part A), <i>Genuine vs. Avoidable</i>
+  and <i>Where the Funnel Breaks</i> (Task 1 Part B). Task 3 — PRD, ARD and project plan — builds from
+  the four risks above.</div>
+</section>
+</body></html>

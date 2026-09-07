@@ -31,6 +31,9 @@ cells right next to the code and query it explains. There is deliberately no `AU
 | Task 1 — presentation | [Where the Funnel Breaks](https://claude.ai/code/artifact/e9f9cc6d-f995-4873-9db2-f6bb36b16018) |
 | Task 2 — redesigned waterfall (text) | [TASK2_WATERFALL_DESIGN.md](TASK2_WATERFALL_DESIGN.md) |
 | Task 2 — presentation | [The Waterfall, Rebuilt](https://claude.ai/code/artifact/49e52e3d-08f8-49bc-a5ee-2dc1a300051d) |
+| Task 3 — PRD | **[reports/Task3a_PRD_KYC_Waterfall_v2.docx](reports/Task3a_PRD_KYC_Waterfall_v2.docx)** · [source](TASK3_PRD.md) · [published](https://claude.ai/code/artifact/43613d78-705d-46f2-b0a7-47d3216a6c3b) |
+| Task 3 — ARD / monitoring plan | **[reports/Task3b_ARD_Monitoring_Plan.docx](reports/Task3b_ARD_Monitoring_Plan.docx)** · [source](TASK3_ARD.md) · [published](https://claude.ai/code/artifact/04ceac23-6b23-40a2-afa1-a2a8da69e6f5) |
+| Task 3 — project plan | **[reports/Task3c_Project_Plan.docx](reports/Task3c_Project_Plan.docx)** · [source](TASK3_PROJECT_PLAN.md) · [published](https://claude.ai/code/artifact/27f7a568-f2cb-4285-bc97-041bc4077127) |
 | Setup, file map, for a human reader | [README.md](README.md) |
 
 **Do not recompute or restate specific numbers here.** If you need a figure, get it from a fresh run
@@ -45,7 +48,7 @@ what has gone stale and drifted out of sync in the past on this project.
 | Task 0 | Load + profile the dataset into Postgres (self-imposed, not in the brief) | Done, 11/11 validation gates pass |
 | Task 1 | Funnel analysis — headline rate, causes, highest-leverage problems, as a presentation | Done |
 | Task 2 | Redesigned waterfall — diagram, decision logic, rationale, every change tied to a Task 1 finding | Done |
-| Task 3 | PRD + ARD/monitoring plan + project plan | Not started |
+| Task 3 | PRD + ARD/monitoring plan + project plan | Done |
 
 ## Environment, in short
 
@@ -79,7 +82,7 @@ cd /Users/rudransh/d_drive/GITHUB/brightmoney
   table it didn't create, since `study` is a shared database (override: `ALLOW_FOREIGN_OVERWRITE`
   in that notebook's setup cell).
 
-## Open threads for Task 3
+## Open threads carried into Task 3 (now addressed there — WS0, WS7, WS5)
 
 - The reason classifier that Task 2's redesign depends on (L1.5, distinguishing an SSN mismatch from
   an identity-attribute mismatch from a sanctions hit) is an assumption about what Idology's API can

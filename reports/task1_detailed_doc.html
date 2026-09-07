@@ -1,0 +1,1386 @@
+<title>Task 1 — The Waterfall As Built, and the 7.93% Problem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* ==================================================================
+   COMBINED TASK 1 REPORT
+   Part 1 and Part 2 are two previously separate documents. Each keeps
+   its own stylesheet, namespaced to .doc-a / .doc-b, because both use
+   the same custom-property NAMES with different VALUES. Nothing in the
+   markup of either was edited.
+   ================================================================== */
+
+/* ---- global shell (the only unscoped rules) ---- */
+*{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{ margin:0; background:#e9ebf0; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) body{ background:#0a0c11; } }
+:root[data-theme="dark"] body{ background:#0a0c11; }
+
+/* ==================================================================
+   PAGE CHROME for Part 1 — a neutral namespace holding the same sheet
+   geometry Part 2's own stylesheet already defines, so the two parts
+   paginate identically without either stylesheet reaching the other.
+   ================================================================== */
+.mx-deck{
+  --mx-ink:#12161d; --mx-faint:#8a94a6; --mx-surface:#ffffff;
+  --mx-line:#dde1e8; --mx-accent:#1d5aad;
+  --mx-shadow: 0 1px 2px rgba(18,22,29,.04), 0 10px 30px -14px rgba(18,22,29,.22);
+  display:flex; flex-direction:column; align-items:center; gap:26px; padding:0 16px 26px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .mx-deck{
+    --mx-ink:#eef1f6; --mx-faint:#77839a; --mx-surface:#171b24;
+    --mx-line:#2a3040; --mx-accent:#5b98e6;
+    --mx-shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"] .mx-deck{
+  --mx-ink:#eef1f6; --mx-faint:#77839a; --mx-surface:#171b24;
+  --mx-line:#2a3040; --mx-accent:#5b98e6;
+  --mx-shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+}
+.mx-sheet{
+  width:100%; max-width:8.5in; aspect-ratio:8.5/11;
+  background:var(--mx-surface); border:1px solid var(--mx-line); border-radius:3px;
+  box-shadow:var(--mx-shadow); padding:0.52in 0.6in 0.44in;
+  display:flex; flex-direction:column;
+}
+@media (max-width:820px){ .mx-sheet{ aspect-ratio:auto; padding:30px 22px; } }
+.mx-rule{ display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+  border-bottom:1px solid var(--mx-line); padding-bottom:7px; flex:none; }
+.mx-rule .d{ font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:9.5px;
+  font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--mx-faint); }
+.mx-rule .f{ font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:9.5px;
+  font-weight:600; letter-spacing:.1em; color:var(--mx-accent); white-space:nowrap; }
+.mx-body{ flex:1 1 auto; min-height:0; padding-top:20px; }
+
+/* Part 1's sections were written to flow down a continuous page. These rules only
+   change how they are FRAMED - they strip the standalone document's own page
+   furniture (its own background, gutters, section rules) so the sheet supplies it. */
+.mx-body .doc-a{ background:none; }
+.mx-body .doc-a .wrap{ max-width:none; margin:0; padding:0; }
+.mx-body .doc-a section{ padding:0; border-bottom:none; }
+.mx-body .doc-a header.masthead{ padding:0 0 26px; margin-bottom:26px; }
+.mx-body .doc-a .scope-table{ margin-top:0; max-width:none; }
+/* the denominator table opens page 1; a rule keeps it distinct from the section under it */
+.mx-scope{ padding-bottom:20px; margin-bottom:26px; border-bottom:1px solid var(--mx-line); }
+.mx-body .doc-a .fig-frame{ overflow-x:visible; }
+.mx-body .doc-a .fig-frame svg{ min-width:0; }
+/* A page body is ~200px narrower than the standalone document's column, so three
+   places that were comfortable there need the space returned: the inventory table's
+   right-hand columns, and the two provider cards, whose rows only line up if both
+   verdict headings reserve the same height. */
+.mx-body .doc-a .inv thead th + th,
+.mx-body .doc-a .inv tbody td + td{ padding-left:20px; }
+.mx-body .doc-a .inv .fire-track{ width:70px; }
+.mx-body .doc-a .ln-verdict{ min-height:3.2em; }
+
+/* ---- part divider ---- */
+.mx-part{
+  max-width:8.5in; margin:0 auto; padding:52px 16px 26px;
+  font-family:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+.mx-part .mx-num{
+  font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace; font-size:11px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:#1d5aad; display:block;
+}
+.mx-part .mx-q{
+  font-family:'Archivo',"Arial Narrow",sans-serif; font-weight:800; letter-spacing:-.01em;
+  font-size:clamp(21px,3.1vw,29px); line-height:1.22; margin:10px 0 0; color:#12161d;
+  text-wrap:balance;
+}
+.mx-part hr{ border:none; border-top:2px solid #1d5aad; margin:0 0 18px; width:56px; }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .mx-part .mx-q{ color:#eef1f6; }
+  :root:not([data-theme="light"]) .mx-part .mx-num{ color:#5b98e6; }
+  :root:not([data-theme="light"]) .mx-part hr{ border-top-color:#5b98e6; }
+}
+:root[data-theme="dark"] .mx-part .mx-q{ color:#eef1f6; }
+:root[data-theme="dark"] .mx-part .mx-num{ color:#5b98e6; }
+:root[data-theme="dark"] .mx-part hr{ border-top-color:#5b98e6; }
+
+/* ---- print: one sheet per physical page, both parts alike ---- */
+@media print{
+  .mx-deck{ display:block; padding:0; gap:0; }
+  .mx-sheet{ max-width:none; width:100%; height:11in; aspect-ratio:auto;
+    border:none; border-radius:0; box-shadow:none; break-after:page; page-break-after:always; }
+  .mx-part{ max-width:none; padding:0.6in 0.6in 0; break-after:page; page-break-after:always; }
+}
+
+
+/* ================= PART 1 stylesheet, namespaced ================= */
+/* ============================= TOKENS =============================
+     Inherited verbatim from the Task 1 / Task 2 reports so this section
+     folds into the same document family. Do not fork the palette. */
+:root .doc-a{
+    color-scheme: light;
+    --font-display:'Archivo',"Arial Narrow",sans-serif;
+    --font-body:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+
+    --ink:#12161d;
+    --ink-soft:#4c5768;
+    --ink-faint:#8a94a6;
+    --paper:#f5f6f9;
+    --surface:#ffffff;
+    --surface-2:#eef0f4;
+    --line:#dde1e8;
+
+    --accent:#1d5aad;
+    --accent-2:#3f7fd1;
+    --accent-soft:#e8f0fb;
+    --critical:#c93636;
+    --critical-soft:#fbeaea;
+    --warning:#c98500;
+    --warning-soft:#fbf1de;
+    --node:#3a4256;
+
+    --shadow: 0 1px 2px rgba(18,22,29,.04), 0 8px 24px -12px rgba(18,22,29,.12);
+  }
+@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]) .doc-a{
+      color-scheme: dark;
+      --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
+      --paper:#10131a; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
+      --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+      --critical:#e2635f; --critical-soft:#3a1f1e;
+      --warning:#eda100; --warning-soft:#3a2c10;
+      --node:#5c6884;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+}
+:root[data-theme="dark"] .doc-a{
+    color-scheme: dark;
+    --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
+    --paper:#10131a; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
+    --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+    --critical:#e2635f; --critical-soft:#3a1f1e;
+    --warning:#eda100; --warning-soft:#3a2c10;
+    --node:#5c6884;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+.doc-a, .doc-a *{ box-sizing:border-box; }
+.doc-a{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+.doc-a ::selection{ background:var(--accent-soft); color:var(--ink); }
+.doc-a a{ color:var(--accent); }
+.doc-a :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
+@media (prefers-reduced-motion:reduce){
+.doc-a, .doc-a *{ animation:none !important; transition:none !important; }
+}
+.doc-a .wrap{ max-width:900px; margin:0 auto; padding:0 24px; }
+.doc-a h1, .doc-a h2, .doc-a h3{ font-family:var(--font-display); font-weight:800; letter-spacing:-.01em; text-wrap:balance; margin:0; color:var(--ink); }
+.doc-a .eyebrow{
+    font-family:var(--font-mono); font-size:11.5px; font-weight:600; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent);
+  }
+.doc-a .num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+.doc-a code{ font-family:var(--font-mono); background:var(--surface-2); padding:1px 5px; border-radius:4px; font-size:.88em; }
+/* ============================= MASTHEAD ============================= */
+.doc-a header.masthead{ border-bottom:1px solid var(--line); padding:56px 0 40px; }
+.doc-a header.masthead h1{ font-size:clamp(34px,5.4vw,52px); line-height:1.04; margin-top:14px; }
+.doc-a header.masthead .thesis{ margin-top:18px; font-size:18px; color:var(--ink-soft); max-width:62ch; line-height:1.55; }
+.doc-a .scope-note{ margin-top:20px; font-size:12.5px; color:var(--ink-faint); line-height:1.6; max-width:64ch; }
+.doc-a .scope-table{ width:100%; max-width:640px; border-collapse:collapse; margin-top:20px; font-size:13px; }
+.doc-a .scope-table td{ padding:9px 14px 9px 0; border-top:1px solid var(--line); vertical-align:top; }
+.doc-a .scope-table tr:first-child td{ border-top:none; }
+.doc-a .scope-table td:first-child{ color:var(--ink-faint); font-family:var(--font-mono); font-size:11.5px; letter-spacing:.02em; white-space:nowrap; }
+.doc-a .scope-table td:nth-child(2){ font-family:var(--font-display); font-weight:800; color:var(--ink); white-space:nowrap; }
+.doc-a .scope-table td:last-child{ color:var(--ink-soft); line-height:1.5; }
+.doc-a .method-note{
+    margin-top:28px; padding:16px 18px; background:var(--surface-2); border-left:3px solid var(--ink-faint);
+    border-radius:0 8px 8px 0; font-size:13.5px; color:var(--ink-soft); line-height:1.6; max-width:none;
+  }
+.doc-a .method-note b{ color:var(--ink); }
+/* ============================= SECTIONS ============================= */
+.doc-a section{ padding:60px 0; border-bottom:1px solid var(--line); }
+.doc-a section:last-of-type{ border-bottom:none; }
+.doc-a .sec-head{ margin-bottom:28px; }
+.doc-a .sec-head .eyebrow{ display:block; margin-bottom:10px; }
+.doc-a .sec-head h2{ font-size:clamp(23px,3.4vw,29px); }
+.doc-a .sec-head p{ margin-top:12px; color:var(--ink-soft); font-size:16px; max-width:64ch; line-height:1.6; }
+.doc-a .body-copy{ max-width:64ch; }
+.doc-a .body-copy p{ font-size:15px; color:var(--ink-soft); line-height:1.65; }
+.doc-a .body-copy p b{ color:var(--ink); }
+/* ============================= FIGURES ============================= */
+.doc-a figure{ margin:0; }
+.doc-a .fig-frame{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:24px 20px 14px; box-shadow:var(--shadow); overflow-x:auto;
+  }
+.doc-a .fig-frame svg{ width:100%; min-width:760px; height:auto; display:block; }
+.doc-a figcaption{
+    margin-top:16px; padding:14px 16px; background:var(--surface-2); border-radius:8px;
+    font-size:13.5px; color:var(--ink-soft); line-height:1.6;
+  }
+.doc-a figcaption b{ color:var(--ink); }
+/* diagram type + marks, all theme-token driven */
+.doc-a .dg text{ font-family:var(--font-body); }
+.doc-a .dg .bx{ fill:var(--surface); stroke:var(--node); stroke-width:1.4; }
+.doc-a .dg .bx-accent{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.6; }
+.doc-a .dg .bx-crit{ fill:var(--critical-soft); stroke:var(--critical); stroke-width:1.6; }
+.doc-a .dg .bx-warn{ fill:var(--warning-soft); stroke:var(--warning); stroke-width:1.6; }
+.doc-a .dg .t-name{ font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+.doc-a .dg .t-name.on-accent{ fill:var(--accent); }
+.doc-a .dg .t-name.on-crit{ fill:var(--critical); }
+.doc-a .dg .t-name.on-warn{ fill:var(--warning); }
+.doc-a .dg .t-name.on-plain{ fill:var(--ink-faint); }
+.doc-a .dg .t-val{ font-family:var(--font-display); font-weight:800; font-size:15px; fill:var(--ink); }
+.doc-a .dg .t-sub{ font-size:11.5px; fill:var(--ink-soft); }
+.doc-a .dg .t-edge{ font-family:var(--font-mono); font-size:11px; fill:var(--ink-soft); font-weight:500; }
+.doc-a .dg .t-edge-em{ font-family:var(--font-mono); font-size:11px; fill:var(--warning); font-weight:600; }
+.doc-a .dg .t-note{ font-size:11px; fill:var(--ink-faint); font-style:italic; }
+.doc-a .dg .ln{ stroke:var(--node); stroke-width:1.3; fill:none; }
+.doc-a .dg .ln-cross{ stroke:var(--warning); stroke-width:1.8; fill:none; }
+.doc-a .dg .ln-dead{ stroke:var(--critical); stroke-width:1.3; fill:none; stroke-dasharray:4 3; }
+.doc-a .dg .ah{ fill:var(--node); }
+.doc-a .dg .ah-cross{ fill:var(--warning); }
+.doc-a .dg .ah-dead{ fill:var(--critical); }
+/* ============================= CHECK INVENTORY ============================= */
+.doc-a .inv{ width:100%; border-collapse:collapse; font-size:14px; }
+.doc-a .inv thead th{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--ink-faint); text-align:right; font-weight:600; padding:0 0 10px; border-bottom:1px solid var(--line);
+  }
+.doc-a .inv thead th:first-child{ text-align:left; }
+.doc-a .inv tbody td{ padding:13px 0; border-bottom:1px solid var(--line); text-align:right; vertical-align:middle; }
+.doc-a .inv tbody td:first-child{ text-align:left; }
+.doc-a .inv tbody tr:last-child td{ border-bottom:none; }
+.doc-a .inv .ck{ display:flex; align-items:baseline; gap:9px; }
+.doc-a .inv .ck-tier{
+    font-family:var(--font-mono); font-weight:700; font-size:11px; color:var(--accent);
+    background:var(--accent-soft); border-radius:4px; padding:2px 6px; flex:none;
+  }
+.doc-a .inv .ck-name{ font-weight:600; }
+.doc-a .inv .ck-role{ display:block; font-size:12px; color:var(--ink-faint); margin-top:2px; }
+.doc-a .inv .fire{ display:flex; align-items:center; gap:10px; justify-content:flex-end; }
+.doc-a .inv .fire-track{ width:88px; height:7px; background:var(--surface-2); border-radius:4px; overflow:hidden; flex:none; }
+.doc-a .inv .fire-fill{ height:100%; background:var(--accent); border-radius:4px; }
+.doc-a .inv .pass-def{ color:var(--warning); }
+.doc-a .inv-foot{ margin-top:14px; font-size:12.5px; color:var(--ink-faint); line-height:1.6; }
+/* ============================= ROUTE TABLE ============================= */
+.doc-a .routes{ display:flex; flex-direction:column; gap:2px; }
+.doc-a .route{ display:grid; grid-template-columns:1fr 132px 108px; gap:18px; align-items:center; padding:16px 0; border-top:1px solid var(--line); }
+.doc-a .route:first-child{ border-top:none; }
+@media (max-width:640px){
+.doc-a .route{ grid-template-columns:1fr; gap:8px; }
+}
+.doc-a .route .r-name{ font-weight:600; font-size:14.5px; }
+.doc-a .route .r-name span{ display:block; font-size:12.5px; color:var(--ink-faint); font-weight:400; margin-top:3px; line-height:1.45; }
+.doc-a .route .r-vol{ font-family:var(--font-mono); font-size:13px; color:var(--ink-soft); text-align:right; }
+.doc-a .route .r-vol b{ display:block; font-family:var(--font-display); font-size:16px; color:var(--ink); font-weight:800; }
+.doc-a .route .r-rec{ text-align:right; }
+.doc-a .route .r-rec .rr-track{ height:7px; background:var(--surface-2); border-radius:4px; overflow:hidden; margin-bottom:5px; }
+.doc-a .route .r-rec .rr-fill{ height:100%; border-radius:4px; background:var(--accent); }
+.doc-a .route .r-rec .rr-fill.dead{ background:var(--critical); }
+.doc-a .route .r-rec .rr-num{ font-family:var(--font-display); font-weight:800; font-size:14px; }
+.doc-a .route .r-rec .rr-num.dead{ color:var(--critical); }
+/* ============================= CROSSOVER EVIDENCE ============================= */
+.doc-a .xo{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+@media (max-width:700px){
+.doc-a .xo{ grid-template-columns:1fr; }
+}
+.doc-a .xo-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:8px; }
+.doc-a .xo-card.lead{ border-color:var(--warning); background:var(--warning-soft); }
+.doc-a .xo-cond{ font-family:var(--font-mono); font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); }
+.doc-a .xo-card.lead .xo-cond{ color:var(--warning); }
+.doc-a .xo-pct{ font-family:var(--font-display); font-weight:900; font-size:32px; line-height:1; }
+.doc-a .xo-card.lead .xo-pct{ color:var(--warning); }
+.doc-a .xo-den{ font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); }
+.doc-a .xo-read{ margin-top:20px; padding:16px 18px; border-left:3px solid var(--warning); background:var(--warning-soft); border-radius:0 8px 8px 0; font-size:14.5px; }
+/* ============================= LEXISNEXIS SPLIT ============================= */
+.doc-a .ln2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media (max-width:700px){
+.doc-a .ln2{ grid-template-columns:1fr; }
+}
+.doc-a .ln-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:20px; box-shadow:var(--shadow); }
+.doc-a .ln-card h3{ font-family:var(--font-mono); font-size:12.5px; letter-spacing:.05em; color:var(--accent); font-weight:600; }
+.doc-a .ln-verdict{ font-family:var(--font-display); font-weight:800; font-size:17px; margin:8px 0 14px; }
+.doc-a .ln-rows{ display:flex; flex-direction:column; gap:0; }
+.doc-a .ln-row{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-top:1px dashed var(--line); font-size:13px; }
+.doc-a .ln-row:first-child{ border-top:none; }
+.doc-a .ln-row .k{ color:var(--ink-faint); }
+.doc-a .ln-row .v{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--ink); font-weight:500; }
+.doc-a .ln-row .v.em{ color:var(--accent); font-weight:600; }
+/* ============================= DOCUMENTED VS OBSERVED ============================= */
+.doc-a .cmp-list{ display:flex; flex-direction:column; gap:2px; }
+.doc-a .cmp-row{ display:grid; grid-template-columns:1fr 1fr 128px; gap:20px; padding:18px 0; border-top:1px solid var(--line); align-items:start; }
+.doc-a .cmp-row:first-child{ border-top:none; }
+@media (max-width:760px){
+.doc-a .cmp-row{ grid-template-columns:1fr; gap:10px; }
+}
+.doc-a .cmp-col .cmp-head{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-faint); margin-bottom:5px; }
+.doc-a .cmp-col p{ margin:0; font-size:14px; line-height:1.5; color:var(--ink-soft); }
+.doc-a .cmp-col.observed p{ color:var(--ink); }
+.doc-a .cmp-col.observed .cmp-head{ color:var(--critical); }
+.doc-a .verdict{ font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:.04em; padding:5px 9px; border-radius:5px; text-align:center; height:fit-content; }
+.doc-a .verdict.ok{ background:var(--accent-soft); color:var(--accent); }
+.doc-a .verdict.bad{ background:var(--critical-soft); color:var(--critical); }
+.doc-a .verdict.warn{ background:var(--warning-soft); color:var(--warning); }
+/* ============================= LIMITS ============================= */
+.doc-a .limit{ display:flex; gap:14px; padding:18px 0; border-top:1px solid var(--line); }
+.doc-a .limit:first-child{ border-top:none; }
+.doc-a .limit-mark{
+    flex:none; width:26px; height:26px; border-radius:50%; background:var(--warning-soft); color:var(--warning);
+    font-family:var(--font-display); font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+.doc-a .limit h4{ margin:0 0 4px; font-size:14.5px; font-weight:700; }
+.doc-a .limit p{ margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+/* ============================= FOOTER ============================= */
+.doc-a footer{ padding:40px 0 64px; }
+.doc-a footer p{ font-size:12.5px; color:var(--ink-faint); font-family:var(--font-mono); line-height:1.7; }
+.doc-a footer .prov{ margin-top:14px; padding:14px 16px; background:var(--surface-2); border-radius:8px; font-family:var(--font-body); font-size:12.5px; color:var(--ink-soft); line-height:1.6; }
+.doc-a footer .prov b{ color:var(--ink); }
+
+/* ---- caveat rules, lifted from the companion sheet they came from ---- */
+/* ---------------- caveats ---------------- */
+.doc-a .caveat{ display:flex; gap:14px; padding:17px 0; border-top:1px solid var(--line); }
+.doc-a .caveat:first-child{ border-top:none; }
+.doc-a .caveat-mark{ flex:none; width:25px; height:25px; border-radius:50%; background:var(--warning-soft);
+                color:var(--warning); font-family:var(--font-display); font-weight:800; font-size:12.5px;
+                display:flex; align-items:center; justify-content:center; margin-top:1px; }
+.doc-a .caveat h4{ margin:0 0 4px; font-size:14px; font-weight:700; }
+.doc-a .caveat p{ margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+
+/* ================= PART 2 stylesheet, namespaced ================= */
+/* ============ TOKENS — inherited verbatim from the Task 1 / Task 2 report
+   family so this folds into the same document set. Do not fork. ============ */
+:root .doc-b{
+  color-scheme: light;
+  --font-display:'Archivo',"Arial Narrow",sans-serif;
+  --font-body:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ink:#12161d; --ink-soft:#4c5768; --ink-faint:#8a94a6;
+  --paper:#e9ebf0; --surface:#ffffff; --surface-2:#eef0f4; --line:#dde1e8;
+  --accent:#1d5aad; --accent-2:#3f7fd1; --accent-soft:#e8f0fb;
+  --critical:#c93636; --critical-soft:#fbeaea;
+  --warning:#c98500; --warning-soft:#fbf1de;
+  --node:#3a4256;
+  --shadow: 0 1px 2px rgba(18,22,29,.04), 0 10px 30px -14px rgba(18,22,29,.22);
+}
+@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]) .doc-b{
+    color-scheme: dark;
+    --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
+    --paper:#0a0c11; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
+    --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+    --critical:#e2635f; --critical-soft:#3a1f1e;
+    --warning:#eda100; --warning-soft:#3a2c10;
+    --node:#5c6884;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"] .doc-b{
+  color-scheme: dark;
+  --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
+  --paper:#0a0c11; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
+  --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+  --critical:#e2635f; --critical-soft:#3a1f1e;
+  --warning:#eda100; --warning-soft:#3a2c10;
+  --node:#5c6884;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+}
+.doc-b, .doc-b *{ box-sizing:border-box; }
+.doc-b{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--font-body); font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.doc-b a{ color:var(--accent); }
+.doc-b :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
+@media (prefers-reduced-motion:reduce){
+.doc-b, .doc-b *{ animation:none !important; transition:none !important; }
+}
+.doc-b h1, .doc-b h2, .doc-b h3, .doc-b h4{ font-family:var(--font-display); font-weight:800; letter-spacing:-.012em;
+  text-wrap:balance; margin:0; color:var(--ink); }
+.doc-b .num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+.doc-b code{ font-family:var(--font-mono); background:var(--surface-2); padding:1px 4px;
+  border-radius:3px; font-size:.86em; }
+/* ============ THE SHEET — a literal page, Letter proportion ============ */
+.doc-b .deck{ display:flex; flex-direction:column; align-items:center; gap:26px; padding:26px 16px 60px; }
+.doc-b .sheet{
+  width:100%; max-width:8.5in; aspect-ratio:8.5/11;
+  background:var(--surface); border:1px solid var(--line); border-radius:3px;
+  box-shadow:var(--shadow); padding:0.52in 0.6in 0.44in;
+  display:flex; flex-direction:column;
+}
+/* On narrow screens a fixed page shape would crush the type — let it flow instead. */
+@media (max-width:820px){
+.doc-b .sheet{ aspect-ratio:auto; padding:30px 22px; }
+}
+.doc-b .rule{ display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+  border-bottom:1px solid var(--line); padding-bottom:7px; flex:none; }
+.doc-b .rule .doc{ font-family:var(--font-mono); font-size:9.5px; font-weight:500; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--ink-faint); }
+.doc-b .rule .fol{ font-family:var(--font-mono); font-size:9.5px; font-weight:600; letter-spacing:.1em;
+  color:var(--accent); white-space:nowrap; }
+.doc-b .body{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; padding-top:20px; }
+.doc-b .body > *{ flex:0 0 auto; }
+.doc-b .body > .verdict{ margin-top:auto; }
+.doc-b .foot{ flex:none; border-top:1px solid var(--line); padding-top:7px; margin-top:11px;
+  font-family:var(--font-mono); font-size:9px; color:var(--ink-faint); line-height:1.5; }
+.doc-b .eyebrow{ font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--accent); display:block; }
+.doc-b .sec-h{ font-size:20px; margin-top:8px; }
+.doc-b p{ margin:0; }
+.doc-b .lede{ font-size:13.5px; color:var(--ink-soft); line-height:1.6; max-width:66ch; }
+.doc-b .lede b, .doc-b .note b{ color:var(--ink); font-weight:600; }
+/* ============ PAGE 1 — the answer ============ */
+.doc-b .p1-h{ font-size:clamp(30px,4.2vw,42px); line-height:1.03; margin-top:12px; }
+.doc-b .answer{ margin-top:14px; font-size:16.5px; line-height:1.5; color:var(--ink-soft); max-width:60ch; }
+.doc-b .answer b{ color:var(--critical); font-family:var(--font-display); font-weight:900; }
+/* threshold chart: one measure against a bar it must clear */
+.doc-b .gauge{ margin-top:26px; }
+.doc-b .gauge-track{ position:relative; height:62px; background:var(--surface-2);
+  border-radius:5px; overflow:hidden; }
+.doc-b .gauge-fill{ position:absolute; inset:0 auto 0 0; width:79.29%;
+  background:var(--critical); border-radius:5px 3px 3px 5px; }
+.doc-b .gauge-budget{ position:absolute; inset:0 auto 0 0; width:50%;
+  background:rgba(255,255,255,.22); border-right:2px solid var(--surface); }
+.doc-b .gauge-marks{ position:relative; height:34px; margin-top:7px; }
+.doc-b .gm{ position:absolute; top:0; font-family:var(--font-mono); font-size:10px; color:var(--ink-faint);
+  line-height:1.35; }
+.doc-b .gm b{ display:block; font-family:var(--font-display); font-size:15px; font-weight:900; }
+.doc-b .gm.bar{ left:50%; transform:translateX(-50%); text-align:center; color:var(--ink-soft); }
+.doc-b .gm.bar::before{ content:""; position:absolute; left:50%; top:-9px; width:2px; height:7px;
+  background:var(--ink-faint); }
+.doc-b .gm.obs{ left:79.29%; transform:translateX(-50%); text-align:center; color:var(--critical); }
+.doc-b .gm.obs b{ color:var(--critical); }
+.doc-b .gm.obs::before{ content:""; position:absolute; left:50%; top:-9px; width:2px; height:7px;
+  background:var(--critical); }
+.doc-b .gauge-cap{ margin-top:9px; font-size:11.5px; color:var(--ink-faint);
+  font-family:var(--font-mono); line-height:1.5; }
+.doc-b .trio{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-top:26px;
+  border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+.doc-b .trio > div{ padding:14px 16px; }
+.doc-b .trio > div + div{ border-left:1px solid var(--line); }
+.doc-b .t-lab{ font-family:var(--font-mono); font-size:9.5px; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--ink-faint); }
+.doc-b .t-val{ font-family:var(--font-display); font-weight:900; font-size:27px; line-height:1.05;
+  margin-top:6px; }
+.doc-b .t-val.crit{ color:var(--critical); }
+.doc-b .t-sub{ margin-top:4px; font-size:11.5px; color:var(--ink-faint); line-height:1.45; }
+.doc-b .note{ margin-top:20px; padding:12px 14px; background:var(--surface-2);
+  border-left:3px solid var(--accent); border-radius:0 5px 5px 0;
+  font-size:12px; color:var(--ink-soft); line-height:1.55; }
+.doc-b .note.warn{ border-left-color:var(--warning); }
+.doc-b .note h4{ font-size:12.5px; margin-bottom:4px; font-family:var(--font-body); font-weight:700; }
+/* flatness strip */
+.doc-b .flat{ margin-top:22px; }
+.doc-b .flat-row{ display:grid; grid-template-columns:64px 1fr 58px; align-items:center; gap:12px;
+  margin-bottom:6px; }
+.doc-b .flat-yr{ font-family:var(--font-mono); font-size:11px; color:var(--ink-faint); }
+.doc-b .flat-track{ position:relative; height:16px; background:var(--surface-2); border-radius:3px; }
+.doc-b .flat-fill{ position:absolute; inset:0 auto 0 0; background:var(--ink-soft); border-radius:3px; }
+.doc-b .flat-bar5{ position:absolute; top:-3px; bottom:-3px; left:50%; width:2px; background:var(--accent); }
+.doc-b .flat-val{ font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); text-align:right; }
+/* ============ PAGE 2 — buckets ============ */
+.doc-b .rulebox{ margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:620px){
+.doc-b .rulebox{ grid-template-columns:1fr; }
+}
+.doc-b .rb{ padding:13px 15px; border-radius:6px; border:1px solid var(--line); background:var(--surface); }
+.doc-b .rb.av{ border-color:var(--critical); background:var(--critical-soft); }
+.doc-b .rb h4{ font-size:12.5px; font-family:var(--font-body); font-weight:700; }
+.doc-b .rb.av h4{ color:var(--critical); }
+.doc-b .rb p{ margin-top:5px; font-size:12px; color:var(--ink-soft); line-height:1.55; }
+.doc-b .stack{ margin-top:24px; }
+.doc-b .stack-bar{ display:flex; height:52px; gap:2px; }
+.doc-b .sg{ display:flex; align-items:center; justify-content:center; font-family:var(--font-display);
+  font-weight:800; font-size:13px; color:#fff; min-width:0; overflow:hidden; }
+.doc-b .sg:first-child{ border-radius:5px 0 0 5px; }
+.doc-b .sg:last-child{ border-radius:0 5px 5px 0; }
+.doc-b .sg.a{ background:var(--node); }
+.doc-b .sg.b{ background:var(--critical); }
+.doc-b .sg.c{ background:var(--warning); }
+.doc-b .sg.d{ background:var(--ink-soft); }
+:root[data-theme="dark"] .doc-b .sg, :root:not([data-theme="light"]) .doc-b .sg{ color:#12161d; }
+@media (prefers-color-scheme: light){
+:root:not([data-theme="dark"]) .doc-b .sg{ color:#fff; }
+}
+.doc-b .brace{ display:flex; gap:2px; margin-top:5px; }
+.doc-b .br{ font-family:var(--font-mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase;
+  padding-top:6px; border-top:2px solid var(--line); color:var(--ink-faint); text-align:center; }
+.doc-b .br.av{ border-top-color:var(--critical); color:var(--critical); }
+.doc-b .br.mid{ border-top-color:var(--warning); color:var(--warning); }
+.doc-b .br.gen{ border-top-color:var(--ink-soft); color:var(--ink-soft); }
+.doc-b table.dt{ width:100%; border-collapse:collapse; margin-top:22px; font-size:12.5px; }
+.doc-b table.dt th{ font-family:var(--font-mono); font-size:9.5px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--ink-faint); font-weight:600; text-align:left;
+  padding:0 10px 7px 0; border-bottom:1px solid var(--line); }
+.doc-b table.dt th.r, .doc-b table.dt td.r{ text-align:right; padding-right:0; }
+.doc-b table.dt td{ padding:8px 10px 8px 0; border-bottom:1px solid var(--line);
+  color:var(--ink-soft); vertical-align:top; line-height:1.45; }
+.doc-b table.dt td.k{ color:var(--ink); font-weight:600; white-space:nowrap; }
+.doc-b table.dt td.n{ font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  color:var(--ink); text-align:right; padding-right:0; white-space:nowrap; }
+.doc-b .swatch{ display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px;
+  vertical-align:baseline; }
+.doc-b .sw-a{ background:var(--node); }
+.doc-b .sw-b{ background:var(--critical); }
+.doc-b .sw-c{ background:var(--warning); }
+.doc-b .sw-d{ background:var(--ink-soft); }
+.doc-b tr.tot td{ border-bottom:none; border-top:2px solid var(--ink-faint); color:var(--ink);
+  font-weight:700; padding-top:9px; }
+.doc-b .verdict{ margin-top:auto; padding:15px 17px; border-radius:6px;
+  background:var(--critical-soft); border:1px solid var(--critical); }
+.doc-b .verdict p{ font-size:13.5px; color:var(--ink); line-height:1.55; }
+.doc-b .verdict b{ font-family:var(--font-display); font-weight:900; color:var(--critical); }
+/* ============ PAGE 3 — largest of each ============ */
+.doc-b .split{ display:flex; flex-direction:column; gap:0; }
+.doc-b .half{ padding:13px 0; }
+.doc-b .half + .half{ border-top:1px solid var(--line); }
+.doc-b .half:first-child{ padding-top:6px; }
+.doc-b .half:last-child{ padding-bottom:0; }
+.doc-b .half-tag{ font-family:var(--font-mono); font-size:9.5px; letter-spacing:.13em;
+  text-transform:uppercase; font-weight:600; }
+.doc-b .half-tag.av{ color:var(--critical); }
+.doc-b .half-tag.gen{ color:var(--ink-soft); }
+.doc-b .half h3{ font-size:16px; margin-top:6px; }
+.doc-b .half .big{ font-family:var(--font-display); font-weight:900; font-size:30px; line-height:1;
+  margin-top:8px; }
+.doc-b .half .big.av{ color:var(--critical); }
+.doc-b .half .big small{ font-family:var(--font-mono); font-weight:500; font-size:12px;
+  color:var(--ink-faint); display:inline-block; margin-left:9px; letter-spacing:.02em; }
+/* same-start comparison: single series, two conditions — no legend needed */
+.doc-b .cmp{ margin-top:14px; }
+.doc-b .cmp-t{ font-family:var(--font-mono); font-size:10.5px; color:var(--ink-faint);
+  margin-bottom:9px; letter-spacing:.02em; }
+.doc-b .cmp-row{ display:grid; grid-template-columns:118px 1fr 106px; align-items:center; gap:12px;
+  margin-bottom:6px; }
+@media (max-width:620px){
+.doc-b .cmp-row{ grid-template-columns:100px 1fr 92px; }
+}
+.doc-b .cmp-lab{ font-size:12px; color:var(--ink); font-weight:600; }
+.doc-b .cmp-lab span{ display:block; font-family:var(--font-mono); font-size:10px; font-weight:400;
+  color:var(--ink-faint); }
+.doc-b .cmp-track{ position:relative; height:23px; background:var(--surface-2); border-radius:4px; }
+.doc-b .cmp-fill{ position:absolute; inset:0 auto 0 0; border-radius:4px; }
+.doc-b .cmp-fill.good{ background:var(--accent); }
+.doc-b .cmp-fill.zero{ background:var(--critical); width:2px !important; border-radius:2px; }
+.doc-b .cmp-val{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:13px;
+  font-weight:600; text-align:right; }
+.doc-b .cmp-val.good{ color:var(--accent); }
+.doc-b .cmp-val.bad{ color:var(--critical); }
+.doc-b .uni{ margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+.doc-b .chip{ font-family:var(--font-mono); font-size:10px; padding:4px 8px; border-radius:3px;
+  background:var(--surface-2); color:var(--ink-soft); white-space:nowrap; }
+.doc-b .chip b{ color:var(--ink); font-weight:600; }
+/* ============ PAGE 4 ============ */
+.doc-b .step{ margin-top:18px; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+.doc-b .step-row{ display:grid; grid-template-columns:1fr 92px 76px; gap:14px; align-items:center;
+  padding:12px 16px; border-bottom:1px solid var(--line); }
+.doc-b .step-row:last-child{ border-bottom:none; }
+.doc-b .step-row.base{ background:var(--surface-2); }
+.doc-b .step-row.goal{ background:var(--accent-soft); }
+.doc-b .step-lab{ font-size:12.5px; color:var(--ink-soft); line-height:1.45; }
+.doc-b .step-lab b{ color:var(--ink); font-weight:600; }
+.doc-b .step-d{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:12.5px;
+  text-align:right; color:var(--accent); }
+.doc-b .step-r{ font-family:var(--font-display); font-weight:900; font-size:19px; text-align:right;
+  font-variant-numeric:tabular-nums; }
+.doc-b .step-row.base .step-r{ color:var(--critical); }
+.doc-b .step-row.goal .step-r{ color:var(--accent); }
+.doc-b .cav{ margin-top:12px; }
+.doc-b .cav-i{ display:grid; grid-template-columns:20px 1fr; gap:11px; padding:8px 0;
+  border-top:1px solid var(--line); }
+.doc-b .cav-i:last-child{ border-bottom:1px solid var(--line); }
+.doc-b .cav-n{ font-family:var(--font-mono); font-size:10px; font-weight:600; color:var(--warning);
+  padding-top:2px; }
+.doc-b .cav-b h4{ font-size:12.5px; font-family:var(--font-body); font-weight:700; }
+.doc-b .cav-b p{ margin-top:3px; font-size:11.5px; color:var(--ink-soft); line-height:1.55; }
+/* ============ PRINT — exactly four sheets ============ */
+@media print{
+@page{ size:letter; margin:0; }
+.doc-b{ background:#fff; }
+.doc-b .deck{ display:block; padding:0; gap:0; }
+.doc-b .sheet{ max-width:none; width:100%; height:11in; aspect-ratio:auto;
+    border:none; border-radius:0; box-shadow:none; break-after:page; page-break-after:always; }
+.doc-b .sheet:last-child{ break-after:auto; page-break-after:auto; }
+}
+</style>
+
+<div class="mx-part">
+  <hr>
+  <span class="mx-num">Question 1</span>
+  <h2 class="mx-q">Reconstruct how the waterfall runs today: which checks fire, in what
+    order, and how users route between the SSN and non-SSN paths.</h2>
+</div>
+
+<div class="mx-deck">
+<section class="mx-sheet">
+  <div class="mx-rule"><span class="d">Task 1 · Part A — the waterfall as built</span><span class="f">Page 1 / 6</span></div>
+  <div class="mx-body"><div class="doc-a"><div class="mx-scope"><table class="scope-table">
+      <tbody>
+        <tr>
+          <td>Analysis denominator</td>
+          <td class="num">2,515,155</td>
+          <td><code>kyc.kyc_users</code>, 2,515,262 raw rows less 107 flagged <code>Test_user</code>
+            accounts (never deleted, exclusion stated not baked in). Used for every figure below
+            unless noted otherwise.</td>
+        </tr>
+        <tr>
+          <td>Idology-outcome denominator</td>
+          <td class="num">2,420,972</td>
+          <td>Users Idology actually ran for — not the full book. The two differ, and the difference
+            matters wherever an Idology rate is quoted.</td>
+        </tr>
+      </tbody>
+    </table></div><section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Which checks fire — entry</span>
+      <h2>Where users enter the waterfall</h2>
+      <p style="margin-top:14px;">
+        <b>The documented design is broadly the design that runs</b> — but three things in it are not
+        what the brief describes. There is a second front door. An Idology pass does not always end
+        the journey.
+      </p>
+    </div>
+
+    <figure>
+      <div class="fig-frame">
+        <svg class="dg" viewBox="0 0 900 232" role="img"
+             aria-label="Of 2,515,155 enrolled users, 2,420,972 (96.26%) enter at L1 Idology, 93,319 (3.71%) enter at ProviderA LexisNexis without ever seeing Idology, 843 have no check run at all, and 21 follow other paths.">
+          <defs>
+            <marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah"/>
+            </marker>
+          </defs>
+
+          <!-- source -->
+          <rect x="330" y="14" width="240" height="50" rx="7" class="bx"/>
+          <text x="450" y="34" text-anchor="middle" class="t-name on-plain">ENROLLED</text>
+          <text x="450" y="53" text-anchor="middle" class="t-val">2,515,155</text>
+
+          <!-- fan-out lines -->
+          <path d="M 450 64 L 450 92 L 170 92 L 170 132" class="ln" marker-end="url(#ah1)"/>
+          <path d="M 450 64 L 450 92 L 470 92 L 470 132" class="ln" marker-end="url(#ah1)"/>
+          <path d="M 450 64 L 450 92 L 760 92 L 760 132" class="ln" marker-end="url(#ah1)"/>
+
+          <!-- edge labels, offset clear of their own connector lines -->
+          <text x="162" y="115" text-anchor="end" class="t-edge">96.26%</text>
+          <text x="478" y="115" text-anchor="start" class="t-edge">3.71%</text>
+          <text x="768" y="115" text-anchor="start" class="t-edge">0.03%</text>
+
+          <!-- L1 -->
+          <rect x="60" y="134" width="220" height="62" rx="7" class="bx-accent"/>
+          <text x="170" y="154" text-anchor="middle" class="t-name on-accent">L1 · IDOLOGY</text>
+          <text x="170" y="174" text-anchor="middle" class="t-val">2,420,972</text>
+          <text x="170" y="189" text-anchor="middle" class="t-sub">the documented front door</text>
+
+          <!-- side door -->
+          <rect x="360" y="134" width="260" height="62" rx="7" class="bx-warn"/>
+          <text x="490" y="154" text-anchor="middle" class="t-name on-warn">PROVIDERA LEXISNEXIS</text>
+          <text x="490" y="174" text-anchor="middle" class="t-val">93,319</text>
+          <text x="490" y="189" text-anchor="middle" class="t-sub">never sees Idology · 99.6% verify</text>
+
+          <!-- nothing -->
+          <rect x="660" y="134" width="200" height="62" rx="7" class="bx-crit"/>
+          <text x="760" y="154" text-anchor="middle" class="t-name on-crit">NO CHECK AT ALL</text>
+          <text x="760" y="174" text-anchor="middle" class="t-val">843</text>
+          <text x="760" y="189" text-anchor="middle" class="t-sub">0 verified</text>
+
+          <text x="450" y="220" text-anchor="middle" class="t-note">21 further users enter by paths too small to chart individually</text>
+        </svg>
+      </div>
+      <figcaption>
+        <b>A second front door exists and is not in the design.</b> 93,319 users — 3.71% of the book —
+        have no Idology result at all and are cleared by <code>ProviderA_Lexis_Nexis</code> instead.
+        They verify at 99.55%. A primary-position check that filters almost nothing is either
+        pre-screened somewhere upstream or under-controlled, and the data cannot distinguish the two.
+        That makes it a <b>risk question for engineering, not a conversion question</b> — the one item
+        here that does not resolve into a routing fix.
+      </figcaption>
+    </figure>
+
+    <p class="method-note">
+      <b>Method note.</b> With no per-check timestamps, order above is inferred from column
+      co-occurrence, <code>kyc_source</code> attribution and Idology's near-universality, not observed
+      directly — and a null provider column is only an upper bound on &ldquo;did not run,&rdquo; not a
+      guarantee, since at least 11,695 users carry a reviewer comment naming a check whose result was
+      never written back.
+    </p>
+  </div>
+</section></div></div>
+</section>
+<section class="mx-sheet">
+  <div class="mx-rule"><span class="d">Task 1 · Part A — the waterfall as built</span><span class="f">Page 2 / 6</span></div>
+  <div class="mx-body"><div class="doc-a"><section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">How users route — SSN vs non-SSN</span>
+      <h2>How users route between the SSN and non-SSN paths</h2>
+      <p>
+        This is the decision the waterfall is built around. For 288,028 users who failed Idology,
+        here is where they actually went.
+      </p>
+    </div>
+
+    <figure>
+      <div class="fig-frame">
+        <svg class="dg" viewBox="0 0 900 360" role="img"
+             aria-label="Of 288,028 Idology failures: 54,973 (19.1%) enter the SSN path, 107,114 (37.2%) go direct to the non-SSN path, and 125,941 (43.7%) reach neither path. 8,605 users cross over from the SSN path to the non-SSN path. The 125,941 split into 101,162 stranded with 0.01% recovery and 24,779 sent straight to manual review with 41.1% recovery.">
+          <defs>
+            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah"/>
+            </marker>
+            <marker id="ah2x" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah-cross"/>
+            </marker>
+            <marker id="ah2d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah-dead"/>
+            </marker>
+          </defs>
+
+          <!-- source: idology fail -->
+          <rect x="330" y="14" width="240" height="52" rx="7" class="bx-crit"/>
+          <text x="450" y="34" text-anchor="middle" class="t-name on-crit">IDOLOGY FAIL</text>
+          <text x="450" y="55" text-anchor="middle" class="t-val">288,028</text>
+
+          <!-- fan out to three destinations -->
+          <path d="M 450 66 L 450 94 L 150 94 L 150 140" class="ln" marker-end="url(#ah2)"/>
+          <path d="M 450 66 L 450 140" class="ln" marker-end="url(#ah2)"/>
+          <path d="M 450 66 L 450 94 L 762 94 L 762 140" class="ln" marker-end="url(#ah2)"/>
+
+          <text x="142" y="115" text-anchor="end" class="t-edge">54,973 · 19.1%</text>
+          <text x="458" y="115" text-anchor="start" class="t-edge">107,114 · 37.2%</text>
+          <text x="770" y="115" text-anchor="start" class="t-edge">125,941 · 43.7%</text>
+
+          <!-- SSN path -->
+          <rect x="42" y="142" width="216" height="66" rx="7" class="bx-accent"/>
+          <text x="150" y="162" text-anchor="middle" class="t-name on-accent">SSN PATH</text>
+          <text x="150" y="181" text-anchor="middle" class="t-sub">LexisNexis · Persona-SSN</text>
+          <text x="150" y="199" text-anchor="middle" class="t-sub">45.2% recovered</text>
+
+          <!-- crossover, drawn in the gap -->
+          <path d="M 258 175 L 330 175" class="ln-cross" marker-end="url(#ah2x)"/>
+          <text x="294" y="158" text-anchor="middle" class="t-edge-em">crossover</text>
+          <text x="294" y="196" text-anchor="middle" class="t-edge-em">8,605</text>
+
+          <!-- non-SSN path -->
+          <rect x="336" y="142" width="228" height="66" rx="7" class="bx-accent"/>
+          <text x="450" y="162" text-anchor="middle" class="t-name on-accent">NON-SSN PATH</text>
+          <text x="450" y="181" text-anchor="middle" class="t-sub">ACRO · Persona-IDV</text>
+          <text x="450" y="199" text-anchor="middle" class="t-sub">50.4% recovered</text>
+
+          <!-- neither -->
+          <rect x="640" y="142" width="244" height="66" rx="7" class="bx-crit"/>
+          <text x="762" y="162" text-anchor="middle" class="t-name on-crit">NEITHER PATH RAN</text>
+          <text x="762" y="181" text-anchor="middle" class="t-sub">the branch was never reached</text>
+          <text x="762" y="199" text-anchor="middle" class="t-sub">8.1% recovered</text>
+
+          <!-- neither splits -->
+          <path d="M 762 208 L 762 236 L 645 236 L 645 274" class="ln-dead" marker-end="url(#ah2d)"/>
+          <path d="M 762 208 L 762 236 L 817 236 L 817 274" class="ln" marker-end="url(#ah2)"/>
+
+          <rect x="560" y="276" width="170" height="66" rx="7" class="bx-crit"/>
+          <text x="645" y="296" text-anchor="middle" class="t-name on-crit">STRANDED</text>
+          <text x="645" y="316" text-anchor="middle" class="t-val">101,162</text>
+          <text x="645" y="332" text-anchor="middle" class="t-sub">0.01% recovered</text>
+
+          <rect x="742" y="276" width="150" height="66" rx="7" class="bx"/>
+          <text x="817" y="296" text-anchor="middle" class="t-name on-plain">STRAIGHT TO L4</text>
+          <text x="817" y="316" text-anchor="middle" class="t-val">24,779</text>
+          <text x="817" y="332" text-anchor="middle" class="t-sub">41.1% recovered</text>
+        </svg>
+      </div>
+      <figcaption>
+        <b>The branch is sound. Reaching it is the problem.</b> The SSN path, the non-SSN path and the
+        crossover between them all work — 45%, 50% and 55% recovery respectively. But
+        <b>43.7% of Idology failures never arrive at the branch at all</b>, and the 101,162 who reach
+        no check of any kind recover 12 people, a rate of 0.01%.
+      </figcaption>
+    </figure>
+
+  </div>
+</section></div></div>
+</section>
+<section class="mx-sheet">
+  <div class="mx-rule"><span class="d">Task 1 · Part A — the waterfall as built</span><span class="f">Page 3 / 6</span></div>
+  <div class="mx-body"><div class="doc-a"><section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Which checks fire — provider note</span>
+      <h2>The two LexisNexis routes are not the same check</h2>
+      <p>
+        Both write to <code>lexis_nexis_result</code>. They sit in opposite positions in the flow,
+        and grouping on that column alone merges a primary check with a secondary one.
+      </p>
+    </div>
+
+    <div class="ln2">
+      <div class="ln-card">
+        <h3>ProviderA_Lexis_Nexis</h3>
+        <div class="ln-verdict">Acting as an alternative <em>primary</em></div>
+        <div class="ln-rows">
+          <div class="ln-row"><span class="k">Users</span><span class="v">149,364</span></div>
+          <div class="ln-row"><span class="k">Never saw Idology</span><span class="v em">93,319</span></div>
+          <div class="ln-row"><span class="k">After an Idology PASS</span><span class="v">50,523</span></div>
+          <div class="ln-row"><span class="k">After an Idology FAIL</span><span class="v">5,522</span></div>
+          <div class="ln-row"><span class="k">Paired with Persona-SSN</span><span class="v">827</span></div>
+          <div class="ln-row"><span class="k">Verified</span><span class="v">99.55%</span></div>
+        </div>
+      </div>
+      <div class="ln-card">
+        <h3>ProviderB_Lexis_Nexis</h3>
+        <div class="ln-verdict">Acting as a <em>secondary</em>, SSN-path check</div>
+        <div class="ln-rows">
+          <div class="ln-row"><span class="k">Users</span><span class="v">15,998</span></div>
+          <div class="ln-row"><span class="k">Never saw Idology</span><span class="v">1</span></div>
+          <div class="ln-row"><span class="k">After an Idology PASS</span><span class="v">4,320</span></div>
+          <div class="ln-row"><span class="k">After an Idology FAIL</span><span class="v em">11,677</span></div>
+          <div class="ln-row"><span class="k">Paired with Persona-SSN</span><span class="v em">4,757</span></div>
+          <div class="ln-row"><span class="k">Verified</span><span class="v">98.46%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="body-copy" style="margin-top:24px">
+      <p>
+        ProviderA carries nine times the volume and is dominated by users who <b>never saw
+        Idology</b> — it is the side door from Step 0. ProviderB is small, almost entirely
+        post-Idology-failure, and three times more likely to be paired with Persona-SSN — it is the
+        SSN-path secondary the design describes. Same brand, same column, opposite roles.
+      </p>
+    </div>
+  </div>
+</section></div></div>
+</section>
+<section class="mx-sheet">
+  <div class="mx-rule"><span class="d">Task 1 · Part A — the waterfall as built</span><span class="f">Page 4 / 6</span></div>
+  <div class="mx-body"><div class="doc-a"><section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Which checks fire</span>
+      <h2>Which checks fire, and how often</h2>
+      <p>
+        Six distinct checks are instrumented across five columns. Their firing rates span three
+        orders of magnitude — from Idology on 96% of users to Persona-IDV on one in a thousand.
+      </p>
+    </div>
+
+    <table class="inv">
+      <thead>
+        <tr>
+          <th>Check</th>
+          <th>Fired for</th>
+          <th>Share of book</th>
+          <th>Pass rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L1</span><span class="ck-name">Idology</span></div>
+            <span class="ck-role">Primary identity — name, DOB, address, SSN against public records</span>
+          </td>
+          <td class="num">2,420,972</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:100%"></div></div><span class="num">96.26%</span></div></td>
+          <td class="num">88.10%</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L2</span><span class="ck-name">LexisNexis</span></div>
+            <span class="ck-role">SSN &amp; identity — two distinct integrations sharing one column</span>
+          </td>
+          <td class="num">276,993</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:11.4%"></div></div><span class="num">11.01%</span></div></td>
+          <td class="num">66.21%</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L2</span><span class="ck-name">Persona — SSN mode</span></div>
+            <span class="ck-role">Documented as the legacy SSN route for “older accounts”</span>
+          </td>
+          <td class="num">10,733</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:0.9%"></div></div><span class="num">0.43%</span></div></td>
+          <td class="num pass-def">100%<sup>†</sup></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L3</span><span class="ck-name">ACRO</span></div>
+            <span class="ck-role">Automated secondary identity — the non-SSN workhorse</span>
+          </td>
+          <td class="num">114,167</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:4.7%"></div></div><span class="num">4.54%</span></div></td>
+          <td class="num">44.84%</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L3</span><span class="ck-name">Persona — IDV mode</span></div>
+            <span class="ck-role">Photo ID + selfie — highest friction, highest cost</span>
+          </td>
+          <td class="num">2,595</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:0.3%"></div></div><span class="num">0.10%</span></div></td>
+          <td class="num pass-def">100%<sup>†</sup></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L4</span><span class="ck-name">Manual review</span></div>
+            <span class="ck-role">Human analyst — the safety net</span>
+          </td>
+          <td class="num">74,400</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:3.1%"></div></div><span class="num">2.96%</span></div></td>
+          <td class="num">32.30%</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="inv-foot">
+      <sup>†</sup> <b>Not a performance figure.</b> Both Persona columns only ever hold
+      <code>PASS</code> or null — there is no <code>FAIL</code> value for Persona anywhere in the
+      dataset, by the brief's own note. A 100% pass rate on those two rows is therefore definitional
+      and must never be quoted as provider quality. What a Persona null cannot distinguish is
+      “did not run” from “ran and did not clear”, which is why Persona is excluded from any
+      failed-every-check test on this page.
+    </p>
+  </div>
+</section></div></div>
+</section>
+<section class="mx-sheet">
+  <div class="mx-rule"><span class="d">Task 1 · Part A — the waterfall as built</span><span class="f">Page 5 / 6</span></div>
+  <div class="mx-body" style="zoom:0.9"><div class="doc-a"><section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Summary</span>
+      <h2>Documented design vs the system that runs</h2>
+    </div>
+
+    <div class="cmp-list">
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>Idology is the primary check for every user.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>93,319 users (3.71%) never see it and are cleared by ProviderA LexisNexis, which passes ~100%.</p></div>
+        <div class="verdict warn">SECOND DOOR</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>Pass Idology ⇒ verified, exit the waterfall.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>130,713 passed and had LexisNexis run anyway; 57,822 failed it and verified regardless. Pass rate 84.80%, exit rate 79.57%.</p></div>
+        <div class="verdict warn">NON-BLOCKING</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>Fail Idology ⇒ log the reason and route by SSN vs non-SSN.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>43.73% of failures (125,941) reach neither path. 101,162 of them reach no check at all and recover 12 people.</p></div>
+        <div class="verdict bad">MAIN DEFECT</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>If an SSN provider surfaces a non-SSN issue, move the user to the non-SSN track.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>Real: 19.47% crossover after a LexisNexis FAIL vs 9.50% after a PASS. But absent from the Persona-SSN leg (0.45%).</p></div>
+        <div class="verdict warn">PARTIAL</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>SSN path sends standard users to LexisNexis and older accounts to legacy Persona-SSN.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>No age signal (34.9 vs 34.7) and no vintage signal (flat 0.42–0.44% every year).</p></div>
+        <div class="verdict bad">NOT REPRODUCIBLE</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>The two LexisNexis routes are different integration paths.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>Confirmed, and stronger than stated: ProviderA is primary-position, ProviderB is secondary. They are not interchangeable.</p></div>
+        <div class="verdict ok">CONFIRMED</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>A null provider value means the check did not run.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>False for at least 11,695 users whose reviewer comment names a provider whose column is null. Checks run off-instrument.</p></div>
+        <div class="verdict bad">CONTRADICTED</div>
+      </div>
+    </div>
+  </div>
+</section></div></div>
+</section>
+<section class="mx-sheet">
+  <div class="mx-rule"><span class="d">Task 1 · Part A — the waterfall as built</span><span class="f">Page 6 / 6</span></div>
+  <div class="mx-body"><div class="doc-a"><section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Reading this responsibly</span>
+      <h2>Data caveats, and how each was handled</h2>
+    </div>
+
+    <div class="caveat">
+      <div class="caveat-mark">1</div>
+      <div>
+        <h4>The denominator that would have made this report say 0.09%</h4>
+        <p>
+          <code>kyc_source</code> is null for 197,314 users and 99.99% of them are unverified. It
+          looks like missing data; dropping those rows gives a non-verification rate of
+          <b>0.09%</b> instead of 7.93%. It is not missing data — the field names the provider that
+          <em>cleared</em> a user, so it is null precisely when nobody did. <b>Proof: not one of
+          those rows carries a PASS on any provider.</b> Excluding them would exclude almost every
+          rejection by construction. Kept in, and this is the single most important denominator
+          decision on the page.
+        </p>
+      </div>
+    </div>
+    <div class="caveat">
+      <div class="caveat-mark">2</div>
+      <div>
+        <h4>2,122 users are not verified despite passing something</h4>
+        <p>
+          Including 393 who passed Idology and 34 who passed manual review. These contradict the
+          documented design. They are <b>flagged, not corrected</b> — overriding
+          <code>overall_kyc_status</code> would be editorialising the outcome field the whole
+          analysis is measured against. At 1.06% of non-verifications they move the headline by
+          under 0.1 points either way.
+        </p>
+      </div>
+    </div>
+    <div class="caveat">
+      <div class="caveat-mark">3</div>
+      <div>
+        <h4>Reviewer comments cover 3% of users and cannot predict outcomes</h4>
+        <p>
+          Free text exists for the manually reviewed population only, so the reason taxonomy
+          describes <em>reviewed</em> users, not all failures — the stranded cohort has zero
+          comments. And every one of the 1,889 distinct comment strings maps to exactly one manual
+          decision, so the comment is written <em>with</em> the decision. It can describe
+          composition; it cannot be used as an independent predictor.
+        </p>
+      </div>
+    </div>
+    <div class="caveat">
+      <div class="caveat-mark">4</div>
+      <div>
+        <h4>No cost or latency data exists in this extract</h4>
+        <p>
+          There are no per-check timestamps and no provider pricing, so “cheaper” and “faster”
+          claims here rest on the ordinary economics of these check types, not on measurements from
+          this dataset. Task 2's trade-offs use illustrative unit costs against real volumes and say
+          so; collecting the real numbers is a Task 3 item.
+        </p>
+      </div>
+    </div>
+  </div>
+</section></div></div>
+</section>
+</div>
+
+<div class="mx-part">
+  <hr>
+  <span class="mx-num">Question 2</span>
+  <h2 class="mx-q">Measure the overall non-verification rate and compare it to the 5% bar.
+    Diagnose the drivers — separate genuine rejections from avoidable losses, and quantify
+    the largest of each.</h2>
+</div>
+
+<div class="doc-b">
+<div class="deck">
+
+<!-- ==================== SHEET 1 ==================== -->
+<section class="sheet">
+  <div class="rule"><span class="doc">Task 1 · KYC funnel — rate &amp; drivers</span><span class="fol">Page 1 / 4</span></div>
+  <div class="body">
+    <span class="eyebrow">The answer</span>
+    <h1 class="p1-h">7.93% of users<br>never verify.</h1>
+    <p class="answer">The bar is 5%. We are <b>2.93 points over</b> it — <b>73,663 people</b>
+      beyond budget. Three quarters of that loss is process, not risk: the waterfall stops
+      before it finishes asking.</p>
+
+    <div class="gauge">
+      <div class="gauge-track">
+        <div class="gauge-fill"></div>
+        <div class="gauge-budget"></div>
+      </div>
+      <div class="gauge-marks">
+        <span class="gm bar"><b>5.00%</b>acceptable bar</span>
+        <span class="gm obs"><b>7.93%</b>observed</span>
+      </div>
+      <p class="gauge-cap">Scale 0–10%. Shaded panel = the 5% budget; full red bar = actual
+        non-verification.</p>
+    </div>
+
+    <div class="trio">
+      <div>
+        <div class="t-lab">Not verified</div>
+        <div class="t-val crit num">199,421</div>
+        <div class="t-sub">of 2,515,155 enrolled users</div>
+      </div>
+      <div>
+        <div class="t-lab">Budget at 5%</div>
+        <div class="t-val num">125,758</div>
+        <div class="t-sub">what the bar allows</div>
+      </div>
+      <div>
+        <div class="t-lab">Over budget</div>
+        <div class="t-val crit num">73,663</div>
+        <div class="t-sub">the size of the job</div>
+      </div>
+    </div>
+
+    <div class="flat">
+      <span class="eyebrow">Not a regression — steady state</span>
+      <div style="margin-top:12px">
+        <div class="flat-row"><span class="flat-yr">2023</span>
+          <span class="flat-track"><span class="flat-fill" style="width:79.7%"></span><span class="flat-bar5"></span></span>
+          <span class="flat-val">7.97%</span></div>
+        <div class="flat-row"><span class="flat-yr">2024</span>
+          <span class="flat-track"><span class="flat-fill" style="width:78.9%"></span><span class="flat-bar5"></span></span>
+          <span class="flat-val">7.89%</span></div>
+        <div class="flat-row"><span class="flat-yr">2025</span>
+          <span class="flat-track"><span class="flat-fill" style="width:79.3%"></span><span class="flat-bar5"></span></span>
+          <span class="flat-val">7.93%</span></div>
+        <div class="flat-row"><span class="flat-yr">2026</span>
+          <span class="flat-track"><span class="flat-fill" style="width:79.3%"></span><span class="flat-bar5"></span></span>
+          <span class="flat-val">7.93%</span></div>
+      </div>
+      <p class="gauge-cap" style="margin-top:8px">Same 0–10% scale; blue tick marks the 5% bar.
+        Across all 41 months on record the rate stays between 7.67% and 8.22%.</p>
+    </div>
+
+    <div class="note">
+      <h4>The denominator decision that matters most</h4>
+      <code>kyc_source</code> is null for 197,314 users and almost all of them are unverified. It
+      looks like missing data, and dropping those rows would report <b>0.09%</b> instead of 7.93%.
+      It is not missing — the field names the provider that <b>cleared</b> a user, so it is null
+      precisely when nobody did. Not one of those rows carries a PASS on any provider column.
+      They stay in.
+    </div>
+  </div>
+  <div class="foot">Denominator 2,515,155 = all enrolled users less 107 flagged <code>Test_user</code>
+    QA accounts (flagged, never deleted). Source: <code>kyc.kyc_users</code>, re-queried live.</div>
+</section>
+
+<!-- ==================== SHEET 2 ==================== -->
+<section class="sheet">
+  <div class="rule"><span class="doc">Task 1 · KYC funnel — rate &amp; drivers</span><span class="fol">Page 2 / 4</span></div>
+  <div class="body">
+    <span class="eyebrow">Diagnose the drivers</span>
+    <h2 class="sec-h">Genuine rejection, or avoidable loss?</h2>
+    <p class="lede" style="margin-top:10px">Both look identical in the outcome field. They separate
+      on <b>how much assessment the user actually received</b> before the system said no — which is
+      recorded, check by check, for every row.</p>
+
+    <div class="rulebox">
+      <div class="rb av">
+        <h4>Avoidable loss</h4>
+        <p>The waterfall never finished. One check ran, or none — no second provider, no human.
+          The question was closed before it was asked.</p>
+      </div>
+      <div class="rb">
+        <h4>Genuine rejection</h4>
+        <p>Two or more providers <i>and</i> a human analyst assessed the user, and all of them
+          declined. The system working as designed.</p>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="stack-bar">
+        <div class="sg a" style="width:0.42%"></div>
+        <div class="sg b" style="width:50.81%">B · 50.8%</div>
+        <div class="sg c" style="width:24.37%">C · 24.4%</div>
+        <div class="sg d" style="width:24.40%">D · 24.4%</div>
+      </div>
+      <div class="brace">
+        <div class="br av" style="width:51.23%">Avoidable — 51.2%</div>
+        <div class="br mid" style="width:24.37%">Partly avoidable</div>
+        <div class="br gen" style="width:24.40%">Genuine — 24.4%</div>
+      </div>
+      <p class="gauge-cap" style="margin-top:9px">All 199,421 non-verified users, to scale.
+        Bucket A is 0.42% — a hairline at this width; its count is in the table.</p>
+    </div>
+
+    <table class="dt">
+      <thead><tr>
+        <th style="width:31%">Bucket — how far the system got</th>
+        <th>What it means</th>
+        <th class="r">Users</th><th class="r">Share</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="k"><span class="swatch sw-a"></span>A · Never started</td>
+          <td>Enrolled, not one check of any kind ever ran. Zero verified.</td>
+          <td class="n">843</td><td class="n">0.4%</td></tr>
+        <tr><td class="k"><span class="swatch sw-b"></span>B · One check, stopped</td>
+          <td>A single check ran and the waterfall halted. No secondary provider, no human.</td>
+          <td class="n">101,325</td><td class="n">50.8%</td></tr>
+        <tr><td class="k"><span class="swatch sw-c"></span>C · Automated only</td>
+          <td>Two or more automated checks failed, but the case never reached a reviewer —
+            though the design says it should have.</td>
+          <td class="n">48,598</td><td class="n">24.4%</td></tr>
+        <tr><td class="k"><span class="swatch sw-d"></span>D · Fully assessed</td>
+          <td>Multiple providers <i>and</i> a human analyst. Still declined.</td>
+          <td class="n">48,655</td><td class="n">24.4%</td></tr>
+        <tr class="tot"><td class="k">Total not verified</td><td></td>
+          <td class="n">199,421</td><td class="n">100%</td></tr>
+      </tbody>
+    </table>
+
+    <p class="lede" style="margin-top:16px"><b>Bucket C is the honest middle.</b> Those users did
+      fail two or more automated checks, so some are genuine. But the design routes anyone who
+      fails everything to a human, and these never got there — so the question was closed early.
+      Counted as partly avoidable and sized conservatively on page 4, not claimed in full.</p>
+
+    <div class="verdict">
+      <p><b>75.6%</b> of non-verification — buckets A, B and C, 150,766 users — is the waterfall
+        failing to finish, not a correct decision. Only bucket D, just under a quarter, is the
+        system doing its job.</p>
+    </div>
+  </div>
+  <div class="foot">Bucket boundary uses <code>checks_run</code>, verified against the count of
+    populated provider columns on every row; the two disagree only where manual review ran, with
+    no unexplained cases.</div>
+</section>
+
+<!-- ==================== SHEET 3 ==================== -->
+<section class="sheet">
+  <div class="rule"><span class="doc">Task 1 · KYC funnel — rate &amp; drivers</span><span class="fol">Page 3 / 4</span></div>
+  <div class="body">
+    <span class="eyebrow">Quantify the largest of each</span>
+    <h2 class="sec-h">One routing gap, one real control</h2>
+
+    <div class="split">
+      <div class="half">
+        <span class="half-tag av">Largest avoidable loss</span>
+        <h3>Idology fails, and nothing else ever runs</h3>
+        <div class="big av num">101,159<small>50.7% of all non-verification</small></div>
+        <div class="cmp" style="margin-top:12px">
+          <p class="cmp-t">No secondary provider, no human, no second question. Of the 288,028
+            users who failed Idology — share who ultimately verified:</p>
+          <div class="cmp-row">
+            <span class="cmp-lab">Routed onward<span>186,866 users</span></span>
+            <span class="cmp-track"><span class="cmp-fill good" style="width:48.09%"></span></span>
+            <span class="cmp-val good">48.09%</span>
+          </div>
+          <div class="cmp-row">
+            <span class="cmp-lab">Stranded<span>101,162 users</span></span>
+            <span class="cmp-track"><span class="cmp-fill zero"></span></span>
+            <span class="cmp-val bad">0.00%</span>
+          </div>
+        </div>
+        <p class="lede" style="margin-top:9px"><b>Identical starting line — 89,860 recovered
+          versus 3.</b> A second check clears roughly half of everyone it sees. The stranded group
+          is not failing verification; it is never being asked.</p>
+        <div class="uni">
+          <span class="chip">Stranding by partner: <b>35.1 / 35.2 / 36.0 / 35.9%</b></span>
+          <span class="chip">By year: <b>34.9 – 35.4%</b></span>
+        </div>
+        <p class="lede" style="margin-top:8px">A broken integration or a bad release would cluster.
+          This does not — it is <b>one systematic gap in the routing logic</b>, fixable as a single
+          change.</p>
+      </div>
+
+      <div class="half">
+        <span class="half-tag gen">Largest genuine rejection</span>
+        <h3>Identity attributes that do not match</h3>
+        <div class="big num">23,426<small>48.1% of bucket D · 11.7% of all non-verification</small></div>
+        <p class="lede" style="margin-top:8px">Mismatches upheld by a human after multiple
+          providers declined. Every one of the 48,655 users in bucket D carries a reviewer comment
+          — <b>100% coverage</b> — so this population is characterised in full, not sampled.</p>
+
+        <table class="dt" style="margin-top:11px">
+          <thead><tr><th>Stated reason, bucket D</th><th class="r">Users</th><th class="r">Share</th></tr></thead>
+          <tbody>
+            <tr><td class="k">Identity attribute mismatch (name / DOB / address)</td>
+              <td class="n">23,426</td><td class="n">48.1%</td></tr>
+            <tr><td class="k">SSN problem — mismatch, absent, or tied to multiple names</td>
+              <td class="n">16,033</td><td class="n">33.0%</td></tr>
+            <tr><td class="k">No data returned by any provider</td>
+              <td class="n">4,612</td><td class="n">9.5%</td></tr>
+            <tr><td class="k">Sanctions / PEP / OFAC watchlist hit</td>
+              <td class="n">1,809</td><td class="n">3.7%</td></tr>
+            <tr><td class="k">Other / uncategorised</td><td class="n">2,775</td><td class="n">5.7%</td></tr>
+          </tbody>
+        </table>
+
+        <div class="note warn" style="margin-top:11px">
+          <h4>The SSN category looks like a target. It is not.</h4>
+          Second-largest named reason at 16,033 users — but reviewers clear just
+          <b>30 of them, 0.19%</b>. A control upheld 99.8% of the time is working; weakening it to
+          buy a few hundred users is the wrong trade. <b>A genuine rejection, correctly made.</b>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">Reason taxonomy built from <code>reviewer_comment</code> string families, not
+    keyword contains: a naive <code>%ssn%</code> match also catches "SSN … are matching" on approved
+    users, overstating that category ~2×.</div>
+</section>
+
+<!-- ==================== SHEET 4 ==================== -->
+<section class="sheet">
+  <div class="rule"><span class="doc">Task 1 · KYC funnel — rate &amp; drivers</span><span class="fol">Page 4 / 4</span></div>
+  <div class="body">
+    <span class="eyebrow">What it adds up to</span>
+    <h2 class="sec-h">Two fixes close most of the gap</h2>
+    <p class="lede" style="margin-top:9px">Neither weakens a control, moves a threshold, or lets
+      through anybody who should be rejected. Both cost provider calls and analyst capacity, not
+      risk appetite.</p>
+
+    <div class="step">
+      <div class="step-row base">
+        <span class="step-lab"><b>Today</b> — 199,421 users not verified</span>
+        <span class="step-d"></span><span class="step-r num">7.93%</span>
+      </div>
+      <div class="step-row">
+        <span class="step-lab"><b>Route every Idology failure onward.</b> Applies the observed
+          48.09% recovery rate to the 101,159 stranded users.</span>
+        <span class="step-d num">−48,647</span><span class="step-r num">5.99%</span>
+      </div>
+      <div class="step-row">
+        <span class="step-lab"><b>Triage the 2+-failure cases to review.</b> 53,312 users who
+          failed two or more automated checks never reached a human.</span>
+        <span class="step-d num">−3,945</span><span class="step-r num">5.84%</span>
+      </div>
+      <div class="step-row goal">
+        <span class="step-lab"><b>Remaining gap to the 5% bar</b> — 21,071 users</span>
+        <span class="step-d num">0.84 pp</span><span class="step-r num">5.00%</span>
+      </div>
+    </div>
+
+    <p class="lede" style="margin-top:12px"><b>Routing alone moves 7.93% to roughly 6.0%</b> —
+      two-thirds of the gap, nothing loosened. The second fix is sized on the <b>incremental</b>
+      7.40-point lift (17.84% verify with review, 10.44% without), not review's headline 32.30%
+      clear rate — crediting that would double-count users who already verify by other means. The
+      last 0.84 points has to come from the redesign in Task 2.</p>
+
+    <span class="eyebrow" style="margin-top:20px">Reading this responsibly</span>
+    <div class="cav">
+      <div class="cav-i"><span class="cav-n">01</span><div class="cav-b">
+        <h4>Both recovery figures are projections, not experiments</h4>
+        <p>They assume stranded users behave like routed users who failed the same check —
+          defensible because stranding is uniform across every partner and year, but not a direct
+          test: no secondary check ever ran on the stranded group, so there is nothing to measure
+          against. The honest confirmation is to route a sample and measure. Sizing, not a
+          commitment.</p></div></div>
+      <div class="cav-i"><span class="cav-n">02</span><div class="cav-b">
+        <h4>2,093 users are not verified despite passing a check</h4>
+        <p>164 in bucket B, 1,131 in C, 798 in D. The 798 had a human review them, so an override
+          is plausibly intended; the other 1,295 — 0.65% of non-verification, no human involved —
+          are a real if small defect. Flagged, not corrected: overriding
+          <code>overall_kyc_status</code> would edit the outcome field the analysis is measured
+          against. Moves the headline under 0.1 points either way.</p></div></div>
+      <div class="cav-i"><span class="cav-n">03</span><div class="cav-b">
+        <h4>Reviewer comments cover 2.96% of the book and cannot predict outcomes</h4>
+        <p>Free text exists for the manually reviewed population only — it fully characterises
+          bucket D but has <b>zero coverage of the stranded population</b>, since nothing ever
+          looked at them. Every distinct comment maps to one manual decision, so it is written
+          <i>with</i> the decision: it describes composition, it does not predict.</p></div></div>
+      <div class="cav-i"><span class="cav-n">04</span><div class="cav-b">
+        <h4><code>kyc_source</code> was audited, not trusted</h4>
+        <p>It names one credited clearing provider per user, not every check that ran or passed
+          — so every check-level figure here comes from the individual result columns instead.</p></div></div>
+    </div>
+  </div>
+  <div class="foot">All figures re-queried live against <code>kyc.kyc_users</code> (2,515,262 rows,
+    11 validation gates, less 107 test accounts); routing figures use the 288,028 Idology failures.
+    · Companions: <b>The Waterfall As Built</b> and <b>The Waterfall, Rebuilt</b> (Task 2).</div>
+</section>
+
+</div>
+</div>

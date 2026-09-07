@@ -28,6 +28,7 @@ to measure. Full story: **[The Waterfall, Rebuilt](https://claude.ai/code/artifa
 | View either report offline, or as it looked as of a given commit | [reports/](reports/) — static HTML snapshots of both, committed alongside the code they're derived from |
 | See exactly how the data was loaded, cleaned, and analysed, with every number's derivation | The notebooks below — every loading decision, defect, and caveat is documented inline, next to the code |
 | Read the redesign's full logic and cost trade-offs | [TASK2_WATERFALL_DESIGN.md](TASK2_WATERFALL_DESIGN.md) |
+| Read the build docs handed to eng & analytics (Word) | [PRD](reports/Task3a_PRD_KYC_Waterfall_v2.docx) · [ARD](reports/Task3b_ARD_Monitoring_Plan.docx) · [Project plan](reports/Task3c_Project_Plan.docx) |
 | Run the SQL myself / verify a number | Set up Postgres below, then run the notebooks |
 | Understand working conventions for this repo | [CLAUDE.md](CLAUDE.md) |
 
@@ -44,6 +45,12 @@ notebooks/
   02_task1_funnel_analysis.ipynb             the funnel analysis, plus the full flow-path audit
                                               behind Task 2 — everything in plain English + SQL
 TASK2_WATERFALL_DESIGN.md                    the redesigned waterfall: logic, stop conditions, cost
+reports/Task3a_PRD_KYC_Waterfall_v2.docx     Task 3 DELIVERABLE: PRD (Word)
+reports/Task3b_ARD_Monitoring_Plan.docx      Task 3 DELIVERABLE: ARD / monitoring plan (Word)
+reports/Task3c_Project_Plan.docx             Task 3 DELIVERABLE: project plan (Word)
+TASK3_PRD.md                                 markdown source the .docx above is generated from
+TASK3_ARD.md                                 markdown source
+TASK3_PROJECT_PLAN.md                        markdown source
 reports/                                     static HTML snapshots of both published reports, as
                                               committed — not regenerated automatically, so they can
                                               lag the live claude.ai/code/artifact links between updates
