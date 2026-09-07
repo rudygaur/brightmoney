@@ -1,0 +1,789 @@
+<title>The Waterfall As Built</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================= TOKENS =============================
+     Inherited verbatim from the Task 1 / Task 2 reports so this section
+     folds into the same document family. Do not fork the palette. */
+  :root{
+    color-scheme: light;
+    --font-display:'Archivo',"Arial Narrow",sans-serif;
+    --font-body:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+
+    --ink:#12161d;
+    --ink-soft:#4c5768;
+    --ink-faint:#8a94a6;
+    --paper:#f5f6f9;
+    --surface:#ffffff;
+    --surface-2:#eef0f4;
+    --line:#dde1e8;
+
+    --accent:#1d5aad;
+    --accent-2:#3f7fd1;
+    --accent-soft:#e8f0fb;
+    --critical:#c93636;
+    --critical-soft:#fbeaea;
+    --warning:#c98500;
+    --warning-soft:#fbf1de;
+    --node:#3a4256;
+
+    --shadow: 0 1px 2px rgba(18,22,29,.04), 0 8px 24px -12px rgba(18,22,29,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
+      --paper:#10131a; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
+      --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+      --critical:#e2635f; --critical-soft:#3a1f1e;
+      --warning:#eda100; --warning-soft:#3a2c10;
+      --node:#5c6884;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
+    --paper:#10131a; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
+    --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+    --critical:#e2635f; --critical-soft:#3a1f1e;
+    --warning:#eda100; --warning-soft:#3a2c10;
+    --node:#5c6884;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent-soft); color:var(--ink); }
+  a{ color:var(--accent); }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
+  @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
+
+  .wrap{ max-width:900px; margin:0 auto; padding:0 24px; }
+
+  h1,h2,h3{ font-family:var(--font-display); font-weight:800; letter-spacing:-.01em; text-wrap:balance; margin:0; color:var(--ink); }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:11.5px; font-weight:600; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent);
+  }
+  .num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+  code{ font-family:var(--font-mono); background:var(--surface-2); padding:1px 5px; border-radius:4px; font-size:.88em; }
+
+  /* ============================= MASTHEAD ============================= */
+  header.masthead{ border-bottom:1px solid var(--line); padding:56px 0 40px; }
+  header.masthead h1{ font-size:clamp(34px,5.4vw,52px); line-height:1.04; margin-top:14px; }
+  header.masthead .thesis{ margin-top:18px; font-size:18px; color:var(--ink-soft); max-width:62ch; line-height:1.55; }
+  .scope-note{ margin-top:20px; font-size:12.5px; color:var(--ink-faint); line-height:1.6; max-width:64ch; }
+
+  /* ============================= SECTIONS ============================= */
+  section{ padding:60px 0; border-bottom:1px solid var(--line); }
+  section:last-of-type{ border-bottom:none; }
+  .sec-head{ margin-bottom:28px; }
+  .sec-head .eyebrow{ display:block; margin-bottom:10px; }
+  .sec-head h2{ font-size:clamp(23px,3.4vw,29px); }
+  .sec-head p{ margin-top:12px; color:var(--ink-soft); font-size:16px; max-width:64ch; line-height:1.6; }
+  .body-copy{ max-width:64ch; }
+  .body-copy p{ font-size:15px; color:var(--ink-soft); line-height:1.65; }
+  .body-copy p b{ color:var(--ink); }
+
+  /* ============================= FIGURES ============================= */
+  figure{ margin:0; }
+  .fig-frame{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:24px 20px 14px; box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .fig-frame svg{ width:100%; min-width:760px; height:auto; display:block; }
+  figcaption{
+    margin-top:16px; padding:14px 16px; background:var(--surface-2); border-radius:8px;
+    font-size:13.5px; color:var(--ink-soft); line-height:1.6;
+  }
+  figcaption b{ color:var(--ink); }
+
+  /* diagram type + marks, all theme-token driven */
+  .dg text{ font-family:var(--font-body); }
+  .dg .bx{ fill:var(--surface); stroke:var(--node); stroke-width:1.4; }
+  .dg .bx-accent{ fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.6; }
+  .dg .bx-crit{ fill:var(--critical-soft); stroke:var(--critical); stroke-width:1.6; }
+  .dg .bx-warn{ fill:var(--warning-soft); stroke:var(--warning); stroke-width:1.6; }
+  .dg .t-name{ font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+  .dg .t-name.on-accent{ fill:var(--accent); }
+  .dg .t-name.on-crit{ fill:var(--critical); }
+  .dg .t-name.on-warn{ fill:var(--warning); }
+  .dg .t-name.on-plain{ fill:var(--ink-faint); }
+  .dg .t-val{ font-family:var(--font-display); font-weight:800; font-size:15px; fill:var(--ink); }
+  .dg .t-sub{ font-size:11.5px; fill:var(--ink-soft); }
+  .dg .t-edge{ font-family:var(--font-mono); font-size:11px; fill:var(--ink-soft); font-weight:500; }
+  .dg .t-edge-em{ font-family:var(--font-mono); font-size:11px; fill:var(--warning); font-weight:600; }
+  .dg .t-note{ font-size:11px; fill:var(--ink-faint); font-style:italic; }
+  .dg .ln{ stroke:var(--node); stroke-width:1.3; fill:none; }
+  .dg .ln-cross{ stroke:var(--warning); stroke-width:1.8; fill:none; }
+  .dg .ln-dead{ stroke:var(--critical); stroke-width:1.3; fill:none; stroke-dasharray:4 3; }
+  .dg .ah{ fill:var(--node); }
+  .dg .ah-cross{ fill:var(--warning); }
+  .dg .ah-dead{ fill:var(--critical); }
+
+  /* ============================= CHECK INVENTORY ============================= */
+  .inv{ width:100%; border-collapse:collapse; font-size:14px; }
+  .inv thead th{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--ink-faint); text-align:right; font-weight:600; padding:0 0 10px; border-bottom:1px solid var(--line);
+  }
+  .inv thead th:first-child{ text-align:left; }
+  .inv tbody td{ padding:13px 0; border-bottom:1px solid var(--line); text-align:right; vertical-align:middle; }
+  .inv tbody td:first-child{ text-align:left; }
+  .inv tbody tr:last-child td{ border-bottom:none; }
+  .inv .ck{ display:flex; align-items:baseline; gap:9px; }
+  .inv .ck-tier{
+    font-family:var(--font-mono); font-weight:700; font-size:11px; color:var(--accent);
+    background:var(--accent-soft); border-radius:4px; padding:2px 6px; flex:none;
+  }
+  .inv .ck-name{ font-weight:600; }
+  .inv .ck-role{ display:block; font-size:12px; color:var(--ink-faint); margin-top:2px; }
+  .inv .fire{ display:flex; align-items:center; gap:10px; justify-content:flex-end; }
+  .inv .fire-track{ width:88px; height:7px; background:var(--surface-2); border-radius:4px; overflow:hidden; flex:none; }
+  .inv .fire-fill{ height:100%; background:var(--accent); border-radius:4px; }
+  .inv .pass-def{ color:var(--warning); }
+  .inv-foot{ margin-top:14px; font-size:12.5px; color:var(--ink-faint); line-height:1.6; }
+
+  /* ============================= ROUTE TABLE ============================= */
+  .routes{ display:flex; flex-direction:column; gap:2px; }
+  .route{ display:grid; grid-template-columns:1fr 132px 108px; gap:18px; align-items:center; padding:16px 0; border-top:1px solid var(--line); }
+  .route:first-child{ border-top:none; }
+  @media (max-width:640px){ .route{ grid-template-columns:1fr; gap:8px; } }
+  .route .r-name{ font-weight:600; font-size:14.5px; }
+  .route .r-name span{ display:block; font-size:12.5px; color:var(--ink-faint); font-weight:400; margin-top:3px; line-height:1.45; }
+  .route .r-vol{ font-family:var(--font-mono); font-size:13px; color:var(--ink-soft); text-align:right; }
+  .route .r-vol b{ display:block; font-family:var(--font-display); font-size:16px; color:var(--ink); font-weight:800; }
+  .route .r-rec{ text-align:right; }
+  .route .r-rec .rr-track{ height:7px; background:var(--surface-2); border-radius:4px; overflow:hidden; margin-bottom:5px; }
+  .route .r-rec .rr-fill{ height:100%; border-radius:4px; background:var(--accent); }
+  .route .r-rec .rr-fill.dead{ background:var(--critical); }
+  .route .r-rec .rr-num{ font-family:var(--font-display); font-weight:800; font-size:14px; }
+  .route .r-rec .rr-num.dead{ color:var(--critical); }
+
+  /* ============================= CROSSOVER EVIDENCE ============================= */
+  .xo{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  @media (max-width:700px){ .xo{ grid-template-columns:1fr; } }
+  .xo-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:8px; }
+  .xo-card.lead{ border-color:var(--warning); background:var(--warning-soft); }
+  .xo-cond{ font-family:var(--font-mono); font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); }
+  .xo-card.lead .xo-cond{ color:var(--warning); }
+  .xo-pct{ font-family:var(--font-display); font-weight:900; font-size:32px; line-height:1; }
+  .xo-card.lead .xo-pct{ color:var(--warning); }
+  .xo-den{ font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); }
+  .xo-read{ margin-top:20px; padding:16px 18px; border-left:3px solid var(--warning); background:var(--warning-soft); border-radius:0 8px 8px 0; font-size:14.5px; }
+
+  /* ============================= LEXISNEXIS SPLIT ============================= */
+  .ln2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:700px){ .ln2{ grid-template-columns:1fr; } }
+  .ln-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:20px; box-shadow:var(--shadow); }
+  .ln-card h3{ font-family:var(--font-mono); font-size:12.5px; letter-spacing:.05em; color:var(--accent); font-weight:600; }
+  .ln-verdict{ font-family:var(--font-display); font-weight:800; font-size:17px; margin:8px 0 14px; }
+  .ln-rows{ display:flex; flex-direction:column; gap:0; }
+  .ln-row{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-top:1px dashed var(--line); font-size:13px; }
+  .ln-row:first-child{ border-top:none; }
+  .ln-row .k{ color:var(--ink-faint); }
+  .ln-row .v{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; color:var(--ink); font-weight:500; }
+  .ln-row .v.em{ color:var(--accent); font-weight:600; }
+
+  /* ============================= DOCUMENTED VS OBSERVED ============================= */
+  .cmp-list{ display:flex; flex-direction:column; gap:2px; }
+  .cmp-row{ display:grid; grid-template-columns:1fr 1fr 128px; gap:20px; padding:18px 0; border-top:1px solid var(--line); align-items:start; }
+  .cmp-row:first-child{ border-top:none; }
+  @media (max-width:760px){ .cmp-row{ grid-template-columns:1fr; gap:10px; } }
+  .cmp-col .cmp-head{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-faint); margin-bottom:5px; }
+  .cmp-col p{ margin:0; font-size:14px; line-height:1.5; color:var(--ink-soft); }
+  .cmp-col.observed p{ color:var(--ink); }
+  .cmp-col.observed .cmp-head{ color:var(--critical); }
+  .verdict{ font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:.04em; padding:5px 9px; border-radius:5px; text-align:center; height:fit-content; }
+  .verdict.ok{ background:var(--accent-soft); color:var(--accent); }
+  .verdict.bad{ background:var(--critical-soft); color:var(--critical); }
+  .verdict.warn{ background:var(--warning-soft); color:var(--warning); }
+
+  /* ============================= LIMITS ============================= */
+  .limit{ display:flex; gap:14px; padding:18px 0; border-top:1px solid var(--line); }
+  .limit:first-child{ border-top:none; }
+  .limit-mark{
+    flex:none; width:26px; height:26px; border-radius:50%; background:var(--warning-soft); color:var(--warning);
+    font-family:var(--font-display); font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+  .limit h4{ margin:0 0 4px; font-size:14.5px; font-weight:700; }
+  .limit p{ margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+
+  /* ============================= FOOTER ============================= */
+  footer{ padding:40px 0 64px; }
+  footer p{ font-size:12.5px; color:var(--ink-faint); font-family:var(--font-mono); line-height:1.7; }
+  footer .prov{ margin-top:14px; padding:14px 16px; background:var(--surface-2); border-radius:8px; font-family:var(--font-body); font-size:12.5px; color:var(--ink-soft); line-height:1.6; }
+  footer .prov b{ color:var(--ink); }
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <span class="eyebrow">Task 1 · Part A — Reconstruction</span>
+    <h1>The Waterfall As Built</h1>
+    <p class="thesis">
+      The documented design is broadly the design that runs — but three things in it are not what
+      the brief describes. There is a second front door. An Idology pass does not always end the
+      journey. And the SSN / non-SSN split, the decision the whole waterfall turns on, is never
+      reached at all for <b>43.7%</b> of the users it is supposed to route.
+    </p>
+    <p class="scope-note">
+      All figures computed on <code>kyc.kyc_users</code> (2,515,262 rows), excluding the 107 flagged
+      <code>Test_user</code> accounts — denominator <b class="num">2,515,155</b>. Test accounts are
+      flagged, never deleted, so this exclusion is reversible and stated rather than baked in.
+      Percentages of an Idology outcome use <b class="num">2,420,972</b> (users Idology actually ran
+      for), not the full book; the two differ and the difference matters.
+    </p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Method</span>
+      <h2>What the data can and cannot tell us</h2>
+      <p>
+        Before any claim about sequence: the extract has no timestamps. Reconstruction rests on
+        which result columns are populated together, and that method has exactly two limits — both
+        of which bound everything below.
+      </p>
+    </div>
+
+    <div class="limit">
+      <div class="limit-mark">1</div>
+      <div>
+        <h4>Order is inferred, not observed</h4>
+        <p>
+          The only date-typed columns in the table are <code>enrolled_date</code> and
+          <code>dob_month_start</code>. There is no per-check timestamp, no attempt counter, no
+          sequence field. So <b>the order of checks cannot be read off the data</b> — it is inferred
+          from three things that do not depend on time: which checks co-occur, which provider
+          <code>kyc_source</code> credits with clearing the user, and the near-universality of
+          Idology. Where the inference is load-bearing I say so; where it is not available — the
+          direction of the crossover below — I say that too.
+        </p>
+      </div>
+    </div>
+    <div class="limit">
+      <div class="limit-mark">2</div>
+      <div>
+        <h4>A null column does not always mean the check did not run</h4>
+        <p>
+          The brief states that a null provider value means the check did not run. That is false for
+          at least <b class="num">11,695</b> users. Among the 24,779 who went from an Idology failure
+          straight to manual review, 11,695 carry a reviewer comment that <em>names</em> a secondary
+          provider — most commonly <em>“User PII reviewed with ACRO and found that Name, DOB, Address
+          are matching”</em> — while <code>acro_result</code>, <code>lexis_nexis_result</code> and
+          both Persona columns are null for every one of them. The check ran; a human ran it and
+          wrote it down; the system never wrote it back to the column. Every “this check did not
+          fire” count on this page is therefore an <b>upper bound on non-firing</b>, and the
+          instrumentation gap is a finding in its own right.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Step 0 — Entry</span>
+      <h2>Where users enter the waterfall</h2>
+      <p>
+        The brief describes one front door. There are two, and the second one is undocumented.
+      </p>
+    </div>
+
+    <figure>
+      <div class="fig-frame">
+        <svg class="dg" viewBox="0 0 900 232" role="img"
+             aria-label="Of 2,515,155 enrolled users, 2,420,972 (96.26%) enter at L1 Idology, 93,319 (3.71%) enter at ProviderA LexisNexis without ever seeing Idology, 843 have no check run at all, and 21 follow other paths.">
+          <defs>
+            <marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah"/>
+            </marker>
+          </defs>
+
+          <!-- source -->
+          <rect x="330" y="14" width="240" height="50" rx="7" class="bx"/>
+          <text x="450" y="34" text-anchor="middle" class="t-name on-plain">ENROLLED</text>
+          <text x="450" y="53" text-anchor="middle" class="t-val">2,515,155</text>
+
+          <!-- fan-out lines -->
+          <path d="M 450 64 L 450 92 L 170 92 L 170 132" class="ln" marker-end="url(#ah1)"/>
+          <path d="M 450 64 L 450 92 L 470 92 L 470 132" class="ln" marker-end="url(#ah1)"/>
+          <path d="M 450 64 L 450 92 L 760 92 L 760 132" class="ln" marker-end="url(#ah1)"/>
+
+          <!-- edge labels, offset clear of their own connector lines -->
+          <text x="162" y="115" text-anchor="end" class="t-edge">96.26%</text>
+          <text x="478" y="115" text-anchor="start" class="t-edge">3.71%</text>
+          <text x="768" y="115" text-anchor="start" class="t-edge">0.03%</text>
+
+          <!-- L1 -->
+          <rect x="60" y="134" width="220" height="62" rx="7" class="bx-accent"/>
+          <text x="170" y="154" text-anchor="middle" class="t-name on-accent">L1 · IDOLOGY</text>
+          <text x="170" y="174" text-anchor="middle" class="t-val">2,420,972</text>
+          <text x="170" y="189" text-anchor="middle" class="t-sub">the documented front door</text>
+
+          <!-- side door -->
+          <rect x="360" y="134" width="260" height="62" rx="7" class="bx-warn"/>
+          <text x="490" y="154" text-anchor="middle" class="t-name on-warn">PROVIDERA LEXISNEXIS</text>
+          <text x="490" y="174" text-anchor="middle" class="t-val">93,319</text>
+          <text x="490" y="189" text-anchor="middle" class="t-sub">never sees Idology · 99.6% verify</text>
+
+          <!-- nothing -->
+          <rect x="660" y="134" width="200" height="62" rx="7" class="bx-crit"/>
+          <text x="760" y="154" text-anchor="middle" class="t-name on-crit">NO CHECK AT ALL</text>
+          <text x="760" y="174" text-anchor="middle" class="t-val">843</text>
+          <text x="760" y="189" text-anchor="middle" class="t-sub">0 verified</text>
+
+          <text x="450" y="220" text-anchor="middle" class="t-note">21 further users enter by paths too small to chart individually</text>
+        </svg>
+      </div>
+      <figcaption>
+        <b>A second front door exists and is not in the design.</b> 93,319 users — 3.71% of the book —
+        have no Idology result at all and are cleared by <code>ProviderA_Lexis_Nexis</code> instead.
+        They verify at 99.55%. A primary-position check that filters almost nothing is either
+        pre-screened somewhere upstream or under-controlled, and the data cannot distinguish the two.
+        That makes it a <b>risk question for engineering, not a conversion question</b> — the one item
+        here that does not resolve into a routing fix.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Step 1 — Inventory</span>
+      <h2>Which checks fire, and how often</h2>
+      <p>
+        Six distinct checks are instrumented across five columns. Their firing rates span three
+        orders of magnitude — from Idology on 96% of users to Persona-IDV on one in a thousand.
+      </p>
+    </div>
+
+    <table class="inv">
+      <thead>
+        <tr>
+          <th>Check</th>
+          <th>Fired for</th>
+          <th>Share of book</th>
+          <th>Pass rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L1</span><span class="ck-name">Idology</span></div>
+            <span class="ck-role">Primary identity — name, DOB, address, SSN against public records</span>
+          </td>
+          <td class="num">2,420,972</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:100%"></div></div><span class="num">96.26%</span></div></td>
+          <td class="num">88.10%</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L2</span><span class="ck-name">LexisNexis</span></div>
+            <span class="ck-role">SSN &amp; identity — two distinct integrations sharing one column</span>
+          </td>
+          <td class="num">276,993</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:11.4%"></div></div><span class="num">11.01%</span></div></td>
+          <td class="num">66.21%</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L2</span><span class="ck-name">Persona — SSN mode</span></div>
+            <span class="ck-role">Documented as the legacy SSN route for “older accounts”</span>
+          </td>
+          <td class="num">10,733</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:0.9%"></div></div><span class="num">0.43%</span></div></td>
+          <td class="num pass-def">100%<sup>†</sup></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L3</span><span class="ck-name">ACRO</span></div>
+            <span class="ck-role">Automated secondary identity — the non-SSN workhorse</span>
+          </td>
+          <td class="num">114,167</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:4.7%"></div></div><span class="num">4.54%</span></div></td>
+          <td class="num">44.84%</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L3</span><span class="ck-name">Persona — IDV mode</span></div>
+            <span class="ck-role">Photo ID + selfie — highest friction, highest cost</span>
+          </td>
+          <td class="num">2,595</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:0.3%"></div></div><span class="num">0.10%</span></div></td>
+          <td class="num pass-def">100%<sup>†</sup></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="ck"><span class="ck-tier">L4</span><span class="ck-name">Manual review</span></div>
+            <span class="ck-role">Human analyst — the safety net</span>
+          </td>
+          <td class="num">74,400</td>
+          <td><div class="fire"><div class="fire-track"><div class="fire-fill" style="width:3.1%"></div></div><span class="num">2.96%</span></div></td>
+          <td class="num">32.30%</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="inv-foot">
+      <sup>†</sup> <b>Not a performance figure.</b> Both Persona columns only ever hold
+      <code>PASS</code> or null — there is no <code>FAIL</code> value for Persona anywhere in the
+      dataset, by the brief's own note. A 100% pass rate on those two rows is therefore definitional
+      and must never be quoted as provider quality. What a Persona null cannot distinguish is
+      “did not run” from “ran and did not clear”, which is why Persona is excluded from any
+      failed-every-check test on this page.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Step 1 — Order</span>
+      <h2>The sequence, and the one place it breaks</h2>
+    </div>
+    <div class="body-copy">
+      <p>
+        The documented order — L1 Idology, then an SSN or non-SSN branch, then manual review — holds
+        as a <b>dependency order</b>: 96.3% of users are checked by Idology first, every secondary
+        provider fires overwhelmingly on users who already have an Idology result, and manual review
+        is the only check that appears alongside all the others. Nothing in the data contradicts that
+        shape.
+      </p>
+      <p>
+        One documented rule does not hold. The brief says a user who passes Idology is verified and
+        <em>exits</em> the waterfall. <b>130,713 users passed Idology and had LexisNexis run
+        anyway</b>, and 57,822 of them <em>failed</em> that second check and were verified regardless
+        — a 99.9% verification rate for the group. So L2 is running in a non-blocking position for
+        some passing users: it costs a provider call and returns a result nobody acts on.
+      </p>
+      <p>
+        This is also why the L1 pass rate and the L1 <em>exit</em> rate are different numbers.
+        84.80% of the book passes Idology; only <b>79.57%</b> passes it and stops there. The 5.23%
+        gap is precisely this non-blocking check. Quoting the pass rate as though it were the exit
+        rate merges the two and hides the finding.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Step 2 — The branch</span>
+      <h2>How users route between the SSN and non-SSN paths</h2>
+      <p>
+        This is the decision the waterfall is built around. For 288,028 users who failed Idology,
+        here is where they actually went.
+      </p>
+    </div>
+
+    <figure>
+      <div class="fig-frame">
+        <svg class="dg" viewBox="0 0 900 360" role="img"
+             aria-label="Of 288,028 Idology failures: 54,973 (19.1%) enter the SSN path, 107,114 (37.2%) go direct to the non-SSN path, and 125,941 (43.7%) reach neither path. 8,605 users cross over from the SSN path to the non-SSN path. The 125,941 split into 101,162 stranded with 0.01% recovery and 24,779 sent straight to manual review with 41.1% recovery.">
+          <defs>
+            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah"/>
+            </marker>
+            <marker id="ah2x" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah-cross"/>
+            </marker>
+            <marker id="ah2d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" class="ah-dead"/>
+            </marker>
+          </defs>
+
+          <!-- source: idology fail -->
+          <rect x="330" y="14" width="240" height="52" rx="7" class="bx-crit"/>
+          <text x="450" y="34" text-anchor="middle" class="t-name on-crit">IDOLOGY FAIL</text>
+          <text x="450" y="55" text-anchor="middle" class="t-val">288,028</text>
+
+          <!-- fan out to three destinations -->
+          <path d="M 450 66 L 450 94 L 150 94 L 150 140" class="ln" marker-end="url(#ah2)"/>
+          <path d="M 450 66 L 450 140" class="ln" marker-end="url(#ah2)"/>
+          <path d="M 450 66 L 450 94 L 762 94 L 762 140" class="ln" marker-end="url(#ah2)"/>
+
+          <text x="142" y="115" text-anchor="end" class="t-edge">54,973 · 19.1%</text>
+          <text x="458" y="115" text-anchor="start" class="t-edge">107,114 · 37.2%</text>
+          <text x="770" y="115" text-anchor="start" class="t-edge">125,941 · 43.7%</text>
+
+          <!-- SSN path -->
+          <rect x="42" y="142" width="216" height="66" rx="7" class="bx-accent"/>
+          <text x="150" y="162" text-anchor="middle" class="t-name on-accent">SSN PATH</text>
+          <text x="150" y="181" text-anchor="middle" class="t-sub">LexisNexis · Persona-SSN</text>
+          <text x="150" y="199" text-anchor="middle" class="t-sub">45.2% recovered</text>
+
+          <!-- crossover, drawn in the gap -->
+          <path d="M 258 175 L 330 175" class="ln-cross" marker-end="url(#ah2x)"/>
+          <text x="294" y="158" text-anchor="middle" class="t-edge-em">crossover</text>
+          <text x="294" y="196" text-anchor="middle" class="t-edge-em">8,605</text>
+
+          <!-- non-SSN path -->
+          <rect x="336" y="142" width="228" height="66" rx="7" class="bx-accent"/>
+          <text x="450" y="162" text-anchor="middle" class="t-name on-accent">NON-SSN PATH</text>
+          <text x="450" y="181" text-anchor="middle" class="t-sub">ACRO · Persona-IDV</text>
+          <text x="450" y="199" text-anchor="middle" class="t-sub">50.4% recovered</text>
+
+          <!-- neither -->
+          <rect x="640" y="142" width="244" height="66" rx="7" class="bx-crit"/>
+          <text x="762" y="162" text-anchor="middle" class="t-name on-crit">NEITHER PATH RAN</text>
+          <text x="762" y="181" text-anchor="middle" class="t-sub">the branch was never reached</text>
+          <text x="762" y="199" text-anchor="middle" class="t-sub">8.1% recovered</text>
+
+          <!-- neither splits -->
+          <path d="M 762 208 L 762 236 L 645 236 L 645 274" class="ln-dead" marker-end="url(#ah2d)"/>
+          <path d="M 762 208 L 762 236 L 817 236 L 817 274" class="ln" marker-end="url(#ah2)"/>
+
+          <rect x="560" y="276" width="170" height="66" rx="7" class="bx-crit"/>
+          <text x="645" y="296" text-anchor="middle" class="t-name on-crit">STRANDED</text>
+          <text x="645" y="316" text-anchor="middle" class="t-val">101,162</text>
+          <text x="645" y="332" text-anchor="middle" class="t-sub">0.01% recovered</text>
+
+          <rect x="742" y="276" width="150" height="66" rx="7" class="bx"/>
+          <text x="817" y="296" text-anchor="middle" class="t-name on-plain">STRAIGHT TO L4</text>
+          <text x="817" y="316" text-anchor="middle" class="t-val">24,779</text>
+          <text x="817" y="332" text-anchor="middle" class="t-sub">41.1% recovered</text>
+
+          <text x="300" y="300" text-anchor="middle" class="t-note">Every path that actually runs recovers 45–55% of the users sent to it.</text>
+          <text x="300" y="320" text-anchor="middle" class="t-note">The 101,162 who reach no path recover 12 people in total.</text>
+        </svg>
+      </div>
+      <figcaption>
+        <b>The branch is sound. Reaching it is the problem.</b> The SSN path, the non-SSN path and the
+        crossover between them all work — 45%, 50% and 55% recovery respectively. But
+        <b>43.7% of Idology failures never arrive at the branch at all</b>, and the 101,162 who reach
+        no check of any kind recover 12 people, a rate of 0.01%. Arrow widths are uniform; volume is
+        carried by the labels, not by line thickness.
+      </figcaption>
+    </figure>
+
+    <div class="routes" style="margin-top:34px">
+      <div class="route">
+        <div class="r-name">Non-SSN path only
+          <span>Straight to ACRO or Persona-IDV after the Idology failure</span></div>
+        <div class="r-vol"><b class="num">107,114</b>37.19% of failures</div>
+        <div class="r-rec"><div class="rr-track"><div class="rr-fill" style="width:50.4%"></div></div><span class="rr-num num">50.39%</span></div>
+      </div>
+      <div class="route">
+        <div class="r-name">SSN path only
+          <span>LexisNexis or Persona-SSN, no crossover</span></div>
+        <div class="r-vol"><b class="num">46,368</b>16.10% of failures</div>
+        <div class="r-rec"><div class="rr-track"><div class="rr-fill" style="width:45.2%"></div></div><span class="rr-num num">45.20%</span></div>
+      </div>
+      <div class="route">
+        <div class="r-name">Both paths — the crossover fired
+          <span>Started on the SSN path, moved to the non-SSN track</span></div>
+        <div class="r-vol"><b class="num">8,605</b>2.99% of failures</div>
+        <div class="r-rec"><div class="rr-track"><div class="rr-fill" style="width:55.0%"></div></div><span class="rr-num num">55.01%</span></div>
+      </div>
+      <div class="route">
+        <div class="r-name">Neither path ran
+          <span>101,162 stranded with nothing · 24,779 sent straight to a human</span></div>
+        <div class="r-vol"><b class="num">125,941</b>43.73% of failures</div>
+        <div class="r-rec"><div class="rr-track"><div class="rr-fill dead" style="width:8.1%"></div></div><span class="rr-num dead num">8.10%</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Step 2 — The crossover rule</span>
+      <h2>Testing the brief's “crucial rule”</h2>
+      <p>
+        The design states that if an SSN-path provider surfaces a secondary non-SSN issue, the user
+        moves to the non-SSN track. That rule is real — and it leaks in both directions.
+      </p>
+    </div>
+
+    <div class="xo">
+      <div class="xo-card lead">
+        <span class="xo-cond">LexisNexis returned FAIL</span>
+        <span class="xo-pct num">19.47%</span>
+        <span class="xo-den">6,963 of 35,761 crossed over</span>
+      </div>
+      <div class="xo-card">
+        <span class="xo-cond">LexisNexis returned PASS</span>
+        <span class="xo-pct num">9.50%</span>
+        <span class="xo-den">1,633 of 17,197 crossed over</span>
+      </div>
+      <div class="xo-card">
+        <span class="xo-cond">Persona-SSN leg only</span>
+        <span class="xo-pct num">0.45%</span>
+        <span class="xo-den">9 of 2,015 crossed over</span>
+      </div>
+    </div>
+
+    <div class="xo-read">
+      <b>Directionally confirmed, mechanically leaky.</b> A failed SSN check is twice as likely to
+      cross over as a passed one, which is the documented rule showing up in the data. But the rule
+      does not explain a 9.5% crossover rate on users whose SSN check <em>passed</em>, and it is
+      effectively absent from the Persona-SSN leg, where 9 users in 2,015 ever cross. The crossover
+      is implemented on the LexisNexis leg and essentially not implemented on the other.
+    </div>
+
+    <div class="body-copy" style="margin-top:26px">
+      <p>
+        <b>What this cannot establish: direction.</b> With no timestamps, a user holding both a
+        LexisNexis and an ACRO result is evidence that both checks ran — not that one preceded the
+        other. I read these 8,605 as SSN→non-SSN because that is the documented direction and
+        because the reverse is much rarer in the population (7.7% of ACRO failures also carry an SSN
+        check, against 19.5% the other way). That is an inference from asymmetry, not a measurement,
+        and it is the one claim on this page I would want a log to confirm.
+      </p>
+      <p>
+        One documented rule is <b>not reproducible at all</b>. The brief routes “older accounts” to
+        legacy Persona-SSN. Tested both readings: mean age is 34.9 for Persona-SSN users against
+        34.7 for everyone else, and the route fires on 0.42–0.44% of users in every enrolment year
+        including 2026 — flat, where a legacy route being wound down would decay. Neither age nor
+        vintage drives it. The field that does is not in this extract.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Step 2 — Provider note</span>
+      <h2>The two LexisNexis routes are not the same check</h2>
+      <p>
+        Both write to <code>lexis_nexis_result</code>. They sit in opposite positions in the flow,
+        and grouping on that column alone merges a primary check with a secondary one.
+      </p>
+    </div>
+
+    <div class="ln2">
+      <div class="ln-card">
+        <h3>ProviderA_Lexis_Nexis</h3>
+        <div class="ln-verdict">Acting as an alternative <em>primary</em></div>
+        <div class="ln-rows">
+          <div class="ln-row"><span class="k">Users</span><span class="v">149,364</span></div>
+          <div class="ln-row"><span class="k">Never saw Idology</span><span class="v em">93,319</span></div>
+          <div class="ln-row"><span class="k">After an Idology PASS</span><span class="v">50,523</span></div>
+          <div class="ln-row"><span class="k">After an Idology FAIL</span><span class="v">5,522</span></div>
+          <div class="ln-row"><span class="k">Paired with Persona-SSN</span><span class="v">827</span></div>
+          <div class="ln-row"><span class="k">Verified</span><span class="v">99.55%</span></div>
+        </div>
+      </div>
+      <div class="ln-card">
+        <h3>ProviderB_Lexis_Nexis</h3>
+        <div class="ln-verdict">Acting as a <em>secondary</em>, SSN-path check</div>
+        <div class="ln-rows">
+          <div class="ln-row"><span class="k">Users</span><span class="v">15,998</span></div>
+          <div class="ln-row"><span class="k">Never saw Idology</span><span class="v">1</span></div>
+          <div class="ln-row"><span class="k">After an Idology PASS</span><span class="v">4,320</span></div>
+          <div class="ln-row"><span class="k">After an Idology FAIL</span><span class="v em">11,677</span></div>
+          <div class="ln-row"><span class="k">Paired with Persona-SSN</span><span class="v em">4,757</span></div>
+          <div class="ln-row"><span class="k">Verified</span><span class="v">98.46%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="body-copy" style="margin-top:24px">
+      <p>
+        ProviderA carries nine times the volume and is dominated by users who <b>never saw
+        Idology</b> — it is the side door from Step 0. ProviderB is small, almost entirely
+        post-Idology-failure, and three times more likely to be paired with Persona-SSN — it is the
+        SSN-path secondary the design describes. Same brand, same column, opposite roles.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Summary</span>
+      <h2>Documented design vs the system that runs</h2>
+    </div>
+
+    <div class="cmp-list">
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>Idology is the primary check for every user.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>93,319 users (3.71%) never see it and are cleared by ProviderA LexisNexis, which passes ~100%.</p></div>
+        <div class="verdict warn">SECOND DOOR</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>Pass Idology ⇒ verified, exit the waterfall.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>130,713 passed and had LexisNexis run anyway; 57,822 failed it and verified regardless. Pass rate 84.80%, exit rate 79.57%.</p></div>
+        <div class="verdict warn">NON-BLOCKING</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>Fail Idology ⇒ log the reason and route by SSN vs non-SSN.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>43.73% of failures (125,941) reach neither path. 101,162 of them reach no check at all and recover 12 people.</p></div>
+        <div class="verdict bad">MAIN DEFECT</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>If an SSN provider surfaces a non-SSN issue, move the user to the non-SSN track.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>Real: 19.47% crossover after a LexisNexis FAIL vs 9.50% after a PASS. But absent from the Persona-SSN leg (0.45%).</p></div>
+        <div class="verdict warn">PARTIAL</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>SSN path sends standard users to LexisNexis and older accounts to legacy Persona-SSN.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>No age signal (34.9 vs 34.7) and no vintage signal (flat 0.42–0.44% every year).</p></div>
+        <div class="verdict bad">NOT REPRODUCIBLE</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>The two LexisNexis routes are different integration paths.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>Confirmed, and stronger than stated: ProviderA is primary-position, ProviderB is secondary. They are not interchangeable.</p></div>
+        <div class="verdict ok">CONFIRMED</div>
+      </div>
+      <div class="cmp-row">
+        <div class="cmp-col"><div class="cmp-head">Documented</div>
+          <p>A null provider value means the check did not run.</p></div>
+        <div class="cmp-col observed"><div class="cmp-head">Observed</div>
+          <p>False for at least 11,695 users whose reviewer comment names a provider whose column is null. Checks run off-instrument.</p></div>
+        <div class="verdict bad">CONTRADICTED</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Source: <code>kyc.kyc_users</code>, 2,515,262 rows loaded from KYC_Synthetic_Dataset.csv and
+      validated by 11 assertion gates.<br>
+      Reconstruction method: provider-column co-occurrence, <code>kyc_source</code> attribution, and
+      direct tests of each documented rule.
+    </p>
+    <div class="prov">
+      <b>Denominators used on this page.</b> The book is 2,515,155 users (2,515,262 less 107 flagged
+      test accounts). Idology outcome rates use 2,420,972 — the users Idology actually ran for.
+      Routing shares use 288,028 — Idology failures excluding test accounts; the all-in figure is
+      288,134. <b>Two integrity notes:</b> 2 of 149,364 <code>ProviderA_Lexis_Nexis</code> rows
+      credit that source without a matching <code>PASS</code> in the column, and 21 users enter by
+      paths too small to chart. Neither moves any figure above.
+      <br><br>
+      <b>Companion documents:</b> this reconstruction is Part A of Task 1 and feeds
+      <em>Where the Funnel Breaks</em> (the rate and its drivers) and <em>The Waterfall, Rebuilt</em>
+      (Task 2). Where a number appears in more than one document it is computed once, here.
+    </div>
+  </div>
+</footer>
