@@ -235,6 +235,11 @@
       reached at all for <b>43.7%</b> of the users it is supposed to route.
     </p>
     <p class="scope-note">
+      This document answers the brief's reconstruction ask in the order it's asked: <b>which checks
+      fire</b> (Step 1 — Inventory), <b>in what order</b> (Step 1 — Order), and <b>how users route
+      between the SSN and non-SSN paths</b> (Step 2 — The branch).
+    </p>
+    <p class="scope-note">
       All figures computed on <code>kyc.kyc_users</code> (2,515,262 rows), excluding the 107 flagged
       <code>Test_user</code> accounts — denominator <b class="num">2,515,155</b>. Test accounts are
       flagged, never deleted, so this exclusion is reversible and stated rather than baked in.
@@ -294,7 +299,7 @@
 <section>
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Step 0 — Entry</span>
+      <span class="eyebrow">Which checks fire — entry</span>
       <h2>Where users enter the waterfall</h2>
       <p>
         The brief describes one front door. There are two, and the second one is undocumented.
@@ -362,7 +367,7 @@
 <section>
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Step 1 — Inventory</span>
+      <span class="eyebrow">Which checks fire</span>
       <h2>Which checks fire, and how often</h2>
       <p>
         Six distinct checks are instrumented across five columns. Their firing rates span three
@@ -450,8 +455,8 @@
 <section>
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Step 1 — Order</span>
-      <h2>The sequence, and the one place it breaks</h2>
+      <span class="eyebrow">In what order</span>
+      <h2>The order checks fire in, and the one place it breaks</h2>
     </div>
     <div class="body-copy">
       <p>
@@ -481,7 +486,7 @@
 <section>
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Step 2 — The branch</span>
+      <span class="eyebrow">How users route — SSN vs non-SSN</span>
       <h2>How users route between the SSN and non-SSN paths</h2>
       <p>
         This is the decision the waterfall is built around. For 288,028 users who failed Idology,
@@ -571,7 +576,7 @@
 <section>
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Step 2 — The crossover rule</span>
+      <span class="eyebrow">How users route — the crossover rule</span>
       <h2>Testing the brief's “crucial rule”</h2>
       <p>
         The design states that if an SSN-path provider surfaces a secondary non-SSN issue, the user
@@ -627,7 +632,7 @@
 <section>
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Step 2 — Provider note</span>
+      <span class="eyebrow">Which checks fire — provider note</span>
       <h2>The two LexisNexis routes are not the same check</h2>
       <p>
         Both write to <code>lexis_nexis_result</code>. They sit in opposite positions in the flow,
@@ -736,12 +741,6 @@
 
 <footer>
   <div class="wrap">
-    <p>
-      Source: <code>kyc.kyc_users</code>, 2,515,262 rows loaded from KYC_Synthetic_Dataset.csv and
-      validated by 11 assertion gates.<br>
-      Reconstruction method: provider-column co-occurrence, <code>kyc_source</code> attribution, and
-      direct tests of each documented rule.
-    </p>
     <div class="prov">
       <b>Denominators used on this page.</b> The book is 2,515,155 users (2,515,262 less 107 flagged
       test accounts). Idology outcome rates use 2,420,972 — the users Idology actually ran for.
