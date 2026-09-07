@@ -3,32 +3,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* ============================= TOKENS =============================
-     Inherited verbatim from the Task 1 / Task 2 reports so this section
-     folds into the same document family. Do not fork the palette. */
   :root{
     color-scheme: light;
     --font-display:'Archivo',"Arial Narrow",sans-serif;
     --font-body:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,sans-serif;
     --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-
-    --ink:#12161d;
-    --ink-soft:#4c5768;
-    --ink-faint:#8a94a6;
-    --paper:#f5f6f9;
-    --surface:#ffffff;
-    --surface-2:#eef0f4;
-    --line:#dde1e8;
-
-    --accent:#1d5aad;
-    --accent-2:#3f7fd1;
-    --accent-soft:#e8f0fb;
-    --critical:#c93636;
-    --critical-soft:#fbeaea;
-    --warning:#c98500;
-    --warning-soft:#fbf1de;
-    --node:#3a4256;
-
+    --ink:#12161d; --ink-soft:#4c5768; --ink-faint:#8a94a6;
+    --paper:#f5f6f9; --surface:#ffffff; --surface-2:#eef0f4; --line:#dde1e8;
+    --accent:#1d5aad; --accent-soft:#e8f0fb;
+    --critical:#c93636; --critical-soft:#fbeaea;
+    --warning:#c98500; --warning-soft:#fbf1de; --node:#3a4256;
     --shadow: 0 1px 2px rgba(18,22,29,.04), 0 8px 24px -12px rgba(18,22,29,.12);
   }
   @media (prefers-color-scheme: dark){
@@ -36,10 +20,9 @@
       color-scheme: dark;
       --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
       --paper:#10131a; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
-      --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+      --accent:#5b98e6; --accent-soft:#1b2a3d;
       --critical:#e2635f; --critical-soft:#3a1f1e;
-      --warning:#eda100; --warning-soft:#3a2c10;
-      --node:#5c6884;
+      --warning:#eda100; --warning-soft:#3a2c10; --node:#5c6884;
       --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
     }
   }
@@ -47,98 +30,43 @@
     color-scheme: dark;
     --ink:#eef1f6; --ink-soft:#b7c0cf; --ink-faint:#77839a;
     --paper:#10131a; --surface:#171b24; --surface-2:#1d222d; --line:#2a3040;
-    --accent:#5b98e6; --accent-2:#82b2ef; --accent-soft:#1b2a3d;
+    --accent:#5b98e6; --accent-soft:#1b2a3d;
     --critical:#e2635f; --critical-soft:#3a1f1e;
-    --warning:#eda100; --warning-soft:#3a2c10;
-    --node:#5c6884;
+    --warning:#eda100; --warning-soft:#3a2c10; --node:#5c6884;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
   }
-
   *{ box-sizing:border-box; }
-  html{ -webkit-text-size-adjust:100%; }
-  body{
-    margin:0; background:var(--paper); color:var(--ink);
-    font-family:var(--font-body); font-size:16px; line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-  }
-  ::selection{ background:var(--accent-soft); color:var(--ink); }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
   a{ color:var(--accent); }
-  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
-  @media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
-
-  .wrap{ max-width:900px; margin:0 auto; padding:0 24px; }
-
-  h1,h2,h3{ font-family:var(--font-display); font-weight:800; letter-spacing:-.01em; text-wrap:balance; margin:0; color:var(--ink); }
-  .eyebrow{
-    font-family:var(--font-mono); font-size:11.5px; font-weight:600; letter-spacing:.14em;
-    text-transform:uppercase; color:var(--accent);
-  }
-  .num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+  .wrap{ max-width:820px; margin:0 auto; padding:0 24px; }
+  h1,h2{ font-family:var(--font-display); font-weight:800; letter-spacing:-.01em; text-wrap:balance; margin:0; color:var(--ink); }
+  .eyebrow{ font-family:var(--font-mono); font-size:11.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); }
+  .num{ font-variant-numeric:tabular-nums; }
   code{ font-family:var(--font-mono); background:var(--surface-2); padding:1px 5px; border-radius:4px; font-size:.88em; }
 
-  /* ============================= MASTHEAD ============================= */
-  header.masthead{ border-bottom:1px solid var(--line); padding:56px 0 40px; }
-  header.masthead h1{ font-size:clamp(34px,5.4vw,52px); line-height:1.04; margin-top:14px; }
-  header.masthead .thesis{ margin-top:18px; font-size:18px; color:var(--ink-soft); max-width:62ch; line-height:1.55; }
-  .scope-note{ margin-top:20px; font-size:12.5px; color:var(--ink-faint); line-height:1.6; max-width:64ch; }
-  .scope-table{ width:100%; max-width:640px; border-collapse:collapse; margin-top:20px; font-size:13px; }
-  .scope-table td{ padding:9px 14px 9px 0; border-top:1px solid var(--line); vertical-align:top; }
+  header.masthead{ border-bottom:1px solid var(--line); padding:48px 0 36px; }
+  header.masthead h1{ font-size:clamp(32px,5vw,46px); line-height:1.05; margin-top:14px; }
+  .thesis{ margin-top:16px; font-size:17px; color:var(--ink-soft); max-width:64ch; line-height:1.55; }
+  .scope-table{ width:100%; max-width:600px; border-collapse:collapse; margin-top:20px; font-size:13px; }
+  .scope-table td{ padding:8px 14px 8px 0; border-top:1px solid var(--line); vertical-align:top; }
   .scope-table tr:first-child td{ border-top:none; }
-  .scope-table td:first-child{ color:var(--ink-faint); font-family:var(--font-mono); font-size:11.5px; letter-spacing:.02em; white-space:nowrap; }
+  .scope-table td:first-child{ color:var(--ink-faint); font-family:var(--font-mono); font-size:11.5px; white-space:nowrap; }
   .scope-table td:nth-child(2){ font-family:var(--font-display); font-weight:800; color:var(--ink); white-space:nowrap; }
   .scope-table td:last-child{ color:var(--ink-soft); line-height:1.5; }
-  .method-note{
-    margin-top:28px; padding:16px 18px; background:var(--surface-2); border-left:3px solid var(--ink-faint);
-    border-radius:0 8px 8px 0; font-size:13.5px; color:var(--ink-soft); line-height:1.6; max-width:none;
-  }
-  .method-note b{ color:var(--ink); }
 
-  /* ============================= SECTIONS ============================= */
-  section{ padding:60px 0; border-bottom:1px solid var(--line); }
-  section:last-of-type{ border-bottom:none; }
-  .sec-head{ margin-bottom:28px; }
-  .sec-head .eyebrow{ display:block; margin-bottom:10px; }
-  .sec-head h2{ font-size:clamp(23px,3.4vw,29px); }
-  .sec-head p{ margin-top:12px; color:var(--ink-soft); font-size:16px; max-width:64ch; line-height:1.6; }
-  .body-copy{ max-width:64ch; }
-  .body-copy p{ font-size:15px; color:var(--ink-soft); line-height:1.65; }
-  .body-copy p b{ color:var(--ink); }
+  /* each brief line = one "sheet" */
+  section.sheet{ padding:44px 0; border-bottom:1px solid var(--line); }
+  section.sheet:last-of-type{ border-bottom:none; }
+  .sheet-head{ margin-bottom:22px; }
+  .sheet-head .eyebrow{ display:block; margin-bottom:8px; }
+  .sheet-head h2{ font-size:clamp(21px,3vw,27px); }
+  .sheet-head p{ margin-top:10px; color:var(--ink-soft); font-size:15.5px; max-width:64ch; line-height:1.6; }
+  .quote{ font-style:italic; color:var(--ink-faint); }
 
-  /* ============================= FIGURES ============================= */
-  figure{ margin:0; }
-  .fig-frame{
-    background:var(--surface); border:1px solid var(--line); border-radius:12px;
-    padding:24px 20px 14px; box-shadow:var(--shadow); overflow-x:auto;
-  }
-  figcaption{
-    margin-top:16px; padding:14px 16px; background:var(--surface-2); border-radius:8px;
-    font-size:13.5px; color:var(--ink-soft); line-height:1.6;
-  }
+  .fig-frame{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px 20px; box-shadow:var(--shadow); }
+  figcaption{ margin-top:14px; padding:14px 16px; background:var(--surface-2); border-radius:8px; font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
   figcaption b{ color:var(--ink); }
 
-  /* ============================= STAT CARDS ============================= */
-  .xo{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-  @media (max-width:700px){ .xo{ grid-template-columns:1fr; } }
-  .xo-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:8px; }
-  .xo-card.lead{ border-color:var(--critical); background:var(--critical-soft); }
-  .xo-cond{ font-family:var(--font-mono); font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); }
-  .xo-card.lead .xo-cond{ color:var(--critical); }
-  .xo-pct{ font-family:var(--font-display); font-weight:900; font-size:32px; line-height:1; }
-  .xo-card.lead .xo-pct{ color:var(--critical); }
-  .xo-den{ font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); }
-  .xo-read{ margin-top:20px; padding:16px 18px; border-left:3px solid var(--critical); background:var(--critical-soft); border-radius:0 8px 8px 0; font-size:14.5px; }
-
-  /* ============================= LIMITS / NOTES & CAVEATS ============================= */
-  .limit{ display:flex; gap:14px; padding:18px 0; border-top:1px solid var(--line); }
-  .limit:first-child{ border-top:none; }
-  .limit-mark{
-    flex:none; width:26px; height:26px; border-radius:50%; background:var(--warning-soft); color:var(--warning);
-    font-family:var(--font-display); font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; margin-top:1px;
-  }
-  .limit h4{ margin:0 0 4px; font-size:14.5px; font-weight:700; }
-  .limit p{ margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
-
-  /* ============================= RATE COMPARISON BAR ============================= */
   .rate-bar{ display:flex; flex-direction:column; gap:12px; }
   .rate-row{ display:grid; grid-template-columns:96px 1fr 76px; align-items:center; gap:14px; }
   .rate-row .rl{ font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); }
@@ -149,29 +77,42 @@
   .rate-row .rv{ font-family:var(--font-display); font-weight:800; font-size:16px; text-align:right; }
   .rate-row .rv.bad{ color:var(--critical); }
 
-  /* ============================= SEGMENTED BUCKET BAR ============================= */
-  .seg-bar{ display:flex; height:36px; border-radius:8px; overflow:hidden; }
-  .seg{ display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:11.5px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; }
-  .seg-legend{ display:flex; flex-wrap:wrap; gap:18px; margin-top:16px; font-size:12.5px; color:var(--ink-soft); }
-  .seg-legend span{ display:inline-flex; align-items:center; gap:7px; }
-  .seg-legend i{ width:10px; height:10px; border-radius:3px; display:inline-block; flex:none; }
+  .xo{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  @media (max-width:700px){ .xo{ grid-template-columns:1fr; } }
+  .xo-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:8px; }
+  .xo-card.lead{ border-color:var(--critical); background:var(--critical-soft); }
+  .xo-cond{ font-family:var(--font-mono); font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); }
+  .xo-card.lead .xo-cond{ color:var(--critical); }
+  .xo-pct{ font-family:var(--font-display); font-weight:900; font-size:30px; line-height:1; }
+  .xo-card.lead .xo-pct{ color:var(--critical); }
+  .xo-den{ font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); }
+  .xo-read{ margin-top:18px; padding:14px 16px; border-left:3px solid var(--critical); background:var(--critical-soft); border-radius:0 8px 8px 0; font-size:14px; }
 
-  /* ============================= LARGEST-OF-EACH PAIR ============================= */
-  .big-pair{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  @media (max-width:700px){ .big-pair{ grid-template-columns:1fr; } }
-  .big-card{ padding:22px; border-radius:12px; border:1px solid var(--line); background:var(--surface); box-shadow:var(--shadow); }
+  .seg-bar{ display:flex; height:34px; border-radius:8px; overflow:hidden; }
+  .seg{ display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:11px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; }
+  .seg-legend{ display:flex; flex-wrap:wrap; gap:16px; margin-top:14px; font-size:12px; color:var(--ink-soft); }
+  .seg-legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .seg-legend i{ width:9px; height:9px; border-radius:3px; display:inline-block; flex:none; }
+
+  .notes{ margin-top:24px; display:flex; flex-direction:column; gap:2px; }
+  .limit{ display:flex; gap:12px; padding:12px 0; border-top:1px solid var(--line); }
+  .limit:first-child{ border-top:none; }
+  .limit-mark{ flex:none; width:22px; height:22px; border-radius:50%; background:var(--warning-soft); color:var(--warning); font-family:var(--font-display); font-weight:800; font-size:11px; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .limit p{ margin:0; font-size:13px; color:var(--ink-soft); line-height:1.55; }
+  .limit p b{ color:var(--ink); }
+
+  .big-pair{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:640px){ .big-pair{ grid-template-columns:1fr; } }
+  .big-card{ padding:20px; border-radius:12px; border:1px solid var(--line); background:var(--surface); box-shadow:var(--shadow); }
   .big-card.avoid{ border-color:var(--critical); background:var(--critical-soft); }
   .big-card .bc-label{ font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
   .big-card.avoid .bc-label{ color:var(--critical); }
-  .big-card .bc-num{ font-family:var(--font-display); font-weight:900; font-size:38px; line-height:1; margin:8px 0 4px; }
+  .big-card .bc-num{ font-family:var(--font-display); font-weight:900; font-size:36px; line-height:1; margin:8px 0 6px; }
   .big-card.avoid .bc-num{ color:var(--critical); }
   .big-card .bc-sub{ font-size:13.5px; color:var(--ink-soft); line-height:1.55; }
 
-  /* ============================= FOOTER ============================= */
-  footer{ padding:40px 0 64px; }
-  footer p{ font-size:12.5px; color:var(--ink-faint); font-family:var(--font-mono); line-height:1.7; }
-  footer .prov{ margin-top:14px; padding:14px 16px; background:var(--surface-2); border-radius:8px; font-family:var(--font-body); font-size:12.5px; color:var(--ink-soft); line-height:1.6; }
-  footer .prov b{ color:var(--ink); }
+  footer{ padding:30px 0 56px; }
+  footer p{ font-size:12.5px; color:var(--ink-faint); line-height:1.6; }
 </style>
 
 <header class="masthead">
@@ -179,45 +120,28 @@
     <span class="eyebrow">Task 1 · Part B — Rate &amp; Drivers</span>
     <h1>Genuine vs. Avoidable</h1>
     <p class="thesis">
-      7.93% of users are not verified — 2.93 points over the brief's 5% bar, or <b>73,663 people</b>.
-      Half of that gap traces to one routing defect. The rest splits cleanly into what a fix can reach
-      and what it can't: <b>75.6%</b> of every non-verification is process failure, avoidable in
-      principle; only <b>24.4%</b> looks like the system correctly saying no.
-    </p>
-    <p class="scope-note">
-      This document answers the brief's second ask, in order: <b>measure the rate</b> against the 5%
-      bar, then <b>diagnose the drivers</b> — separating genuine rejections from avoidable losses and
-      quantifying the largest of each.
+      7.93% of users are not verified — 2.93 points over the 5% bar, or <b>73,663 people</b>. Half
+      that gap is one routing defect. <b>75.6%</b> of non-verification is process failure, avoidable
+      in principle; only <b>24.4%</b> is the system correctly saying no.
     </p>
     <table class="scope-table">
       <tbody>
         <tr>
-          <td>Analysis denominator</td>
+          <td>Denominator</td>
           <td class="num">2,515,155</td>
-          <td><code>kyc.kyc_users</code>, test accounts excluded (107 flagged <code>Test_user</code>
-            rows, never deleted). Used for every figure below unless noted otherwise.</td>
-        </tr>
-        <tr>
-          <td>Not verified</td>
-          <td class="num">199,421 · 7.93%</td>
-          <td>Against a budget of <b class="num">125,758</b> at the 5% bar — <b class="num">73,663</b>
-            users over budget.</td>
+          <td><code>kyc.kyc_users</code>, 107 flagged <code>Test_user</code> rows excluded (never
+            deleted).</td>
         </tr>
       </tbody>
     </table>
   </div>
 </header>
 
-<section>
+<section class="sheet">
   <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Measure the rate</span>
+    <div class="sheet-head">
+      <span class="eyebrow">1 · <span class="quote">&ldquo;Measure the overall non-verification rate and compare it to the 5% bar&rdquo;</span></span>
       <h2>7.93% against a 5% bar</h2>
-      <p>
-        Not a bad month. Checked the trend by enrolment year and by month across the full 3.5-year
-        window — the rate is flat throughout, which means this is steady-state behavior of the system
-        as designed, not a regression, a bad vintage, or a provider outage.
-      </p>
     </div>
 
     <div class="fig-frame">
@@ -235,22 +159,21 @@
       </div>
     </div>
     <figcaption>
-      <b>2.93 percentage points over budget.</b> Non-verified today: <b class="num">199,421</b>.
-      Budget at 5%: <b class="num">125,758</b>. Users over budget: <b class="num">73,663</b> — that is
-      the size of the job.
+      <b>199,421 not verified</b> vs. a budget of <b class="num">125,758</b> — <b class="num">73,663</b>
+      over. Flat across the full 3.5-year window, by month and by year — steady-state behavior of the
+      system as designed, not a bad month or a regression.
     </figcaption>
   </div>
 </section>
 
-<section>
+<section class="sheet">
   <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Diagnose the drivers</span>
+    <div class="sheet-head">
+      <span class="eyebrow">2 · <span class="quote">&ldquo;Diagnose the drivers&rdquo;</span></span>
       <h2>One routing gap is half the problem</h2>
       <p>
-        Not that users fail checks. It's that <b class="num">101,162</b> users failed the primary check
-        (Idology) and then had no second check run at all — never routed onward into the waterfall.
-        That's <b>50.7%</b> of every non-verification in the dataset, from a single defect.
+        Not that users fail checks — <b class="num">101,162</b> failed Idology and got no second check
+        at all, never routed onward. <b>50.7%</b> of every non-verification, from one defect.
       </p>
     </div>
 
@@ -273,31 +196,23 @@
     </div>
 
     <div class="xo-read">
-      <b>Evidence this is a routing failure, not a harder population.</b> Users who failed Idology and
-      <i>were</i> routed onward recovered at 48.09%. The stranding rate is also flat at ~35% across
-      every partner and every enrolment year — consistent with the stranded group not being a
-      specially hard segment, though not a direct test of verification difficulty (no secondary check
-      ever ran on them to measure that against), so this is supporting evidence, not proof. Applying
-      the 48.09% rate to the stranded population projects <b class="num">~48,649</b> recoverable
-      users — roughly two-thirds of the gap to the 5% bar. Stated plainly where it was stated in the
-      notebook: <i>this is an estimate from a comparable group, not a guarantee — the honest way to
-      confirm it is to route a sample and measure.</i>
+      <b>Routing failure, not a harder population.</b> Stranding is flat (~35%) across every partner
+      and year, consistent with the stranded group not being harder to verify. Applying the routed-on
+      recovery rate projects <b class="num">~48,649</b> recoverable users — an estimate from a
+      comparable group, not a measurement.
     </div>
   </div>
 </section>
 
-<section>
+<section class="sheet">
   <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Genuine vs. avoidable</span>
+    <div class="sheet-head">
+      <span class="eyebrow">3 · <span class="quote">&ldquo;Separate genuine rejections from avoidable losses&rdquo;</span></span>
       <h2>Four ways a user goes unverified</h2>
       <p>
-        The distinction the brief asks for: a <b>genuine rejection</b> is a user properly assessed
-        whom the system was right to decline. An <b>avoidable loss</b> is a user who could plausibly
-        have verified, lost to process rather than to risk. The rule applied: a user assessed by
-        <b>two or more</b> checks and failed by all of them is a genuine rejection; a user who failed
-        one check and was never given another is an avoidable loss — the system never finished asking
-        the question.
+        <b>Genuine:</b> properly assessed, correctly declined. <b>Avoidable:</b> could plausibly have
+        verified, lost to process. Rule: 2+ checks, all failed → genuine; one check, never routed
+        further → avoidable.
       </p>
     </div>
 
@@ -312,130 +227,51 @@
         <span><i style="background:var(--ink-faint)"></i>A — no check ever ran (843)</span>
         <span><i style="background:var(--critical)"></i>B — one check ran, stopped (101,325)</span>
         <span><i style="background:var(--warning)"></i>C — 2+ ran, no manual review (48,598)</span>
-        <span><i style="background:var(--node)"></i>D — genuine, assessed incl. manual review (48,655)</span>
+        <span><i style="background:var(--node)"></i>D — genuine, incl. manual review (48,655)</span>
       </div>
     </div>
     <figcaption>
-      <b>75.6% of non-verification (A+B+C) is process failure, not a correct decision</b> — either the
-      waterfall never finished running, or it finished without ever reaching the human backstop the
-      design promises. Only bucket D, just under a quarter, looks like the system doing its job.
+      <b>75.6% (A+B+C) is process failure</b> — the waterfall never finished, or never reached the
+      human backstop it promises. Only bucket D looks like the system working as intended.
     </figcaption>
+
+    <div class="notes">
+      <div class="limit">
+        <div class="limit-mark">i</div>
+        <p><b>2,093 users PASSed a provider check anyway and still aren't verified</b> (166 in B, 1,131
+          in C, 798 in D) — incl. a third undocumented entry point, direct to Persona-IDV. 1,295 had no
+          human review at all.</p>
+      </div>
+      <div class="limit">
+        <div class="limit-mark">ii</div>
+        <p><code>kyc_source</code> was audited, not trusted — names one credited clearer, not every
+          check that passed. 2 outright contradictions; 17 users verified with zero PASS anywhere;
+          85,172 cases of overlap turned out expected.</p>
+      </div>
+    </div>
   </div>
 </section>
 
-<section>
+<section class="sheet">
   <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Quantify the largest of each</span>
-      <h2>The largest avoidable loss vs. the largest genuine rejection</h2>
+    <div class="sheet-head">
+      <span class="eyebrow">4 · <span class="quote">&ldquo;Quantify the largest of each&rdquo;</span></span>
+      <h2>101,325 vs. 48,655</h2>
     </div>
 
     <div class="big-pair">
       <div class="big-card avoid">
         <span class="bc-label">Largest avoidable loss</span>
         <div class="bc-num">101,325</div>
-        <p class="bc-sub"><b>Bucket B</b> — exactly one check ran, then stopped. 50.8% of every
-          non-verification. 101,159 of these are the core routing-gap finding (failed Idology,
-          nothing else ran); the remaining 166 are a related but distinct anomaly — see below.</p>
+        <p class="bc-sub"><b>Bucket B</b> — one check ran, then stopped. 50.8% of non-verification.
+          101,159 are the core routing-gap finding; the other 166 are the anomaly above.</p>
       </div>
       <div class="big-card">
         <span class="bc-label">Largest genuine rejection</span>
         <div class="bc-num">48,655</div>
-        <p class="bc-sub"><b>Bucket D</b> — assessed by two or more providers <i>and</i> a human, and
-          still declined. 24.4% of every non-verification. This is the number this analysis is
-          <b>not</b> trying to shrink — no evidence it's addressable without weakening a control.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Worth flagging</span>
-      <h2>Small, checked, and on the record</h2>
-      <p>
-        None of these move the headline numbers above. Each surfaced while verifying this page and was
-        chased down rather than left as a loose end. Full breakdowns and queries: <code>TASK1_REPORT_DRAFT.md</code>.
-      </p>
-    </div>
-
-    <div class="limit">
-      <div class="limit-mark">1</div>
-      <div>
-        <h4>Bucket B isn't 100% &ldquo;failed Idology&rdquo;</h4>
-        <p>101,159 of 101,325 are the core finding. The other 166: 146 PASSed Idology with nothing else
-          run and still aren't verified; 18 PASSed a direct Persona-IDV check — a third undocumented
-          entry point, Idology never touching them at all; 2 FAILed via the LexisNexis door. All three
-          shapes contradict &ldquo;never routed on,&rdquo; since a check did run.</p>
-      </div>
-    </div>
-    <div class="limit">
-      <div class="limit-mark">2</div>
-      <div>
-        <h4>Bucket C has the same anomaly, larger</h4>
-        <p>1,131 of 48,598 (2.33%) have at least one provider PASS yet remain unverified with no manual
-          review. Persona-IDV-after-Idology-FAIL and Idology-PASS-then-ACRO-FAIL convert at only
-          83&ndash;86% dataset-wide — meaningfully weaker than the &gt;99% seen elsewhere, not noise.
-          Uniform across partners (1.78&ndash;1.94% of each), so not one bad integration.</p>
-      </div>
-    </div>
-    <div class="limit">
-      <div class="limit-mark">3</div>
-      <div>
-        <h4>That pattern totals 2,093 across the whole dataset</h4>
-        <p>164 (bucket B) + 1,131 (bucket C) + 798 (bucket D, where manual review did run — a human
-          overriding a PASS, plausibly intended). The 1,295 with <b>no human involved at all</b>
-          (0.65% of all non-verification) is the part worth treating as a real, if small, defect.</p>
-      </div>
-    </div>
-    <div class="limit">
-      <div class="limit-mark">4</div>
-      <div>
-        <h4><code>kyc_source</code> needed auditing, not trusting</h4>
-        <p>It names one credited clearer per user, not every check that passed — confirmed by
-          cross-checking every row against the result columns directly. Found: 2 outright
-          contradictions (a provider credited despite every column, including manual review, saying
-          FAIL); 17 users verified with zero PASS anywhere; and 85,172 cases of multi-check overlap
-          that turned out to be expected (e.g. Idology and LexisNexis both PASS, credited to Idology
-          alone) — not a bug. Every check-level figure on this page is built from the result columns,
-          never from <code>kyc_source</code>.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="eyebrow">Caveats</span>
-      <h2>What could make these numbers wrong, and how it was handled</h2>
-    </div>
-
-    <div class="limit">
-      <div class="limit-mark">1</div>
-      <div>
-        <h4>Test accounts</h4>
-        <p>107 internal <code>Test_user</code> QA fixtures are excluded from every figure — flagged
-          via <code>is_test_user</code>, never deleted. Barely moves anything at this scale, but
-          they aren't real applicants.</p>
-      </div>
-    </div>
-    <div class="limit">
-      <div class="limit-mark">2</div>
-      <div>
-        <h4>The 48,649 &ldquo;recoverable&rdquo; figure is a projection, not a measurement</h4>
-        <p>Built from an observed comparison group's recovery rate — stated as an estimate, not a
-          guarantee. The honest way to confirm it is to route a sample and measure.</p>
-      </div>
-    </div>
-    <div class="limit">
-      <div class="limit-mark">3</div>
-      <div>
-        <h4>The reviewer-comment reason taxonomy has limited coverage</h4>
-        <p>Comments exist for ~3% of the book, skewed toward manual review — they describe the
-          reviewed population, not the whole book, and have zero coverage of the stranded population,
-          since nothing ever looked at them.</p>
+        <p class="bc-sub"><b>Bucket D</b> — assessed by 2+ providers <i>and</i> a human, still
+          declined. 24.4% of non-verification. Not a target — no evidence it's fixable without
+          weakening a control.</p>
       </div>
     </div>
   </div>
@@ -443,13 +279,7 @@
 
 <footer>
   <div class="wrap">
-    <div class="prov">
-      <b>Denominators used on this page.</b> The book is 2,515,155 users (2,515,262 less 107 flagged
-      test accounts). Non-verification figures use that same denominator throughout.
-      <br><br>
-      <b>Companion documents:</b> this page is Part B of Task 1 and follows
-      <em>The Waterfall As Built</em> (Part A — reconstruction of the routing itself). Where a number
-      appears in more than one document it is computed once and cross-referenced, not re-derived.
-    </div>
+    <p>Part B of Task 1, following <em>The Waterfall As Built</em> (Part A). Denominator throughout:
+      2,515,155 users. Full breakdowns and queries: <code>TASK1_REPORT_DRAFT.md</code>.</p>
   </div>
 </footer>
