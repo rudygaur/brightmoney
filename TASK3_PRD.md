@@ -183,41 +183,10 @@ own flag and is measured separately (M3b) so the two effects are never confused.
 
 ### 5.2 Routing rules, in priority order
 
-```
-                          ┌──────────────────────────────┐
-                          │  L1 — IDOLOGY (100%, no exceptions)  │
-                          │  → identity result + sanctions flag  │
-                          └───────────────┬──────────────┘
-              ┌───────────────────────────┼───────────────────────────┐
-     sanctions/PEP flag             PASS, no flag                FAIL, no flag
-              │                            │                            │
-              ▼                            ▼                            ▼
-   ┌────────────────────┐        ┌──────────────────┐      ┌────────────────────────┐
-   │ L4 COMPLIANCE      │        │    VERIFIED      │      │ L1.5 REASON CLASSIFIER │
-   │ immediate, skips   │        │  flow terminates │      └───────────┬────────────┘
-   │ all automation     │        └──────────────────┘                  │
-   └─────────┬──────────┘                          ┌──────────────────┼──────────────────┐
-     PASS ─► VERIFIED                        SSN_MISMATCH   IDENTITY_ATTR_MISMATCH   NO_DATA
-     FAIL ─► HARD REJECT                            │                  │                  │
-                                                    ▼                  ▼                  ▼
-                                          ┌──────────────────┐  ┌───────────┐  ┌────────────────────┐
-                                          │ legacy account?  │  │  L2 ACRO  │  │ applicable SSN chk │
-                                          │  yes → L2b       │  └─────┬─────┘  │  + L2 ACRO         │
-                                          │  no  → L2a       │   PASS │ FAIL   │  IN PARALLEL       │
-                                          │ (exactly one)    │        │        └─────────┬──────────┘
-                                          └────────┬─────────┘        ▼         any PASS │ both FAIL
-                                             PASS  │  FAIL      ┌───────────┐   ─► VERIFIED   │
-                                                   │            │ L3 IDV    │◄────────────────┘
-                                        ┌──────────┴──────────┐ └─────┬─────┘
-                                        │ secondary non-SSN   │  PASS │ FAIL
-                                        │ issue surfaced?     │       ▼
-                                        │  yes → non-SSN track│  VERIFIED / L4
-                                        │  no  → L4           │
-                                        └─────────────────────┘
-```
+**Figure 1 — the full routing tree**, every branch drawn, including the sanctions/PEP/OFAC route
+from all five checks:
 
-*(Sanctions/PEP/OFAC branches for L2a, L2b, ACRO and IDV omitted above to keep the ASCII tree
-readable — each works exactly like L1's. See Figure 1 for the full tree, every branch drawn.)*
+![The redesigned KYC waterfall: a flowchart with a decision diamond at every branch, showing the sanctions/PEP/OFAC route from all five checks — Idology, LexisNexis, Persona-SSN, ACRO and Persona-IDV — converging on manual review.](reports/assets/redesigned_waterfall_diagram.png)
 
 1. **L1 runs on every applicant.** No bypass, no exception.
 2. **A sanctions/PEP/OFAC flag ⇒ L4 compliance immediately, at any tier** (L1, L2a, L2b, ACRO or
@@ -233,10 +202,6 @@ readable — each works exactly like L1's. See Figure 1 for the full tree, every
    - `NO_DATA` → applicable SSN check **and** ACRO in parallel → any PASS verifies; sanctions/PEP/OFAC
      ⇒ L4; both FAIL → **L3 IDV** → (FAIL) **L4**. (Same sanctions rule throughout.)
 5. **L4 is the last stop on every path.** PASS ⇒ verified; FAIL ⇒ hard reject.
-
-**Figure 1 — the same tree, every branch drawn.**
-
-![The redesigned KYC waterfall: a flowchart with a decision diamond at every branch, showing the sanctions/PEP/OFAC route from all five checks — Idology, LexisNexis, Persona-SSN, ACRO and Persona-IDV — converging on manual review.](reports/assets/redesigned_waterfall_diagram.png)
 
 ### 5.3 Stop conditions
 
