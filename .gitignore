@@ -5,3 +5,4 @@ __pycache__/
 .ipynb_checkpoints/
 KYC_Synthetic_Dataset.csv
 .DS_Store
+task.txt

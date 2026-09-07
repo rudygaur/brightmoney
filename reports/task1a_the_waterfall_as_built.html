@@ -555,46 +555,16 @@
           <text x="817" y="296" text-anchor="middle" class="t-name on-plain">STRAIGHT TO L4</text>
           <text x="817" y="316" text-anchor="middle" class="t-val">24,779</text>
           <text x="817" y="332" text-anchor="middle" class="t-sub">41.1% recovered</text>
-
-          <text x="300" y="300" text-anchor="middle" class="t-note">Every path that actually runs recovers 45–55% of the users sent to it.</text>
-          <text x="300" y="320" text-anchor="middle" class="t-note">The 101,162 who reach no path recover 12 people in total.</text>
         </svg>
       </div>
       <figcaption>
         <b>The branch is sound. Reaching it is the problem.</b> The SSN path, the non-SSN path and the
         crossover between them all work — 45%, 50% and 55% recovery respectively. But
         <b>43.7% of Idology failures never arrive at the branch at all</b>, and the 101,162 who reach
-        no check of any kind recover 12 people, a rate of 0.01%. Arrow widths are uniform; volume is
-        carried by the labels, not by line thickness.
+        no check of any kind recover 12 people, a rate of 0.01%.
       </figcaption>
     </figure>
 
-    <div class="routes" style="margin-top:34px">
-      <div class="route">
-        <div class="r-name">Non-SSN path only
-          <span>Straight to ACRO or Persona-IDV after the Idology failure</span></div>
-        <div class="r-vol"><b class="num">107,114</b>37.19% of failures</div>
-        <div class="r-rec"><div class="rr-track"><div class="rr-fill" style="width:50.4%"></div></div><span class="rr-num num">50.39%</span></div>
-      </div>
-      <div class="route">
-        <div class="r-name">SSN path only
-          <span>LexisNexis or Persona-SSN, no crossover</span></div>
-        <div class="r-vol"><b class="num">46,368</b>16.10% of failures</div>
-        <div class="r-rec"><div class="rr-track"><div class="rr-fill" style="width:45.2%"></div></div><span class="rr-num num">45.20%</span></div>
-      </div>
-      <div class="route">
-        <div class="r-name">Both paths — the crossover fired
-          <span>Started on the SSN path, moved to the non-SSN track</span></div>
-        <div class="r-vol"><b class="num">8,605</b>2.99% of failures</div>
-        <div class="r-rec"><div class="rr-track"><div class="rr-fill" style="width:55.0%"></div></div><span class="rr-num num">55.01%</span></div>
-      </div>
-      <div class="route">
-        <div class="r-name">Neither path ran
-          <span>101,162 stranded with nothing · 24,779 sent straight to a human</span></div>
-        <div class="r-vol"><b class="num">125,941</b>43.73% of failures</div>
-        <div class="r-rec"><div class="rr-track"><div class="rr-fill dead" style="width:8.1%"></div></div><span class="rr-num dead num">8.10%</span></div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -641,8 +611,7 @@
         LexisNexis and an ACRO result is evidence that both checks ran — not that one preceded the
         other. I read these 8,605 as SSN→non-SSN because that is the documented direction and
         because the reverse is much rarer in the population (7.7% of ACRO failures also carry an SSN
-        check, against 19.5% the other way). That is an inference from asymmetry, not a measurement,
-        and it is the one claim on this page I would want a log to confirm.
+        check, against 19.5% the other way). That is an inference from asymmetry, not a measurement.
       </p>
       <p>
         One documented rule is <b>not reproducible at all</b>. The brief routes “older accounts” to
